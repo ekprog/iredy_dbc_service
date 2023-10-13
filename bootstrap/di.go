@@ -3,11 +3,11 @@ package bootstrap
 import (
 	"go.uber.org/dig"
 	"microservice/app"
-	"microservice/core/delivery"
-	"microservice/core/domain"
-	"microservice/core/interactors"
-	"microservice/core/repos"
-	"microservice/core/services"
+	"microservice/delivery"
+	"microservice/domain"
+	"microservice/interactors"
+	"microservice/repos"
+	"microservice/services"
 )
 
 func initDependencies(di *dig.Container) error {

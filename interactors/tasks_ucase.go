@@ -3,8 +3,8 @@ package interactors
 import (
 	"github.com/pkg/errors"
 	"microservice/app/core"
-	"microservice/core/domain"
-	"microservice/core/kafka"
+	"microservice/domain"
+	"microservice/kafka"
 	"microservice/pkg/pb/events"
 )
 

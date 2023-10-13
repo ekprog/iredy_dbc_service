@@ -2,7 +2,7 @@ package services
 
 import (
 	"microservice/app/core"
-	"microservice/core/domain"
+	"microservice/domain"
 	"time"
 )
 

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"microservice/app/core"
-	"microservice/core/domain"
+	"microservice/domain"
 	"time"
 )
 

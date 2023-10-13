@@ -31,8 +31,7 @@ func InitGRPCServer() (*grpc.Server, *runtime.ServeMux, error) {
 	var options []grpc.ServerOption
 
 	// TSL
-
-	tslEnable := viper.GetBool("app.grpc.tsl")
+	tslEnable := viper.GetBool("grpc.tsl_enabled")
 	if tslEnable {
 		crt := "./cert/service.pem"
 		key := "./cert/service.key"
@@ -66,11 +65,17 @@ func InitGRPCServer() (*grpc.Server, *runtime.ServeMux, error) {
 	}
 
 	// Middleware
-	options = append(options, []grpc.ServerOption{
+	mv := []grpc.ServerOption{
 		grpc.ChainUnaryInterceptor(errorLogging),
 		grpc.ChainUnaryInterceptor(anyLogging),
-		grpc.ChainUnaryInterceptor(fromGWOnly),
-	}...)
+	}
+
+	debug := viper.GetBool("app.debug")
+	if !debug {
+		mv = append(mv, grpc.ChainUnaryInterceptor(fromGWOnly))
+	}
+
+	options = append(options, mv...)
 
 	// Create server
 	grpcServer = grpc.NewServer(options...)

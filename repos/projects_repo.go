@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/samber/lo"
 	"microservice/app/core"
-	"microservice/core/domain"
+	"microservice/domain"
 	"strings"
 )
 

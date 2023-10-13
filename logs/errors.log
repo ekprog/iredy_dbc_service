@@ -14,3 +14,9 @@
 [ERROR](2023-03-31 18:56:54) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:79 cannot update projects order: cannot drag projects for user 15: pq: column "parent_id" is of type bigint but expression is of type text
 [ERROR](2023-03-31 18:56:54) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:79 cannot update projects order: cannot drag projects for user 15: pq: invalid input syntax for type integer: "null"
 [ERROR](2023-04-04 17:56:01) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:79 cannot set done task 147: cannot send kafka event (TaskDoneEvent: dial tcp [::1]:29092: connect: connection refused
+[ERROR](2023-10-13 23:39:37) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:79 DENIED access without AUTH! /pb.StatusService/Ping
+[ERROR](2023-10-13 23:40:34) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:79 DENIED access without AUTH! /pb.StatusService/Ping
+[ERROR](2023-10-13 23:40:42) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:79 DENIED access without AUTH! /pb.StatusService/Ping
+[ERROR](2023-10-13 23:40:48) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:79 DENIED access without AUTH! /pb.StatusService/Ping
+[ERROR](2023-10-13 23:42:39) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:79 DENIED access without AUTH! /pb.StatusService/Ping
+[ERROR](2023-10-13 23:44:58) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:79 DENIED access without AUTH! /pb.StatusService/Ping

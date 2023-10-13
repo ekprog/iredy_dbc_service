@@ -4,12 +4,12 @@ import (
 	"context"
 	"microservice/app"
 	"microservice/app/core"
-	"microservice/core/domain"
+	"microservice/domain"
 	pb "microservice/pkg/pb/api"
 )
 
 type StatusDeliveryService struct {
-	pb.UnimplementedStatusServiceServer
+	pb.StatusServiceServer
 	log core.Logger
 }
 

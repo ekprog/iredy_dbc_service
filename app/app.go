@@ -40,8 +40,7 @@ func InitApp(rootDir ...string) error {
 		}
 	}
 
-	d := viper.GetString("app.grpc.port")
-	println(d)
+	viper.GetString("app.grpc.port")
 
 	return nil
 }

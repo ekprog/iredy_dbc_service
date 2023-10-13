@@ -4,7 +4,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"microservice/app/core"
-	"microservice/core/domain"
+	"microservice/domain"
 	"time"
 )
 

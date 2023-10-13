@@ -3,7 +3,7 @@ package repos
 import (
 	"database/sql"
 	"microservice/app/core"
-	"microservice/core/domain"
+	"microservice/domain"
 )
 
 type UsersRepo struct {

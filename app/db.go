@@ -18,7 +18,7 @@ var (
 func connectionString() string {
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		viper.GetString("db.host"),
-		"5432", // For localhost and docker inner network
+		viper.GetString("db.port"),
 		viper.GetString("db.user"),
 		viper.GetString("db.pass"),
 		viper.GetString("db.name"))

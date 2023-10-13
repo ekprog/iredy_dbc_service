@@ -7,7 +7,7 @@ import (
 	"microservice/app"
 	"microservice/app/conv"
 	"microservice/app/core"
-	"microservice/core/domain"
+	"microservice/domain"
 	pb "microservice/pkg/pb/api"
 )
 
