@@ -1,0 +1,41 @@
+version: "3.7"
+services:
+
+  postgres:
+    image: postgres:latest
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
+    hostname: ${DB_HOST}
+    environment:
+      POSTGRES_HOST: ${DB_HOST}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - ${DB_PORT_OUT}:5432
+    volumes:
+      - ./storage/database/postgres:/var/lib/postgresql/data
+    networks:
+      - fullstack
+
+  app:
+    image: egorkozelskij/todo_service_app
+    command: /app/server
+    env_file:
+      - .env
+    expose:
+      - ${APP_GRPC_PORT}
+    ports:
+      - ${APP_GRPC_PORT}:${APP_GRPC_PORT}
+    networks:
+      - fullstack
+    depends_on:
+      postgres:
+        condition: service_healthy
+networks:
+  fullstack:
+    driver: bridge

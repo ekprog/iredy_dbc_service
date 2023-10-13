@@ -1,0 +1,16 @@
+[FATAL](2023-03-20 20:06:19) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:83 listen tcp :8071: bind: address already in use
+[FATAL](2023-03-20 20:06:53) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:83 listen tcp :8071: bind: address already in use
+[ERROR](2023-03-22 19:46:08) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:79 cannot extract user_id from context: user_id was not found into context
+[ERROR](2023-03-22 19:51:35) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:79 cannot extract user_id from context: user_id was not found into context
+[ERROR](2023-03-22 19:51:51) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:79 cannot extract user_id from context: user_id was not found into context
+[ERROR](2023-03-22 19:52:02) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:79 cannot extract user_id from context: user_id was not found into context
+[ERROR](2023-03-22 20:04:31) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:79 cannot extract user_id from context: user_id was not found into context
+[ERROR](2023-03-28 11:24:52) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:79 DENIED access without AUTH! /pb.ToDoService/GetProjects
+[ERROR](2023-03-28 11:24:52) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:79 DENIED access without AUTH! /pb.ToDoService/GetProjects
+[ERROR](2023-03-28 11:24:54) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:79 DENIED access without AUTH! /pb.ToDoService/GetProjects
+[ERROR](2023-03-28 11:24:54) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:79 DENIED access without AUTH! /pb.ToDoService/GetProjects
+[ERROR](2023-03-31 18:50:44) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:79 cannot update projects order: cannot drag projects for user 15: pq: column "parent_id" is of type bigint but expression is of type text
+[ERROR](2023-03-31 18:53:46) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:79 cannot update projects order: cannot drag projects for user 15: pq: column "parent_id" is of type bigint but expression is of type text
+[ERROR](2023-03-31 18:56:54) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:79 cannot update projects order: cannot drag projects for user 15: pq: column "parent_id" is of type bigint but expression is of type text
+[ERROR](2023-03-31 18:56:54) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:79 cannot update projects order: cannot drag projects for user 15: pq: invalid input syntax for type integer: "null"
+[ERROR](2023-04-04 17:56:01) /Users/egorkozelskij/GolandProjects/iredy/todo_service/app/logs.go:79 cannot set done task 147: cannot send kafka event (TaskDoneEvent: dial tcp [::1]:29092: connect: connection refused
