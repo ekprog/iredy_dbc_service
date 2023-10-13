@@ -13,25 +13,15 @@ service StatusService {
 
 
 // The service definition
-service ToDoService {
+service DBCService {
 
-  // Projects
-  rpc GetProjects (GetProjectsRequest) returns (GetProjectsResponse) {}
-  rpc GetProjectInfo (IdRequest) returns (GetProjectInfoResponse) {}
-  rpc CreateProject (CreateProjectRequest) returns (IdResponse) {}
-  rpc RemoveProject (IdRequest) returns (StatusResponse) {}
-  rpc UpdateProject (UpdateProjectRequest) returns (StatusResponse) {}
-  rpc UpdateProjectsOrder (UpdateProjectOrderRequest) returns (StatusResponse) {}
-  rpc DragProjects (DragProjectRequest) returns (StatusResponse) {}
+  // Categories
+  rpc GetCategories (GetCategoriesRequest) returns (GetCategoriesResponse) {}
+  rpc UpdateCategory (UpdateCategoriesRequest) returns (StatusResponse) {}
 
-  //Tasks
-  rpc GetTasks (GetTasksRequest) returns (GetTasksResponse) {}
-  rpc CreateTask (CreateTaskRequest) returns (IdResponse) {}
-  rpc UpdateTask (UpdateTaskRequest) returns (StatusResponse) {}
-  rpc SetTaskDone (SetTaskDoneRequest) returns (StatusResponse) {}
-  rpc RemoveTask (IdRequest) returns (StatusResponse) {}
-
-  // Smart Tasks
-//  rpc CreateSmartTask (CreateSmartTaskRequest) returns (IdResponse) {}
-  rpc GetSmartTasks (GetSmartTasksRequest) returns (GetSmartTasksResponse) {}
+  // Challenges
+  rpc GetChallenges (GetChallengesRequest) returns (GetChallengesResponse) {}
+  rpc CreateChallenge (CreateChallengeRequest) returns (IdResponse) {}
+  rpc UpdateChallenge (UpdateChallengeRequest) returns (StatusResponse) {}
+  rpc RemoveChallenge (IdRequest) returns (StatusResponse) {}
 }

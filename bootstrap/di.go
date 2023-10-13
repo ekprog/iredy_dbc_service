@@ -7,35 +7,29 @@ import (
 	"microservice/domain"
 	"microservice/interactors"
 	"microservice/repos"
-	"microservice/services"
 )
 
 func initDependencies(di *dig.Container) error {
 
 	// Repository
 	di.Provide(repos.NewUsersRepo, dig.As(new(domain.UsersRepository)))
-	di.Provide(repos.NewProjectsRepo, dig.As(new(domain.ProjectsRepository)))
-	di.Provide(repos.NewTasksRepo, dig.As(new(domain.TasksRepository)))
-	di.Provide(repos.NewSmartTasksRepo, dig.As(new(domain.SmartTasksRepository)))
-
-	// Services
-	di.Provide(services.NewPeriodMatcherService, dig.As(new(domain.PeriodMatcher)))
+	di.Provide(repos.NewDBCCategoriesRepo, dig.As(new(domain.DBCCategoryRepository)))
+	di.Provide(repos.NewDBCChallengesRepo, dig.As(new(domain.ChallengesRepository)))
 
 	// Use Cases
 	di.Provide(interactors.NewUsersInteractor, dig.As(new(domain.UsersInteractor)))
-	di.Provide(interactors.NewProjectsInteractor, dig.As(new(domain.ProjectsInteractor)))
-	di.Provide(interactors.NewTasksInteractor, dig.As(new(domain.TasksInteractor)))
-	di.Provide(interactors.NewSmartTasksInteractor, dig.As(new(domain.SmartTasksInteractor)))
+	di.Provide(interactors.NewDBCCategoriesUCase, dig.As(new(domain.DBCCategoryInteractor)))
+	di.Provide(interactors.NewChallengesInteractor, dig.As(new(domain.ChallengesInteractor)))
 
 	di.Provide(delivery.NewStatusDeliveryService)
-	di.Provide(delivery.NewToDoDeliveryService)
+	di.Provide(delivery.NewDBCDeliveryService)
 
 	// Delivery
 	if err := app.InitDelivery(delivery.NewStatusDeliveryService); err != nil {
 		return err
 	}
 
-	if err := app.InitDelivery(delivery.NewToDoDeliveryService); err != nil {
+	if err := app.InitDelivery(delivery.NewDBCDeliveryService); err != nil {
 		return err
 	}
 

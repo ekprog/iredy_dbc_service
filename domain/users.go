@@ -3,7 +3,8 @@ package domain
 import "time"
 
 type User struct {
-	Id int32 `json:"id"`
+	Id    int32 `json:"id"`
+	Score int32 `json:"id"` // ToDo
 
 	UpdatedAt time.Time `json:"updated_at"`
 	CreatedAt time.Time `json:"created_at"`
