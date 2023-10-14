@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/pkg/errors"
 	"microservice/app"
+	"microservice/app/conv"
 	"microservice/app/core"
 	"microservice/layers/domain"
 	pb "microservice/pkg/pb/api"
@@ -41,15 +42,14 @@ func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateCh
 		return nil, errors.Wrap(err, "cannot extract user_id from context")
 	}
 
-	// Есть ли такой пользоваетль?
-	// Если нет - создать пользователя + создать запись
-
 	uCaseRes, err := d.dbcChallengesUCase.Create(&domain.CreateDBCChallengeForm{
-		UserId: userId,
-		Name:   r.Name,
+		UserId:       userId,
+		Name:         r.Name,
+		CategoryName: r.CategoryName,
+		Desc:         conv.ValueOrDefault(r.Desc),
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot create project")
+		return nil, errors.Wrap(err, "CreateChallenge")
 	}
 
 	response := &pb.IdResponse{

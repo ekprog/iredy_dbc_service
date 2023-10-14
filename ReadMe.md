@@ -51,7 +51,15 @@ protoc -I ./proto \
 --openapiv2_out ./docs \
 ./proto/api/*.proto
 ```
-
+```bash
+protoc -I ./proto \
+--go_out ./pkg/pb \
+--go_opt paths=source_relative \
+--go-grpc_out ./pkg/pb \
+--go-grpc_opt paths=source_relative \
+./proto/api/*.proto \
+--experimental_allow_proto3_optional
+```
 
 ## 1. Build docker
 ```bash
