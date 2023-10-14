@@ -90,6 +90,38 @@ func (r *DBCChallengesRepo) FetchById(id int32) (*domain.DBCChallenge, error) {
 	}
 }
 
+func (r *DBCChallengesRepo) FetchByName(userId int32, name string) (*domain.DBCChallenge, error) {
+	var task = &domain.DBCChallenge{
+		UserId: userId,
+		Name:   name,
+	}
+	query := `select 
+    			id,
+    			category_id, 
+    			"desc", 
+    			created_at, 
+    			updated_at,
+    			deleted_at
+			from dbc_challenges
+			where user_id=$1 and name=$2
+			limit 1`
+	err := r.db.QueryRow(query, userId, name).Scan(
+		&task.Id,
+		&task.CategoryId,
+		&task.Desc,
+		&task.CreatedAt,
+		&task.UpdatedAt,
+		&task.DeletedAt)
+	switch err {
+	case nil:
+		return task, nil
+	case sql.ErrNoRows:
+		return nil, nil
+	default:
+		return nil, err
+	}
+}
+
 func (r *DBCChallengesRepo) Insert(item *domain.DBCChallenge) error {
 	query := `INSERT INTO dbc_challenges (
                    user_id, 

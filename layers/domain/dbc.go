@@ -39,6 +39,7 @@ type DBCChallenge struct {
 
 type DBCCategoryRepository interface {
 	FetchByUserId(int32) ([]*DBCCategory, error)
+	FetchByName(int32, string) (*DBCCategory, error)
 	FetchById(int32) (*DBCCategory, error)
 	Insert(*DBCCategory) error
 	Update(*DBCCategory) error
@@ -48,6 +49,7 @@ type DBCCategoryRepository interface {
 type DBCChallengesRepository interface {
 	FetchAll(userId int32) ([]*DBCChallenge, error)
 	FetchById(int32) (*DBCChallenge, error)
+	FetchByName(int32, string) (*DBCChallenge, error)
 	Insert(*DBCChallenge) error
 	Update(*DBCChallenge) error
 	Remove(int32) error
@@ -72,9 +74,9 @@ type ChallengesUseCase interface {
 // IO FORMS
 
 type CreateDBCChallengeForm struct {
-	Id           int32
 	UserId       int32
 	Name         string
+	Desc         string
 	CategoryName *string
 }
 

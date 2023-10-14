@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 	"microservice/app/core"
 	"microservice/layers/domain"
+	"strings"
 )
 
 type ChallengesUseCase struct {
@@ -11,20 +12,29 @@ type ChallengesUseCase struct {
 	usersRepo      domain.UsersRepository
 	categoryRepo   domain.DBCCategoryRepository
 	challengesRepo domain.DBCChallengesRepository
+	usersUseCase   domain.UsersUseCase
 }
 
 func NewChallengesUseCase(log core.Logger,
 	usersRepo domain.UsersRepository,
 	projectsRepo domain.DBCCategoryRepository,
-	tasksRepo domain.DBCChallengesRepository) *ChallengesUseCase {
-	return &ChallengesUseCase{log: log, usersRepo: usersRepo, categoryRepo: projectsRepo, challengesRepo: tasksRepo}
+	tasksRepo domain.DBCChallengesRepository,
+	usersUseCase domain.UsersUseCase) *ChallengesUseCase {
+	//
+	return &ChallengesUseCase{
+		log:            log,
+		usersRepo:      usersRepo,
+		categoryRepo:   projectsRepo,
+		challengesRepo: tasksRepo,
+		usersUseCase:   usersUseCase,
+	}
 }
 
-func (i *ChallengesUseCase) All(userId int32) (domain.ChallengesListResponse, error) {
+func (ucase *ChallengesUseCase) All(userId int32) (domain.ChallengesListResponse, error) {
 	var items []*domain.DBCChallenge
 	var err error
 
-	items, err = i.challengesRepo.FetchAll(userId)
+	items, err = ucase.challengesRepo.FetchAll(userId)
 	if err != nil {
 		return domain.ChallengesListResponse{}, errors.Wrap(err, "cannot fetch dbc-challenges by user id")
 	}
@@ -35,73 +45,90 @@ func (i *ChallengesUseCase) All(userId int32) (domain.ChallengesListResponse, er
 	}, nil
 }
 
-func (i *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (domain.IdResponse, error) {
+func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (domain.IdResponse, error) {
 
-	// ToDo:
-	// Если нет категории у пользователя  CategoryName - создать ее
-	// Проверить, нет ли челленджа с таким же именем
-	// Обрезать у челленджа пробелы
-	// Далее создать челлендж и привязать к категории (если она есть)
+	//
+	_, err := ucase.usersUseCase.CreateIfNotExists(domain.User{Id: form.UserId})
+	if err != nil {
+		return domain.IdResponse{}, errors.Wrap(err, "cannot insert user before creating task")
+	}
 
-	/// НИЖЕ СТАРАЯ
+	// Is challenge connected to category?
+	categoryId := new(int32)
+	if form.CategoryName != nil {
+		// Finding category
+		category, err := ucase.categoryRepo.FetchByName(form.UserId, *form.CategoryName)
+		if err != nil {
+			return domain.IdResponse{}, errors.Wrap(err, "cannot fetch category before creating task")
+		}
 
-	//if form.Name == "" {
-	//	return domain.IdResponse{
-	//		StatusCode: domain.ValidationError,
-	//	}, nil
-	//}
+		// Creating if not exists
+		if category == nil {
+			category = &domain.DBCCategory{
+				UserId: form.UserId,
+				Name:   *form.CategoryName,
+			}
+			err = ucase.categoryRepo.Insert(category)
+			if err != nil {
+				return domain.IdResponse{}, errors.Wrap(err, "cannot insert new category before creating task")
+			}
+		}
+
+		// Set category Id for next step
+		*categoryId = category.Id
+	}
+
+	// Check if challenge with same name already exists
+	form.Name = strings.TrimSpace(form.Name)
+	challengeFound, err := ucase.challengesRepo.FetchByName(form.UserId, form.Name)
+	if err != nil {
+		return domain.IdResponse{}, errors.Wrap(err, "cannot check if challenge exists by name before creating task")
+	}
+	if challengeFound != nil {
+		return domain.IdResponse{
+			StatusCode: domain.AlreadyExists,
+		}, nil
+	}
+
+	// Validation of challenge form
+	if form.Name == "" {
+		return domain.IdResponse{
+			StatusCode: domain.ValidationError,
+		}, nil
+	}
+
+	// Creating challenge
+	challenge := &domain.DBCChallenge{
+		UserId:     form.UserId,
+		CategoryId: categoryId,
+		Name:       form.Name,
+		Desc:       form.Desc,
+		LastSeries: 0,
+	}
+	err = ucase.challengesRepo.Insert(challenge)
+	if err != nil {
+		return domain.IdResponse{}, errors.Wrap(err, "cannot insert new challenge before creating task")
+	}
+
 	//
-	//// If user does not exist - create
-	//err := i.usersRepo.InsertIfNotExists(&domain.User{
-	//	Id: task.UserId,
-	//})
-	//if err != nil {
-	//	return domain.IdResponse{}, errors.Wrap(err, "cannot insert user before creating task")
-	//}
-	//
-	//// If task is a child of project
-	//if task.CategoryId != nil {
-	//	project, err := i.categoryRepo.FetchById(*task.CategoryId)
-	//	if err != nil {
-	//		return domain.IdResponse{}, errors.Wrapf(err, "cannot fetch project %d", *task.CategoryId)
-	//	}
-	//	if project == nil {
-	//		return domain.IdResponse{
-	//			StatusCode: domain.ProjectNotFound,
-	//		}, nil
-	//	}
-	//	// Is user owner of project?
-	//	if project.UserId != task.UserId {
-	//		return domain.IdResponse{
-	//			StatusCode: domain.AccessDenied,
-	//		}, nil
-	//	}
-	//}
-	//
-	//err = i.challengesRepo.Insert(task)
-	//if err != nil {
-	//	return domain.IdResponse{}, errors.Wrap(err, "cannot insert task")
-	//}
-	//
-	//return domain.IdResponse{
-	//	StatusCode: domain.Success,
-	//	Id:         task.Id,
-	//}, nil
-	return domain.IdResponse{}, nil
+	return domain.IdResponse{
+		StatusCode: domain.Success,
+		Id:         challenge.Id,
+	}, nil
 }
 
-func (i *ChallengesUseCase) Update(task *domain.DBCChallenge) (domain.StatusResponse, error) {
+func (ucase *ChallengesUseCase) Update(task *domain.DBCChallenge) (domain.StatusResponse, error) {
 
 	// Поменять имя
 	//
-	//fetchedTask, err := i.challengesRepo.FetchById(task.Id)
+	//fetchedTask, err := ucase.challengesRepo.FetchById(task.Id)
 	//if err != nil || fetchedTask == nil {
 	//	return domain.StatusResponse{
 	//		StatusCode: domain.NotFound,
 	//	}, nil
 	//}
 	//
-	//err = i.challengesRepo.Update(task)
+	//err = ucase.challengesRepo.Update(task)
 	//if err != nil {
 	//	return domain.StatusResponse{}, errors.Wrap(err, "cannot update task")
 	//}
@@ -111,9 +138,9 @@ func (i *ChallengesUseCase) Update(task *domain.DBCChallenge) (domain.StatusResp
 	}, nil
 }
 
-func (i *ChallengesUseCase) Remove(userId, taskId int32) (domain.StatusResponse, error) {
+func (ucase *ChallengesUseCase) Remove(userId, taskId int32) (domain.StatusResponse, error) {
 
-	//task, err := i.challengesRepo.FetchById(taskId)
+	//task, err := ucase.challengesRepo.FetchById(taskId)
 	//if err != nil {
 	//	return domain.StatusResponse{}, errors.Wrapf(err, "cannot fetch task by id %d", taskId)
 	//}
@@ -124,7 +151,7 @@ func (i *ChallengesUseCase) Remove(userId, taskId int32) (domain.StatusResponse,
 	//	}, nil
 	//}
 	//
-	//err = i.challengesRepo.Remove(task.Id)
+	//err = ucase.challengesRepo.Remove(task.Id)
 	//if err != nil {
 	//	return domain.StatusResponse{}, errors.Wrap(err, "cannot remove task")
 	//}

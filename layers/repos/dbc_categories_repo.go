@@ -78,6 +78,35 @@ func (r *DBCCategoriesRepo) FetchById(id int32) (*domain.DBCCategory, error) {
 	}
 }
 
+func (r *DBCCategoriesRepo) FetchByName(userId int32, name string) (*domain.DBCCategory, error) {
+	var item = &domain.DBCCategory{
+		UserId: userId,
+		Name:   name,
+	}
+	query := `select 
+    			id,
+    			created_at,
+    			updated_at,
+    			deleted_at
+			from dbc_challenge_categories
+			where user_id=$1 and name=$2
+			limit 1`
+
+	err := r.db.QueryRow(query, userId, name).Scan(
+		&item.Id,
+		&item.CreatedAt,
+		&item.UpdatedAt,
+		&item.DeletedAt)
+	switch err {
+	case nil:
+		return item, nil
+	case sql.ErrNoRows:
+		return nil, nil
+	default:
+		return nil, err
+	}
+}
+
 func (r *DBCCategoriesRepo) Insert(item *domain.DBCCategory) error {
 	query := `INSERT INTO dbc_challenge_categories (user_id, name) VALUES ($1, $2) returning id;`
 	err := r.db.QueryRow(query, item.UserId, item.Name).Scan(&item.Id)
