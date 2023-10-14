@@ -1,4 +1,4 @@
-package interactors
+package usecase
 
 import (
 	"github.com/pkg/errors"

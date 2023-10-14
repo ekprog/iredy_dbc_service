@@ -17,7 +17,7 @@ type UsersRepository interface {
 	Remove(int32) error
 }
 
-type UsersInteractor interface {
+type UsersUseCase interface {
 	CreateIfNotExists(User) (CreateUserResponse, error)
 	Remove(int32) (RemoveUserResponse, error)
 }

@@ -1,4 +1,4 @@
-package delivery
+package grpc
 
 import (
 	"context"
@@ -10,17 +10,17 @@ import (
 )
 
 type DBCDeliveryService struct {
-	pb.UnimplementedDBCServiceServer
+	pb.DBCServiceServer
 	log                core.Logger
-	usersUCase         domain.UsersInteractor
-	dbcCategoriesUCase domain.DBCCategoryInteractor
-	dbcChallengesUCase domain.ChallengesInteractor
+	usersUCase         domain.UsersUseCase
+	dbcCategoriesUCase domain.DBCCategoryUseCase
+	dbcChallengesUCase domain.ChallengesUseCase
 }
 
 func NewDBCDeliveryService(log core.Logger,
-	usersUCase domain.UsersInteractor,
-	dbcCategoriesUCase domain.DBCCategoryInteractor,
-	dbcChallengesUCase domain.ChallengesInteractor) *DBCDeliveryService {
+	usersUCase domain.UsersUseCase,
+	dbcCategoriesUCase domain.DBCCategoryUseCase,
+	dbcChallengesUCase domain.ChallengesUseCase) *DBCDeliveryService {
 	return &DBCDeliveryService{
 		log:                log,
 		usersUCase:         usersUCase,

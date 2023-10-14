@@ -3,10 +3,10 @@ package bootstrap
 import (
 	"go.uber.org/dig"
 	"microservice/app"
-	"microservice/layers/delivery"
+	"microservice/layers/delivery/grpc"
 	"microservice/layers/domain"
-	"microservice/layers/interactors"
 	"microservice/layers/repos"
+	"microservice/layers/usecase"
 )
 
 func initDependencies(di *dig.Container) error {
@@ -17,19 +17,19 @@ func initDependencies(di *dig.Container) error {
 	di.Provide(repos.NewDBCChallengesRepo, dig.As(new(domain.DBCChallengesRepository)))
 
 	// Use Cases
-	di.Provide(interactors.NewUsersInteractor, dig.As(new(domain.UsersInteractor)))
-	di.Provide(interactors.NewDBCCategoriesUCase, dig.As(new(domain.DBCCategoryInteractor)))
-	di.Provide(interactors.NewChallengesInteractor, dig.As(new(domain.ChallengesInteractor)))
+	di.Provide(usecase.NewUsersUseCase, dig.As(new(domain.UsersUseCase)))
+	di.Provide(usecase.NewDBCCategoriesUCase, dig.As(new(domain.DBCCategoryUseCase)))
+	di.Provide(usecase.NewChallengesUseCase, dig.As(new(domain.ChallengesUseCase)))
 
-	di.Provide(delivery.NewStatusDeliveryService)
-	di.Provide(delivery.NewDBCDeliveryService)
+	di.Provide(grpc.NewStatusDeliveryService)
+	di.Provide(grpc.NewDBCDeliveryService)
 
 	// Delivery
-	if err := app.InitDelivery(delivery.NewStatusDeliveryService); err != nil {
+	if err := app.InitDelivery(grpc.NewStatusDeliveryService); err != nil {
 		return err
 	}
 
-	if err := app.InitDelivery(delivery.NewDBCDeliveryService); err != nil {
+	if err := app.InitDelivery(grpc.NewDBCDeliveryService); err != nil {
 		return err
 	}
 

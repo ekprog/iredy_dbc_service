@@ -54,15 +54,15 @@ type DBCChallengesRepository interface {
 }
 
 //
-// INTERACTORS
+// USE CASES
 //
 
-type DBCCategoryInteractor interface {
+type DBCCategoryUseCase interface {
 	Get(userId int32) (CategoryListResponse, error)
 	Update(*DBCCategory) (StatusResponse, error)
 }
 
-type ChallengesInteractor interface {
+type ChallengesUseCase interface {
 	All(userId int32) (ChallengesListResponse, error)
 	Create(form *CreateDBCChallengeForm) (IdResponse, error)
 	Update(task *DBCChallenge) (StatusResponse, error)

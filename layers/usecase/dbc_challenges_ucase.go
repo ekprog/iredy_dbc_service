@@ -1,4 +1,4 @@
-package interactors
+package usecase
 
 import (
 	"github.com/pkg/errors"
@@ -6,21 +6,21 @@ import (
 	"microservice/layers/domain"
 )
 
-type ChallengesInteractor struct {
+type ChallengesUseCase struct {
 	log            core.Logger
 	usersRepo      domain.UsersRepository
 	categoryRepo   domain.DBCCategoryRepository
 	challengesRepo domain.DBCChallengesRepository
 }
 
-func NewChallengesInteractor(log core.Logger,
+func NewChallengesUseCase(log core.Logger,
 	usersRepo domain.UsersRepository,
 	projectsRepo domain.DBCCategoryRepository,
-	tasksRepo domain.DBCChallengesRepository) *ChallengesInteractor {
-	return &ChallengesInteractor{log: log, usersRepo: usersRepo, categoryRepo: projectsRepo, challengesRepo: tasksRepo}
+	tasksRepo domain.DBCChallengesRepository) *ChallengesUseCase {
+	return &ChallengesUseCase{log: log, usersRepo: usersRepo, categoryRepo: projectsRepo, challengesRepo: tasksRepo}
 }
 
-func (i *ChallengesInteractor) All(userId int32) (domain.ChallengesListResponse, error) {
+func (i *ChallengesUseCase) All(userId int32) (domain.ChallengesListResponse, error) {
 	var items []*domain.DBCChallenge
 	var err error
 
@@ -35,7 +35,7 @@ func (i *ChallengesInteractor) All(userId int32) (domain.ChallengesListResponse,
 	}, nil
 }
 
-func (i *ChallengesInteractor) Create(form *domain.CreateDBCChallengeForm) (domain.IdResponse, error) {
+func (i *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (domain.IdResponse, error) {
 
 	// ToDo:
 	// Если нет категории у пользователя  CategoryName - создать ее
@@ -90,7 +90,7 @@ func (i *ChallengesInteractor) Create(form *domain.CreateDBCChallengeForm) (doma
 	return domain.IdResponse{}, nil
 }
 
-func (i *ChallengesInteractor) Update(task *domain.DBCChallenge) (domain.StatusResponse, error) {
+func (i *ChallengesUseCase) Update(task *domain.DBCChallenge) (domain.StatusResponse, error) {
 
 	// Поменять имя
 	//
@@ -111,7 +111,7 @@ func (i *ChallengesInteractor) Update(task *domain.DBCChallenge) (domain.StatusR
 	}, nil
 }
 
-func (i *ChallengesInteractor) Remove(userId, taskId int32) (domain.StatusResponse, error) {
+func (i *ChallengesUseCase) Remove(userId, taskId int32) (domain.StatusResponse, error) {
 
 	//task, err := i.challengesRepo.FetchById(taskId)
 	//if err != nil {

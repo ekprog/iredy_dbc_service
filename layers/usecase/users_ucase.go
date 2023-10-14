@@ -1,4 +1,4 @@
-package interactors
+package usecase
 
 import (
 	"github.com/pkg/errors"
@@ -6,16 +6,16 @@ import (
 	"microservice/layers/domain"
 )
 
-type UsersInteractor struct {
+type UsersUseCase struct {
 	log  core.Logger
 	repo domain.UsersRepository
 }
 
-func NewUsersInteractor(log core.Logger, repo domain.UsersRepository) *UsersInteractor {
-	return &UsersInteractor{log: log, repo: repo}
+func NewUsersUseCase(log core.Logger, repo domain.UsersRepository) *UsersUseCase {
+	return &UsersUseCase{log: log, repo: repo}
 }
 
-func (i *UsersInteractor) CreateIfNotExists(user domain.User) (domain.CreateUserResponse, error) {
+func (i *UsersUseCase) CreateIfNotExists(user domain.User) (domain.CreateUserResponse, error) {
 	err := i.repo.InsertIfNotExists(&user)
 	if err != nil {
 		return domain.CreateUserResponse{}, errors.Wrap(err, "cannot insert user")
@@ -26,7 +26,7 @@ func (i *UsersInteractor) CreateIfNotExists(user domain.User) (domain.CreateUser
 	}, nil
 }
 
-func (i *UsersInteractor) Remove(userId int32) (domain.RemoveUserResponse, error) {
+func (i *UsersUseCase) Remove(userId int32) (domain.RemoveUserResponse, error) {
 	err := i.repo.Remove(userId)
 	if err != nil {
 		return domain.RemoveUserResponse{}, errors.Wrap(err, "cannot remove user")
