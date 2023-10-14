@@ -3,12 +3,12 @@ package domain
 import "time"
 
 type User struct {
-	Id    int32 `json:"id"`
-	Score int32 `json:"id"` // ToDo
+	Id    int32
+	Score int32
 
-	UpdatedAt time.Time `json:"updated_at"`
-	CreatedAt time.Time `json:"created_at"`
-	DeletedAt time.Time `json:"deleted_at"`
+	UpdatedAt time.Time
+	CreatedAt time.Time
+	DeletedAt time.Time
 }
 
 type UsersRepository interface {

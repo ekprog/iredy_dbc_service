@@ -1,6 +1,8 @@
 package domain
 
-import "time"
+import (
+	"time"
+)
 
 //
 // MODELS
@@ -29,17 +31,6 @@ type DBCChallenge struct {
 	UpdatedAt time.Time
 	CreatedAt time.Time
 	DeletedAt *time.Time
-}
-
-//
-// FORMS
-//
-
-type CreateDBCChallengeForm struct {
-	Id           int32
-	UserId       int32
-	Name         string
-	CategoryName *string
 }
 
 //
@@ -78,12 +69,19 @@ type ChallengesInteractor interface {
 	Remove(userId, taskId int32) (StatusResponse, error)
 }
 
+// IO FORMS
+
+type CreateDBCChallengeForm struct {
+	Id           int32
+	UserId       int32
+	Name         string
+	CategoryName *string
+}
+
 type ChallengesListResponse struct {
 	StatusCode string
 	Challenges []*DBCChallenge
 }
-
-// Responses (only for UseCase layer)
 
 type CategoryListResponse struct {
 	StatusCode string

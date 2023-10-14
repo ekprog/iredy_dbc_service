@@ -1,15 +1,28 @@
 package bootstrap
 
 import (
+	"context"
 	"database/sql"
 	"github.com/pkg/errors"
 	"microservice/app"
 	"microservice/app/core"
 	"microservice/app/job"
 	"microservice/app/kafka"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func Run(rootPath ...string) error {
+
+	// Graceful shutdown
+	ctx, cancel := context.WithCancel(context.Background())
+	osSignCh := make(chan os.Signal)
+	signal.Notify(osSignCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	go func() {
+		<-osSignCh
+		cancel()
+	}()
 
 	// ENV, etc
 	err := app.InitApp(rootPath...)
@@ -95,7 +108,10 @@ func Run(rootPath ...string) error {
 	}
 
 	// Run gRPC and block
-	app.RunGRPCServer()
+	go app.RunGRPCServer()
+
+	// End context
+	<-ctx.Done()
 
 	return nil
 }
