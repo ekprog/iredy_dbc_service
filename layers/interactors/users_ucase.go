@@ -3,7 +3,7 @@ package interactors
 import (
 	"github.com/pkg/errors"
 	"microservice/app/core"
-	"microservice/domain"
+	"microservice/layers/domain"
 )
 
 type UsersInteractor struct {

@@ -5,7 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"microservice/app"
 	"microservice/app/core"
-	"microservice/domain"
+	"microservice/layers/domain"
 	pb "microservice/pkg/pb/api"
 )
 
@@ -44,7 +44,7 @@ func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateCh
 	// Есть ли такой пользоваетль?
 	// Если нет - создать пользователя + создать запись
 
-	uCaseRes, err := d.dbcChallengesUCase.Create(&domain.CreateChallengeForm{
+	uCaseRes, err := d.dbcChallengesUCase.Create(&domain.CreateDBCChallengeForm{
 		UserId: userId,
 		Name:   r.Name,
 	})
@@ -107,7 +107,7 @@ func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateCh
 //
 //			//if pItem.Challenges != nil {
 //			//	for _, tItem := range pItem.Challenges {
-//			//		t := &pb.Challenge{
+//			//		t := &pb.DBCChallenge{
 //			//			Id:        tItem.Id,
 //			//			UserId:    tItem.UserId,
 //			//			CategoryId: tItem.CategoryId,
@@ -127,7 +127,7 @@ func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateCh
 //			//
 //			//if pItem.DoneTasks != nil {
 //			//	for _, tItem := range pItem.DoneTasks {
-//			//		t := &pb.Challenge{
+//			//		t := &pb.DBCChallenge{
 //			//			Id:        tItem.Id,
 //			//			UserId:    tItem.UserId,
 //			//			CategoryId: tItem.CategoryId,

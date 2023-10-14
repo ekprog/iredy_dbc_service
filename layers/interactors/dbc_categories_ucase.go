@@ -3,14 +3,14 @@ package interactors
 import (
 	"github.com/pkg/errors"
 	"microservice/app/core"
-	"microservice/domain"
+	"microservice/layers/domain"
 )
 
 type DBCCategoriesUCase struct {
 	log            core.Logger
 	categoriesRepo domain.DBCCategoryRepository
 	usersRepo      domain.UsersRepository
-	tasksRepo      domain.ChallengesRepository
+	tasksRepo      domain.DBCChallengesRepository
 }
 
 func NewDBCCategoriesUCase(log core.Logger,

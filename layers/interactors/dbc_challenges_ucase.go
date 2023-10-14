@@ -3,25 +3,25 @@ package interactors
 import (
 	"github.com/pkg/errors"
 	"microservice/app/core"
-	"microservice/domain"
+	"microservice/layers/domain"
 )
 
 type ChallengesInteractor struct {
 	log            core.Logger
 	usersRepo      domain.UsersRepository
 	categoryRepo   domain.DBCCategoryRepository
-	challengesRepo domain.ChallengesRepository
+	challengesRepo domain.DBCChallengesRepository
 }
 
 func NewChallengesInteractor(log core.Logger,
 	usersRepo domain.UsersRepository,
 	projectsRepo domain.DBCCategoryRepository,
-	tasksRepo domain.ChallengesRepository) *ChallengesInteractor {
+	tasksRepo domain.DBCChallengesRepository) *ChallengesInteractor {
 	return &ChallengesInteractor{log: log, usersRepo: usersRepo, categoryRepo: projectsRepo, challengesRepo: tasksRepo}
 }
 
 func (i *ChallengesInteractor) All(userId int32) (domain.ChallengesListResponse, error) {
-	var items []*domain.Challenge
+	var items []*domain.DBCChallenge
 	var err error
 
 	items, err = i.challengesRepo.FetchAll(userId)
@@ -35,7 +35,7 @@ func (i *ChallengesInteractor) All(userId int32) (domain.ChallengesListResponse,
 	}, nil
 }
 
-func (i *ChallengesInteractor) Create(form *domain.CreateChallengeForm) (domain.IdResponse, error) {
+func (i *ChallengesInteractor) Create(form *domain.CreateDBCChallengeForm) (domain.IdResponse, error) {
 
 	// ToDo:
 	// Если нет категории у пользователя  CategoryName - создать ее
@@ -90,7 +90,7 @@ func (i *ChallengesInteractor) Create(form *domain.CreateChallengeForm) (domain.
 	return domain.IdResponse{}, nil
 }
 
-func (i *ChallengesInteractor) Update(task *domain.Challenge) (domain.StatusResponse, error) {
+func (i *ChallengesInteractor) Update(task *domain.DBCChallenge) (domain.StatusResponse, error) {
 
 	// Поменять имя
 	//

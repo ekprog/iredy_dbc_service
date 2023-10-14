@@ -2643,3 +2643,6 @@
 [INFO](2023-10-14 01:39:10) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
 [INFO](2023-10-14 01:39:10) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
 [INFO](2023-10-14 01:39:37) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/CreateChallenge
+[INFO](2023-10-14 21:01:33) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-14 21:01:33) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-14 21:01:34) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087

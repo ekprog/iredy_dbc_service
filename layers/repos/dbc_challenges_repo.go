@@ -3,7 +3,7 @@ package repos
 import (
 	"database/sql"
 	"microservice/app/core"
-	"microservice/domain"
+	"microservice/layers/domain"
 )
 
 type DBCChallengesRepo struct {
@@ -15,7 +15,7 @@ func NewDBCChallengesRepo(log core.Logger, db *sql.DB) *DBCChallengesRepo {
 	return &DBCChallengesRepo{log: log, db: db}
 }
 
-func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.Challenge, error) {
+func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, error) {
 
 	query := `select 
     			id,
@@ -35,9 +35,9 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.Challenge, error) 
 		return nil, err
 	}
 
-	var result []*domain.Challenge
+	var result []*domain.DBCChallenge
 	for rows.Next() {
-		item := &domain.Challenge{
+		item := &domain.DBCChallenge{
 			UserId: userId,
 		}
 		err := rows.Scan(&item.Id,
@@ -56,8 +56,8 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.Challenge, error) 
 	return result, nil
 }
 
-func (r *DBCChallengesRepo) FetchById(id int32) (*domain.Challenge, error) {
-	var task = &domain.Challenge{
+func (r *DBCChallengesRepo) FetchById(id int32) (*domain.DBCChallenge, error) {
+	var task = &domain.DBCChallenge{
 		Id: id,
 	}
 	query := `select 
@@ -90,7 +90,7 @@ func (r *DBCChallengesRepo) FetchById(id int32) (*domain.Challenge, error) {
 	}
 }
 
-func (r *DBCChallengesRepo) Insert(item *domain.Challenge) error {
+func (r *DBCChallengesRepo) Insert(item *domain.DBCChallenge) error {
 	query := `INSERT INTO dbc_challenges (
                    user_id, 
                    category_id, 
@@ -109,7 +109,7 @@ func (r *DBCChallengesRepo) Insert(item *domain.Challenge) error {
 	return nil
 }
 
-func (r *DBCChallengesRepo) Update(item *domain.Challenge) error {
+func (r *DBCChallengesRepo) Update(item *domain.DBCChallenge) error {
 	query := `UPDATE dbc_challenges 
 				SET name=$2, "desc"=$3, updated_at=now()
 				WHERE id=$1`

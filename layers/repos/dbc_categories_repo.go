@@ -3,7 +3,7 @@ package repos
 import (
 	"database/sql"
 	"microservice/app/core"
-	"microservice/domain"
+	"microservice/layers/domain"
 )
 
 type DBCCategoriesRepo struct {

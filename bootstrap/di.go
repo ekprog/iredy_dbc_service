@@ -3,10 +3,10 @@ package bootstrap
 import (
 	"go.uber.org/dig"
 	"microservice/app"
-	"microservice/delivery"
-	"microservice/domain"
-	"microservice/interactors"
-	"microservice/repos"
+	"microservice/layers/delivery"
+	"microservice/layers/domain"
+	"microservice/layers/interactors"
+	"microservice/layers/repos"
 )
 
 func initDependencies(di *dig.Container) error {
@@ -14,7 +14,7 @@ func initDependencies(di *dig.Container) error {
 	// Repository
 	di.Provide(repos.NewUsersRepo, dig.As(new(domain.UsersRepository)))
 	di.Provide(repos.NewDBCCategoriesRepo, dig.As(new(domain.DBCCategoryRepository)))
-	di.Provide(repos.NewDBCChallengesRepo, dig.As(new(domain.ChallengesRepository)))
+	di.Provide(repos.NewDBCChallengesRepo, dig.As(new(domain.DBCChallengesRepository)))
 
 	// Use Cases
 	di.Provide(interactors.NewUsersInteractor, dig.As(new(domain.UsersInteractor)))

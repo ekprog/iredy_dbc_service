@@ -4,7 +4,7 @@ import (
 	"context"
 	"microservice/app"
 	"microservice/app/core"
-	"microservice/domain"
+	"microservice/layers/domain"
 	pb "microservice/pkg/pb/api"
 )
 

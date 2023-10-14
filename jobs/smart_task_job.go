@@ -2,7 +2,7 @@ package jobs
 
 import (
 	"microservice/app/core"
-	"microservice/domain"
+	"microservice/layers/domain"
 )
 
 func SmartTaskJob(log core.Logger, smartUCase domain.SmartTasksInteractor) {
