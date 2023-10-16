@@ -9,6 +9,7 @@ import (
 	"microservice/app/core"
 	"microservice/layers/domain"
 	pb "microservice/pkg/pb/api"
+	"time"
 )
 
 type DBCDeliveryService struct {
@@ -64,6 +65,36 @@ func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateCh
 		response.Id = uCaseRes.Id
 	}
 
+	return response, nil
+}
+
+func (d *DBCDeliveryService) UpdateCategory(ctx context.Context, r *pb.UpdateCategoriesRequest) (*pb.StatusResponse, error) {
+
+	userId, err := app.ExtractRequestUserId(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot extract user_id from context")
+	}
+
+	category := &domain.DBCCategory{
+		Id:        r.Id,
+		UserId:    userId,
+		Name:      r.Name,
+		UpdatedAt: time.Time{},
+		CreatedAt: time.Time{},
+		DeletedAt: nil,
+	}
+
+	uCaseRes, err := d.dbcCategoriesUCase.Update(category)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot update category ")
+	}
+
+	response := &pb.StatusResponse{
+		Status: &pb.Status{
+			Code:    uCaseRes.StatusCode,
+			Message: uCaseRes.StatusCode,
+		},
+	}
 	return response, nil
 }
 
