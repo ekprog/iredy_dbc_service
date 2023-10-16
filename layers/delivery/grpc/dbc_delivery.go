@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"github.com/pkg/errors"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"microservice/app"
 	"microservice/app/conv"
 	"microservice/app/core"
@@ -61,6 +62,44 @@ func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateCh
 
 	if uCaseRes.StatusCode == domain.Success {
 		response.Id = uCaseRes.Id
+	}
+
+	return response, nil
+}
+
+func (d *DBCDeliveryService) GetCategories(ctx context.Context, r *pb.GetCategoriesRequest) (*pb.GetCategoriesResponse, error) {
+	userId, err := app.ExtractRequestUserId(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot extract user_id from context")
+	}
+	uCaseRes, err := d.dbcCategoriesUCase.Get(userId)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot fetch project info")
+	}
+
+	response := &pb.GetCategoriesResponse{
+		Status: &pb.Status{
+			Code:    uCaseRes.StatusCode,
+			Message: uCaseRes.StatusCode,
+		},
+	}
+
+	if uCaseRes.StatusCode == domain.Success && uCaseRes.Categories != nil {
+		for _, category := range uCaseRes.Categories {
+			p := &pb.DBCCategory{
+				UserId:    category.UserId,
+				Id:        category.Id,
+				Name:      category.Name,
+				CreatedAt: timestamppb.New(category.CreatedAt),
+				UpdatedAt: timestamppb.New(category.UpdatedAt),
+			}
+
+			if category.DeletedAt != nil {
+				p.DeletedAt = timestamppb.New(*category.DeletedAt)
+			}
+
+			response.Categories = append(response.Categories, p)
+		}
 	}
 
 	return response, nil
