@@ -21,7 +21,7 @@ service DBCService {
 
   // Challenges
   rpc GetChallenges (GetChallengesRequest) returns (GetChallengesResponse) {}
-  rpc CreateChallenge (CreateChallengeRequest) returns (IdResponse) {}
+  rpc CreateChallenge (CreateChallengeRequest) returns (CreateChallengesResponse) {}
   rpc UpdateChallenge (UpdateChallengeRequest) returns (StatusResponse) {}
   rpc RemoveChallenge (IdRequest) returns (StatusResponse) {}
 }

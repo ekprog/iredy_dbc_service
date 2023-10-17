@@ -45,12 +45,12 @@ func (ucase *ChallengesUseCase) All(userId int32) (domain.ChallengesListResponse
 	}, nil
 }
 
-func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (domain.IdResponse, error) {
+func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (domain.CreateChallengeResponse, error) {
 
 	//
 	_, err := ucase.usersUseCase.CreateIfNotExists(domain.User{Id: form.UserId})
 	if err != nil {
-		return domain.IdResponse{}, errors.Wrap(err, "cannot insert user before creating task")
+		return domain.CreateChallengeResponse{}, errors.Wrap(err, "cannot insert user before creating task")
 	}
 
 	// Is challenge connected to category?
@@ -59,7 +59,7 @@ func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (dom
 		// Finding category
 		category, err := ucase.categoryRepo.FetchByName(form.UserId, *form.CategoryName)
 		if err != nil {
-			return domain.IdResponse{}, errors.Wrap(err, "cannot fetch category before creating task")
+			return domain.CreateChallengeResponse{}, errors.Wrap(err, "cannot fetch category before creating task")
 		}
 
 		// Creating if not exists
@@ -70,7 +70,7 @@ func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (dom
 			}
 			err = ucase.categoryRepo.Insert(category)
 			if err != nil {
-				return domain.IdResponse{}, errors.Wrap(err, "cannot insert new category before creating task")
+				return domain.CreateChallengeResponse{}, errors.Wrap(err, "cannot insert new category before creating task")
 			}
 		}
 
@@ -82,17 +82,17 @@ func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (dom
 	form.Name = strings.TrimSpace(form.Name)
 	challengeFound, err := ucase.challengesRepo.FetchByName(form.UserId, form.Name)
 	if err != nil {
-		return domain.IdResponse{}, errors.Wrap(err, "cannot check if challenge exists by name before creating task")
+		return domain.CreateChallengeResponse{}, errors.Wrap(err, "cannot check if challenge exists by name before creating task")
 	}
 	if challengeFound != nil {
-		return domain.IdResponse{
+		return domain.CreateChallengeResponse{
 			StatusCode: domain.AlreadyExists,
 		}, nil
 	}
 
 	// Validation of challenge form
 	if form.Name == "" {
-		return domain.IdResponse{
+		return domain.CreateChallengeResponse{
 			StatusCode: domain.ValidationError,
 		}, nil
 	}
@@ -107,13 +107,14 @@ func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (dom
 	}
 	err = ucase.challengesRepo.Insert(challenge)
 	if err != nil {
-		return domain.IdResponse{}, errors.Wrap(err, "cannot insert new challenge before creating task")
+		return domain.CreateChallengeResponse{}, errors.Wrap(err, "cannot insert new challenge before creating task")
 	}
 
 	//
-	return domain.IdResponse{
+	return domain.CreateChallengeResponse{
 		StatusCode: domain.Success,
 		Id:         challenge.Id,
+		CategoryId: categoryId,
 	}, nil
 }
 

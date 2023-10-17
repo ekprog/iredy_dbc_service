@@ -2927,3 +2927,152 @@
 [INFO](2023-10-17 20:52:32) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
 [INFO](2023-10-17 20:52:33) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
 [INFO](2023-10-17 20:52:33) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:58:50) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 20:58:50) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 20:58:50) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:58:57) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:01:18) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:01:20) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:01:37) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/CreateChallenge
+[INFO](2023-10-17 21:01:37) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:01:37) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:07:17) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:07:20) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:07:20) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:09:23) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:09:24) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:09:55) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:09:55) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:09:57) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:09:57) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:10:53) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:10:53) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:16:31) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:16:32) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:43:30) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:43:30) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:48:07) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 21:48:07) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 21:48:07) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 21:48:37) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:48:37) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:48:41) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:48:41) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:48:57) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 21:48:57) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 21:48:57) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 21:49:00) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:49:17) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/CreateChallenge
+[INFO](2023-10-17 21:49:17) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:49:17) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:50:02) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:50:02) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:50:46) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:50:46) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:52:06) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:52:06) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:52:36) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:52:36) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:52:53) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:52:54) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:52:54) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:53:00) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:53:00) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:53:46) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:53:46) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:53:53) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.StatusService/Ping
+[INFO](2023-10-17 21:54:31) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:54:31) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:54:38) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:54:52) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:54:57) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:54:57) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:55:02) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:55:02) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:55:05) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:55:05) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:55:11) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:55:11) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:55:14) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:55:14) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:55:32) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:55:40) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:55:41) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:55:42) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:55:46) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:55:52) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:55:53) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:55:54) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:55:55) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:55:55) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:57:49) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:57:51) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:57:53) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:57:53) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:57:54) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:57:55) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:57:55) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:57:56) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:58:06) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:58:09) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:58:09) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:59:05) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 21:59:05) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 21:59:05) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 21:59:15) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:59:15) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:59:17) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:59:17) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:59:18) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:59:18) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:59:19) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:59:19) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:59:19) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:59:19) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:59:20) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:59:20) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:59:20) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:59:20) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:59:21) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:59:21) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:59:24) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 21:59:24) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:59:29) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:59:31) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:59:32) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 21:59:33) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 22:00:04) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 22:00:04) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 22:00:04) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 22:00:07) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 22:00:11) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 22:00:13) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 22:04:24) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 22:04:24) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 22:04:24) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 22:04:43) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 22:04:43) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 22:04:45) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 22:04:45) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 22:04:45) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 22:04:45) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 22:04:46) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 22:04:46) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 22:04:46) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 22:04:46) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 22:04:47) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 22:04:47) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 22:04:48) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 22:04:48) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 22:04:48) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 22:04:48) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 22:04:49) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 22:04:49) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 22:04:49) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 22:04:49) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 22:04:50) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 22:04:50) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 22:05:39) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 22:05:57) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/CreateChallenge
+[INFO](2023-10-17 22:05:57) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 22:05:57) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges

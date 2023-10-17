@@ -36,11 +36,12 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
 			      t.deleted_at is null and
 				  (
 				      t.id is null or
-				      t.id IN (SELECT id
-                 		FROM dbc_challenges_tracks
-                 		LIMIT 5 OFFSET 0)  
+				      t.id IN (SELECT ct.id
+                 		FROM dbc_challenges_tracks ct
+                 		order by ct.date desc
+                 		LIMIT 5 OFFSET 0)
 				 )
-			order by c.created_at, t.date`
+			order by c.created_at desc, t.date desc`
 
 	rows, err := r.db.Query(query, userId)
 	if err != nil {
@@ -48,6 +49,7 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
 	}
 
 	result := make(map[int32]*domain.DBCChallenge)
+	var order []int32
 
 	for rows.Next() {
 		var date *time.Time
@@ -70,6 +72,7 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
 
 		if _, ok := result[item.Id]; !ok {
 			result[item.Id] = item
+			order = append(order, item.Id)
 		}
 
 		if date != nil {
@@ -79,8 +82,8 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
 
 	// To array
 	values := make([]*domain.DBCChallenge, 0, len(result))
-	for _, v := range result {
-		values = append(values, v)
+	for _, ind := range order {
+		values = append(values, result[ind])
 	}
 
 	return values, nil
