@@ -21,7 +21,13 @@ message DBCChallenge {
   string name = 4;
   optional string desc = 5;
   int32 last_series = 6;
-  google.protobuf.Timestamp created_at = 7;
-  google.protobuf.Timestamp updated_at = 8;
-  google.protobuf.Timestamp deleted_at = 9;
+  repeated DBTrack last_tracks = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  google.protobuf.Timestamp deleted_at = 10;
+}
+
+message DBTrack {
+  google.protobuf.Timestamp date = 1;
+  string date_string = 2;
 }

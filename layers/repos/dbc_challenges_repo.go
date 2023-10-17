@@ -18,27 +18,38 @@ func NewDBCChallengesRepo(log core.Logger, db *sql.DB) *DBCChallengesRepo {
 func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, error) {
 
 	query := `select 
-    			id,
-    			category_id,
-    			name, 
-    			"desc", 
-    			last_series,
-    			created_at, 
-    			updated_at,
-    			deleted_at
-			from dbc_challenges
-			where user_id=$1 and deleted_at is null
-			order by created_at`
+    			c.id,
+    			c.category_id,
+    			c.name, 
+    			c."desc", 
+    			c.last_series,
+    			c.created_at, 
+    			c.updated_at,
+    			c.deleted_at,
+    			t.date
+			from dbc_challenges c
+				left join dbc_challenges_tracks t 
+				    on c.id = t.challenge_id
+			where c.user_id=$1 and 
+			      c.deleted_at is null and 
+			      t.deleted_at is null and
+				  t.id IN (SELECT id
+							FROM dbc_challenges_tracks
+							LIMIT 5 OFFSET 0)
+			order by c.created_at, t.date`
 
 	rows, err := r.db.Query(query, userId)
 	if err != nil {
 		return nil, err
 	}
 
-	var result []*domain.DBCChallenge
+	result := make(map[int32]*domain.DBCChallenge)
+
 	for rows.Next() {
+		track := &domain.DBCTrack{}
 		item := &domain.DBCChallenge{
-			UserId: userId,
+			UserId:     userId,
+			LastTracks: []*domain.DBCTrack{},
 		}
 		err := rows.Scan(&item.Id,
 			&item.CategoryId,
@@ -47,13 +58,26 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
 			&item.LastSeries,
 			&item.CreatedAt,
 			&item.UpdatedAt,
-			&item.DeletedAt)
+			&item.DeletedAt,
+			&track.Date)
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, item)
+
+		if _, ok := result[item.Id]; !ok {
+			result[item.Id] = item
+		}
+
+		result[item.Id].LastTracks = append(result[item.Id].LastTracks, track)
 	}
-	return result, nil
+
+	// To array
+	values := make([]*domain.DBCChallenge, 0, len(result))
+	for _, v := range result {
+		values = append(values, v)
+	}
+
+	return values, nil
 }
 
 func (r *DBCChallengesRepo) FetchById(id int32) (*domain.DBCChallenge, error) {

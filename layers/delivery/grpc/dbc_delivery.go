@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-type DBCDeliveryService struct {
+type DBCDeliveryService struct { 
 	pb.DBCServiceServer
 	log                core.Logger
 	usersUCase         domain.UsersUseCase
@@ -38,7 +38,6 @@ func (d *DBCDeliveryService) Init() error {
 }
 
 func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateChallengeRequest) (*pb.IdResponse, error) {
-
 	userId, err := app.ExtractRequestUserId(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot extract user_id from context")
@@ -69,11 +68,6 @@ func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateCh
 }
 
 func (d *DBCDeliveryService) UpdateCategory(ctx context.Context, r *pb.UpdateCategoriesRequest) (*pb.StatusResponse, error) {
-
-	userId, err := app.ExtractRequestUserId(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot extract user_id from context")
-	}
 
 	category := &domain.DBCCategory{
 		Id:        r.Id,
