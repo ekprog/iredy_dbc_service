@@ -9,10 +9,9 @@ import (
 	"microservice/app/core"
 	"microservice/layers/domain"
 	pb "microservice/pkg/pb/api"
-	"time"
 )
 
-type DBCDeliveryService struct { 
+type DBCDeliveryService struct {
 	pb.DBCServiceServer
 	log                core.Logger
 	usersUCase         domain.UsersUseCase
@@ -69,18 +68,20 @@ func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateCh
 
 func (d *DBCDeliveryService) UpdateCategory(ctx context.Context, r *pb.UpdateCategoriesRequest) (*pb.StatusResponse, error) {
 
+	userId, err := app.ExtractRequestUserId(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot extract user_id from context")
+	}
+
 	category := &domain.DBCCategory{
-		Id:        r.Id,
-		UserId:    userId,
-		Name:      r.Name,
-		UpdatedAt: time.Time{},
-		CreatedAt: time.Time{},
-		DeletedAt: nil,
+		Id:     r.Id,
+		UserId: userId,
+		Name:   r.Name,
 	}
 
 	uCaseRes, err := d.dbcCategoriesUCase.Update(category)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot update category ")
+		return nil, errors.Wrap(err, "UpdateCategory")
 	}
 
 	response := &pb.StatusResponse{
@@ -89,6 +90,51 @@ func (d *DBCDeliveryService) UpdateCategory(ctx context.Context, r *pb.UpdateCat
 			Message: uCaseRes.StatusCode,
 		},
 	}
+	return response, nil
+}
+
+func (d *DBCDeliveryService) GetChallenges(ctx context.Context, r *pb.GetChallengesRequest) (*pb.GetChallengesResponse, error) {
+	userId, err := app.ExtractRequestUserId(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot extract user_id from context")
+	}
+
+	uCaseRes, err := d.dbcChallengesUCase.All(userId)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetChallenges")
+	}
+
+	response := &pb.GetChallengesResponse{
+		Status: &pb.Status{
+			Code:    uCaseRes.StatusCode,
+			Message: uCaseRes.StatusCode,
+		},
+		Challenges: []*pb.DBCChallenge{},
+	}
+
+	if uCaseRes.StatusCode == domain.Success {
+		for _, pItem := range uCaseRes.Challenges {
+			p := &pb.DBCChallenge{
+				Id:         pItem.Id,
+				UserId:     pItem.UserId,
+				Name:       pItem.Name,
+				CreatedAt:  timestamppb.New(pItem.CreatedAt),
+				DeletedAt:  conv.NullableTime(pItem.DeletedAt),
+				UpdatedAt:  timestamppb.New(pItem.UpdatedAt),
+				LastTracks: []*pb.DBTrack{},
+			}
+
+			for _, pTrack := range pItem.LastTracks {
+				t := &pb.DBTrack{
+					Date:       timestamppb.New(pTrack.Date),
+					DateString: pTrack.Date.Format("02-01-2006"),
+				}
+				p.LastTracks = append(p.LastTracks, t)
+			}
+			response.Challenges = append(response.Challenges, p)
+		}
+	}
+
 	return response, nil
 }
 
@@ -129,146 +175,3 @@ func (d *DBCDeliveryService) GetCategories(ctx context.Context, r *pb.GetCategor
 
 	return response, nil
 }
-
-//func (d *DBCDeliveryService) GetProjects(ctx context.Context, r *pb.GetProjectsRequest) (*pb.GetProjectsResponse, error) {
-//	userId, err := app.ExtractRequestUserId(ctx)
-//	if err != nil {
-//		return nil, errors.Wrap(err, "cannot extract user_id from context")
-//	}
-//
-//	uCaseRes, err := d.projectsUCase.Active(
-//		userId,
-//		conv.ValueOrDefault(r.Trashed, false),
-//	)
-//	if err != nil {
-//		return nil, errors.Wrap(err, "cannot fetch projects")
-//	}
-//
-//	response := &pb.GetProjectsResponse{
-//		Status: &pb.Status{
-//			Code:    uCaseRes.StatusCode,
-//			Message: uCaseRes.StatusCode,
-//		},
-//		Projects: []*pb.Project{},
-//	}
-//
-//	if uCaseRes.StatusCode == domain.Success && uCaseRes.Projects != nil {
-//		for _, pItem := range uCaseRes.Projects {
-//			p := &pb.Project{
-//				Id:        pItem.Id,
-//				UserId:    pItem.UserId,
-//				Name:      pItem.Name,
-//				Desc:      pItem.Desc,
-//				Color:     pItem.Color,
-//				Order:     pItem.Order,
-//				ParentId:  pItem.ParentId,
-//				CreatedAt: timestamppb.New(pItem.CreatedAt),
-//				UpdatedAt: timestamppb.New(pItem.UpdatedAt),
-//			}
-//			if pItem.DeletedAt != nil {
-//				p.DeletedAt = timestamppb.New(*pItem.DeletedAt)
-//			}
-//
-//			//if pItem.Challenges != nil {
-//			//	for _, tItem := range pItem.Challenges {
-//			//		t := &pb.DBCChallenge{
-//			//			Id:        tItem.Id,
-//			//			UserId:    tItem.UserId,
-//			//			CategoryId: tItem.CategoryId,
-//			//			Name:      tItem.Name,
-//			//			Desc:      tItem.Desc,
-//			//			Priority:  int32(tItem.Priority),
-//			//			Done:      tItem.Done,
-//			//			CreatedAt: timestamppb.New(tItem.CreatedAt),
-//			//			UpdatedAt: timestamppb.New(tItem.UpdatedAt),
-//			//		}
-//			//		if tItem.DeletedAt != nil {
-//			//			t.DeletedAt = timestamppb.New(*tItem.DeletedAt)
-//			//		}
-//			//		p.Challenges = append(p.Challenges, t)
-//			//	}
-//			//}
-//			//
-//			//if pItem.DoneTasks != nil {
-//			//	for _, tItem := range pItem.DoneTasks {
-//			//		t := &pb.DBCChallenge{
-//			//			Id:        tItem.Id,
-//			//			UserId:    tItem.UserId,
-//			//			CategoryId: tItem.CategoryId,
-//			//			Name:      tItem.Name,
-//			//			Desc:      tItem.Desc,
-//			//			Priority:  int32(tItem.Priority),
-//			//			Done:      tItem.Done,
-//			//			CreatedAt: timestamppb.New(tItem.CreatedAt),
-//			//			UpdatedAt: timestamppb.New(tItem.UpdatedAt),
-//			//		}
-//			//		if tItem.DeletedAt != nil {
-//			//			t.DeletedAt = timestamppb.New(*tItem.DeletedAt)
-//			//		}
-//			//		p.HistoryTasks = append(p.HistoryTasks, t)
-//			//	}
-//			//}
-//
-//			response.Projects = append(response.Projects, p)
-//		}
-//	}
-//
-//	return response, nil
-//}
-//
-//func (d *DBCDeliveryService) GetProjectInfo(ctx context.Context, r *pb.IdRequest) (*pb.GetProjectInfoResponse, error) {
-//	userId, err := app.ExtractRequestUserId(ctx)
-//	if err != nil {
-//		return nil, errors.Wrap(err, "cannot extract user_id from context")
-//	}
-//
-//	uCaseRes, err := d.projectsUCase.Info(userId, r.Id)
-//	if err != nil {
-//		return nil, errors.Wrap(err, "cannot fetch project info")
-//	}
-//
-//	response := &pb.GetProjectInfoResponse{
-//		Status: &pb.Status{
-//			Code:    uCaseRes.StatusCode,
-//			Message: uCaseRes.StatusCode,
-//		},
-//	}
-//
-//	if uCaseRes.StatusCode == domain.Success && uCaseRes.Project != nil {
-//		response.Project = &pb.Project{
-//			Id:        uCaseRes.Project.Id,
-//			UserId:    uCaseRes.Project.UserId,
-//			Name:      uCaseRes.Project.Name,
-//			Desc:      uCaseRes.Project.Desc,
-//			Color:     uCaseRes.Project.Color,
-//			CreatedAt: timestamppb.New(uCaseRes.Project.CreatedAt),
-//			UpdatedAt: timestamppb.New(uCaseRes.Project.UpdatedAt),
-//		}
-//		if uCaseRes.Project.DeletedAt != nil {
-//			response.Project.DeletedAt = timestamppb.New(*uCaseRes.Project.DeletedAt)
-//		}
-//	}
-//
-//	return response, nil
-//}
-//
-//func (d *DBCDeliveryService) RemoveProject(ctx context.Context, r *pb.IdRequest) (*pb.StatusResponse, error) {
-//	userId, err := app.ExtractRequestUserId(ctx)
-//	if err != nil {
-//		return nil, errors.Wrap(err, "cannot extract user_id from context")
-//	}
-//
-//	uCaseRes, err := d.projectsUCase.Remove(userId, r.Id)
-//	if err != nil {
-//		return nil, errors.Wrap(err, "cannot remove project")
-//	}
-//
-//	response := &pb.StatusResponse{
-//		Status: &pb.Status{
-//			Code:    uCaseRes.StatusCode,
-//			Message: uCaseRes.StatusCode,
-//		},
-//	}
-//
-//	return response, nil
-//}
