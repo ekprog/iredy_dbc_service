@@ -2828,3 +2828,102 @@
 [INFO](2023-10-17 18:30:49) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
 [INFO](2023-10-17 18:30:49) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
 [INFO](2023-10-17 18:30:49) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 18:32:59) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/UpdateCategory
+[INFO](2023-10-17 18:33:01) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/UpdateCategory
+[INFO](2023-10-17 18:33:04) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 19:44:25) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 19:44:25) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 19:44:25) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 19:47:05) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.StatusService/Ping
+[INFO](2023-10-17 19:49:38) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 19:49:38) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 19:49:38) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 19:50:44) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 19:51:52) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 19:51:52) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 19:51:52) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 19:51:54) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 19:52:52) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 19:53:44) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 19:54:11) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 19:54:14) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 19:54:22) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 19:55:05) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 19:55:07) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 19:55:38) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 19:55:38) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 19:55:38) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 19:55:40) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 19:56:24) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 19:56:24) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 19:57:18) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 19:57:18) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:01:22) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.StatusService/Ping
+[INFO](2023-10-17 20:17:18) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 20:17:18) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 20:17:18) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:17:18) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:17:18) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:19:08) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:19:08) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:19:34) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:19:34) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:20:01) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:20:01) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:20:03) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:20:03) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:20:56) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:20:56) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:21:52) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:21:52) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:21:55) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:21:55) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:23:31) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:25:03) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:25:03) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:26:02) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:26:02) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:26:33) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:28:27) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:39:25) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:40:13) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:41:02) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:41:24) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:41:35) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/CreateChallenge
+[INFO](2023-10-17 20:41:35) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:41:35) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:41:45) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:41:46) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:42:09) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:42:09) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:42:23) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:42:23) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:42:26) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:42:26) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:43:09) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 20:43:09) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 20:43:09) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:43:11) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:43:11) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:46:31) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 20:46:31) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 20:46:31) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:46:33) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:46:33) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[ERROR](2023-10-17 20:46:33) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:79 GetChallenges: cannot fetch dbc-challenges by user id: sql: Scan error on column index 8, name "date": unsupported Scan, storing driver.Value type <nil> into type *time.Time
+[INFO](2023-10-17 20:46:34) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:46:34) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[ERROR](2023-10-17 20:46:34) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:79 GetChallenges: cannot fetch dbc-challenges by user id: sql: Scan error on column index 8, name "date": unsupported Scan, storing driver.Value type <nil> into type *time.Time
+[INFO](2023-10-17 20:46:39) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:46:39) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[ERROR](2023-10-17 20:46:39) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:79 GetChallenges: cannot fetch dbc-challenges by user id: sql: Scan error on column index 8, name "date": unsupported Scan, storing driver.Value type <nil> into type *time.Time
+[INFO](2023-10-17 20:48:54) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 20:48:54) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 20:48:54) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:48:59) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:48:59) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges
+[INFO](2023-10-17 20:52:32) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 20:52:32) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 20:52:32) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:52:33) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetCategories
+[INFO](2023-10-17 20:52:33) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/GetChallenges

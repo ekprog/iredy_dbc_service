@@ -118,6 +118,7 @@ func (d *DBCDeliveryService) GetChallenges(ctx context.Context, r *pb.GetChallen
 				Id:         pItem.Id,
 				UserId:     pItem.UserId,
 				Name:       pItem.Name,
+				CategoryId: pItem.CategoryId,
 				CreatedAt:  timestamppb.New(pItem.CreatedAt),
 				DeletedAt:  conv.NullableTime(pItem.DeletedAt),
 				UpdatedAt:  timestamppb.New(pItem.UpdatedAt),

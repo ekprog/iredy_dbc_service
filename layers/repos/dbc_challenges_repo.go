@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"microservice/app/core"
 	"microservice/layers/domain"
+	"time"
 )
 
 type DBCChallengesRepo struct {
@@ -33,9 +34,12 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
 			where c.user_id=$1 and 
 			      c.deleted_at is null and 
 			      t.deleted_at is null and
-				  t.id IN (SELECT id
-							FROM dbc_challenges_tracks
-							LIMIT 5 OFFSET 0)
+				  (
+				      t.id is null or
+				      t.id IN (SELECT id
+                 		FROM dbc_challenges_tracks
+                 		LIMIT 5 OFFSET 0)  
+				 )
 			order by c.created_at, t.date`
 
 	rows, err := r.db.Query(query, userId)
@@ -46,7 +50,7 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
 	result := make(map[int32]*domain.DBCChallenge)
 
 	for rows.Next() {
-		track := &domain.DBCTrack{}
+		var date *time.Time
 		item := &domain.DBCChallenge{
 			UserId:     userId,
 			LastTracks: []*domain.DBCTrack{},
@@ -59,7 +63,7 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
 			&item.CreatedAt,
 			&item.UpdatedAt,
 			&item.DeletedAt,
-			&track.Date)
+			&date)
 		if err != nil {
 			return nil, err
 		}
@@ -68,7 +72,9 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
 			result[item.Id] = item
 		}
 
-		result[item.Id].LastTracks = append(result[item.Id].LastTracks, track)
+		if date != nil {
+			result[item.Id].LastTracks = append(result[item.Id].LastTracks, &domain.DBCTrack{Date: *date})
+		}
 	}
 
 	// To array
