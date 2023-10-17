@@ -9,9 +9,10 @@ import (
 	"microservice/app/core"
 	"microservice/layers/domain"
 	pb "microservice/pkg/pb/api"
+	"time"
 )
 
-type DBCDeliveryService struct {
+type DBCDeliveryService struct { 
 	pb.DBCServiceServer
 	log                core.Logger
 	usersUCase         domain.UsersUseCase
@@ -66,45 +67,63 @@ func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateCh
 	return response, nil
 }
 
-func (d *DBCDeliveryService) GetChallenges(ctx context.Context, r *pb.GetChallengesRequest) (*pb.GetChallengesResponse, error) {
-	userId, err := app.ExtractRequestUserId(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot extract user_id from context")
+func (d *DBCDeliveryService) UpdateCategory(ctx context.Context, r *pb.UpdateCategoriesRequest) (*pb.StatusResponse, error) {
+
+	category := &domain.DBCCategory{
+		Id:        r.Id,
+		UserId:    userId,
+		Name:      r.Name,
+		UpdatedAt: time.Time{},
+		CreatedAt: time.Time{},
+		DeletedAt: nil,
 	}
 
-	uCaseRes, err := d.dbcChallengesUCase.All(userId)
+	uCaseRes, err := d.dbcCategoriesUCase.Update(category)
 	if err != nil {
-		return nil, errors.Wrap(err, "GetChallenges")
+		return nil, errors.Wrap(err, "cannot update category ")
 	}
 
-	response := &pb.GetChallengesResponse{
+	response := &pb.StatusResponse{
 		Status: &pb.Status{
 			Code:    uCaseRes.StatusCode,
 			Message: uCaseRes.StatusCode,
 		},
-		Challenges: []*pb.DBCChallenge{},
+	}
+	return response, nil
+}
+
+func (d *DBCDeliveryService) GetCategories(ctx context.Context, r *pb.GetCategoriesRequest) (*pb.GetCategoriesResponse, error) {
+	userId, err := app.ExtractRequestUserId(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot extract user_id from context")
+	}
+	uCaseRes, err := d.dbcCategoriesUCase.Get(userId)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot fetch project info")
 	}
 
-	if uCaseRes.StatusCode == domain.Success {
-		for _, pItem := range uCaseRes.Challenges {
-			p := &pb.DBCChallenge{
-				Id:         pItem.Id,
-				UserId:     pItem.UserId,
-				Name:       pItem.Name,
-				CreatedAt:  timestamppb.New(pItem.CreatedAt),
-				DeletedAt:  conv.NullableTime(pItem.DeletedAt),
-				UpdatedAt:  timestamppb.New(pItem.UpdatedAt),
-				LastTracks: []*pb.DBTrack{},
+	response := &pb.GetCategoriesResponse{
+		Status: &pb.Status{
+			Code:    uCaseRes.StatusCode,
+			Message: uCaseRes.StatusCode,
+		},
+	}
+
+	if uCaseRes.StatusCode == domain.Success && uCaseRes.Categories != nil {
+		for _, category := range uCaseRes.Categories {
+			p := &pb.DBCCategory{
+				UserId:    category.UserId,
+				Id:        category.Id,
+				Name:      category.Name,
+				CreatedAt: timestamppb.New(category.CreatedAt),
+				UpdatedAt: timestamppb.New(category.UpdatedAt),
 			}
 
-			for _, pTrack := range pItem.LastTracks {
-				t := &pb.DBTrack{
-					Date:       timestamppb.New(pTrack.Date),
-					DateString: pTrack.Date.Format("02-01-2006"),
-				}
-				p.LastTracks = append(p.LastTracks, t)
+			if category.DeletedAt != nil {
+				p.DeletedAt = timestamppb.New(*category.DeletedAt)
 			}
-			response.Challenges = append(response.Challenges, p)
+
+			response.Categories = append(response.Categories, p)
 		}
 	}
 

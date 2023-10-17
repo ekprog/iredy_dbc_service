@@ -117,21 +117,19 @@ func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (dom
 	}, nil
 }
 
-func (ucase *ChallengesUseCase) Update(task *domain.DBCChallenge) (domain.StatusResponse, error) {
+func (ucase *ChallengesUseCase) Update(challenge *domain.DBCChallenge) (domain.StatusResponse, error) {
 
-	// Поменять имя
-	//
-	//fetchedTask, err := ucase.challengesRepo.FetchById(task.Id)
-	//if err != nil || fetchedTask == nil {
-	//	return domain.StatusResponse{
-	//		StatusCode: domain.NotFound,
-	//	}, nil
-	//}
-	//
-	//err = ucase.challengesRepo.Update(task)
-	//if err != nil {
-	//	return domain.StatusResponse{}, errors.Wrap(err, "cannot update task")
-	//}
+	fetchedChallenge, err := ucase.challengesRepo.FetchById(challenge.Id)
+	if err != nil || fetchedChallenge == nil {
+		return domain.StatusResponse{
+			StatusCode: domain.NotFound,
+		}, nil
+	}
+
+	err = ucase.challengesRepo.Update(challenge)
+	if err != nil {
+		return domain.StatusResponse{}, errors.Wrap(err, "cannot update task")
+	}
 
 	return domain.StatusResponse{
 		StatusCode: domain.Success,

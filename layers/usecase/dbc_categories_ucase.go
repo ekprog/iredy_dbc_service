@@ -48,7 +48,7 @@ func (i *DBCCategoriesUCase) Update(item *domain.DBCCategory) (domain.StatusResp
 			errors.Wrapf(err, "cannot fetch category before updating. CategoryId=%d", item.Id)
 	}
 
-	if project.UserId != item.UserId {
+	if project == nil {
 		return domain.StatusResponse{
 			StatusCode: domain.NotFound,
 		}, nil
