@@ -28,9 +28,15 @@ type DBCChallenge struct {
 	Desc       string
 	LastSeries int32
 
+	LastTracks []*DBCTrack
+
 	UpdatedAt time.Time
 	CreatedAt time.Time
 	DeletedAt *time.Time
+}
+
+type DBCTrack struct {
+	Date time.Time
 }
 
 //

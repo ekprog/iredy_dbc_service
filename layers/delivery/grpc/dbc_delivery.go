@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"github.com/pkg/errors"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"microservice/app"
 	"microservice/app/conv"
 	"microservice/app/core"
@@ -36,7 +37,6 @@ func (d *DBCDeliveryService) Init() error {
 }
 
 func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateChallengeRequest) (*pb.IdResponse, error) {
-
 	userId, err := app.ExtractRequestUserId(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot extract user_id from context")
@@ -61,6 +61,51 @@ func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateCh
 
 	if uCaseRes.StatusCode == domain.Success {
 		response.Id = uCaseRes.Id
+	}
+
+	return response, nil
+}
+
+func (d *DBCDeliveryService) GetChallenges(ctx context.Context, r *pb.GetChallengesRequest) (*pb.GetChallengesResponse, error) {
+	userId, err := app.ExtractRequestUserId(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot extract user_id from context")
+	}
+
+	uCaseRes, err := d.dbcChallengesUCase.All(userId)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetChallenges")
+	}
+
+	response := &pb.GetChallengesResponse{
+		Status: &pb.Status{
+			Code:    uCaseRes.StatusCode,
+			Message: uCaseRes.StatusCode,
+		},
+		Challenges: []*pb.DBCChallenge{},
+	}
+
+	if uCaseRes.StatusCode == domain.Success {
+		for _, pItem := range uCaseRes.Challenges {
+			p := &pb.DBCChallenge{
+				Id:         pItem.Id,
+				UserId:     pItem.UserId,
+				Name:       pItem.Name,
+				CreatedAt:  timestamppb.New(pItem.CreatedAt),
+				DeletedAt:  conv.NullableTime(pItem.DeletedAt),
+				UpdatedAt:  timestamppb.New(pItem.UpdatedAt),
+				LastTracks: []*pb.DBTrack{},
+			}
+
+			for _, pTrack := range pItem.LastTracks {
+				t := &pb.DBTrack{
+					Date:       timestamppb.New(pTrack.Date),
+					DateString: pTrack.Date.Format("02-01-2006"),
+				}
+				p.LastTracks = append(p.LastTracks, t)
+			}
+			response.Challenges = append(response.Challenges, p)
+		}
 	}
 
 	return response, nil
