@@ -178,3 +178,23 @@ func (d *DBCDeliveryService) GetCategories(ctx context.Context, r *pb.GetCategor
 
 	return response, nil
 }
+
+func (d *DBCDeliveryService) RemoveCategory(ctx context.Context, r *pb.RemoveCategoriesRequest) (*pb.StatusResponse, error) {
+	userId, err := app.ExtractRequestUserId(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot extract user_id from context")
+	}
+
+	uCase, err := d.dbcCategoriesUCase.Remove(userId, r.Id)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot remove category ")
+	}
+
+	response := &pb.StatusResponse{
+		Status: &pb.Status{
+			Code:    uCase.StatusCode,
+			Message: uCase.StatusCode,
+		},
+	}
+	return response, nil
+}

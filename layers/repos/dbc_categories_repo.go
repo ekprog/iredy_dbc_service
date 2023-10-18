@@ -127,11 +127,12 @@ func (r *DBCCategoriesRepo) Update(item *domain.DBCCategory) error {
 	return nil
 }
 
-func (r *DBCCategoriesRepo) Remove(id int) error {
-	query := `UPDATE dbc_challenge_categories 
+func (r *DBCCategoriesRepo) Remove(userId, id int32) error {
+	query := `DELETE dbc_challenge_categories 
 				SET deleted_at=now()
-				WHERE id=$1`
-	_, err := r.db.Exec(query, id)
+				WHERE id=$1 and user_id=$2`
+	var str string
+	err := r.db.QueryRow(query, id, userId).Scan(&str)
 	if err != nil {
 		return err
 	}

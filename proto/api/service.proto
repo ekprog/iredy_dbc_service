@@ -18,6 +18,7 @@ service DBCService {
   // Categories
   rpc GetCategories (GetCategoriesRequest) returns (GetCategoriesResponse) {}
   rpc UpdateCategory (UpdateCategoriesRequest) returns (StatusResponse) {}
+  rpc RemoveCategory (IdRequest) returns (StatusResponse){}
 
   // Challenges
   rpc GetChallenges (GetChallengesRequest) returns (GetChallengesResponse) {}

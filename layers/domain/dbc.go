@@ -50,7 +50,7 @@ type DBCCategoryRepository interface {
 	FetchById(int32) (*DBCCategory, error)
 	Insert(*DBCCategory) error
 	Update(*DBCCategory) error
-	Remove(int) error
+	Remove(int32, int32) error
 }
 
 type DBCChallengesRepository interface {
@@ -69,6 +69,7 @@ type DBCChallengesRepository interface {
 type DBCCategoryUseCase interface {
 	Get(userId int32) (CategoryListResponse, error)
 	Update(*DBCCategory) (StatusResponse, error)
+	Remove(userId, taskId int32) (StatusResponse, error)
 }
 
 type ChallengesUseCase interface {
