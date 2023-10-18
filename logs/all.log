@@ -2932,3 +2932,79 @@
 [INFO](2023-10-17 18:30:49) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Successfully ping to database
 [INFO](2023-10-17 18:30:49) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
 [INFO](2023-10-17 18:30:49) /Users/egorkozelskij/GolandProjects/iredy/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 19:46:02) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 19:46:02) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 19:46:02) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 19:46:34) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 19:46:34) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 19:46:34) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 19:59:40) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 19:59:40) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 19:59:40) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:17:10) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 20:17:10) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 20:17:10) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:17:49) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/RemoveChallenge
+[INFO](2023-10-17 20:18:14) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 20:18:14) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 20:18:14) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:18:17) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/RemoveChallenge
+[INFO](2023-10-17 20:20:15) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 20:20:15) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 20:20:15) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:20:21) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/RemoveChallenge
+[INFO](2023-10-17 20:21:25) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 20:21:25) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 20:21:25) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:26:24) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 20:26:24) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 20:26:24) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:26:26) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/RemoveChallenge
+[INFO](2023-10-17 20:31:06) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 20:31:06) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 20:31:06) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:31:10) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/RemoveChallenge
+[INFO](2023-10-17 20:32:33) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 20:32:33) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 20:32:33) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:32:38) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/RemoveChallenge
+[INFO](2023-10-17 20:33:09) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 20:33:09) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 20:33:09) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:33:12) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/RemoveChallenge
+[INFO](2023-10-17 20:34:41) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 20:34:41) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 20:34:41) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:34:46) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/RemoveChallenge
+[INFO](2023-10-17 20:35:25) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 20:35:25) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 20:35:25) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:35:28) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/RemoveChallenge
+[INFO](2023-10-17 20:37:24) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 20:37:24) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 20:37:24) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 20:37:28) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/RemoveChallenge
+[INFO](2023-10-17 22:57:30) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 22:57:30) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 22:57:30) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 22:57:35) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/RemoveChallenge
+[INFO](2023-10-17 22:58:23) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 22:58:23) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 22:58:23) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 22:59:47) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 22:59:47) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 22:59:47) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 23:00:07) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/RemoveChallenge
+[INFO](2023-10-17 23:18:27) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 23:18:27) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 23:18:27) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 23:18:46) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/RemoveChallenge
+[INFO](2023-10-17 23:24:48) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 23:24:48) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 23:24:48) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 23:26:12) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/RemoveChallenge
+[INFO](2023-10-17 23:29:15) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Successfully ping to database
+[INFO](2023-10-17 23:29:15) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 Database connection was created: host=localhost port=5432 user=postgres password=qqqq dbname=iredy_dbc_service sslmode=disable
+[INFO](2023-10-17 23:29:15) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 GRPC server listening at [::]:8087
+[INFO](2023-10-17 23:29:22) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:75 New call /pb.DBCService/RemoveCategory
+[ERROR](2023-10-17 23:29:22) /home/dima/GolandProjects/awesomeProject/iredy_dbc_service/app/logs.go:79 cannot remove category : cannot delete categories by user id: pq: syntax error at or near "dbc_challenge_categories"

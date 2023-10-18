@@ -130,8 +130,9 @@ func (r *DBCCategoriesRepo) Update(item *domain.DBCCategory) error {
 func (r *DBCCategoriesRepo) Remove(userId, id int32) error {
 	query := `DELETE dbc_challenge_categories 
 				SET deleted_at=now()
-				WHERE id=$1 and user_id=$2 RETURN `
-	_, err := r.db.Exec(query, id, userId)
+				WHERE id=$1 and user_id=$2`
+	var str string
+	err := r.db.QueryRow(query, id, userId).Scan(&str)
 	if err != nil {
 		return err
 	}
