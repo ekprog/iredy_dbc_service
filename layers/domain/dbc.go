@@ -37,6 +37,7 @@ type DBCChallenge struct {
 
 type DBCTrack struct {
 	Date time.Time
+	Done bool
 }
 
 //
@@ -73,7 +74,7 @@ type DBCCategoryUseCase interface {
 
 type ChallengesUseCase interface {
 	All(userId int32) (ChallengesListResponse, error)
-	Create(form *CreateDBCChallengeForm) (IdResponse, error)
+	Create(form *CreateDBCChallengeForm) (CreateChallengeResponse, error)
 	Update(task *DBCChallenge) (StatusResponse, error)
 	Remove(userId, taskId int32) (StatusResponse, error)
 }
@@ -85,6 +86,12 @@ type CreateDBCChallengeForm struct {
 	Name         string
 	Desc         string
 	CategoryName *string
+}
+
+type CreateChallengeResponse struct {
+	StatusCode string
+	Id         int32
+	CategoryId *int32
 }
 
 type ChallengesListResponse struct {

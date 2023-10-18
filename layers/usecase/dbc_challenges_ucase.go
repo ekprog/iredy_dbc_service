@@ -2,41 +2,87 @@ package usecase
 
 import (
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	"microservice/app/core"
 	"microservice/layers/domain"
+	"microservice/layers/services"
+	"sort"
 	"strings"
+	"time"
 )
 
 type ChallengesUseCase struct {
-	log            core.Logger
-	usersRepo      domain.UsersRepository
-	categoryRepo   domain.DBCCategoryRepository
-	challengesRepo domain.DBCChallengesRepository
-	usersUseCase   domain.UsersUseCase
+	log                 core.Logger
+	usersRepo           domain.UsersRepository
+	categoryRepo        domain.DBCCategoryRepository
+	challengesRepo      domain.DBCChallengesRepository
+	usersUseCase        domain.UsersUseCase
+	periodTypeGenerator *services.PeriodTypeGenerator
 }
 
 func NewChallengesUseCase(log core.Logger,
 	usersRepo domain.UsersRepository,
 	projectsRepo domain.DBCCategoryRepository,
+	periodTypeGenerator *services.PeriodTypeGenerator,
 	tasksRepo domain.DBCChallengesRepository,
 	usersUseCase domain.UsersUseCase) *ChallengesUseCase {
-	//
 	return &ChallengesUseCase{
-		log:            log,
-		usersRepo:      usersRepo,
-		categoryRepo:   projectsRepo,
-		challengesRepo: tasksRepo,
-		usersUseCase:   usersUseCase,
+		log:                 log,
+		usersRepo:           usersRepo,
+		categoryRepo:        projectsRepo,
+		challengesRepo:      tasksRepo,
+		usersUseCase:        usersUseCase,
+		periodTypeGenerator: periodTypeGenerator,
 	}
 }
 
+// Returns all challenges of user with some last tracks (successful or not)
 func (ucase *ChallengesUseCase) All(userId int32) (domain.ChallengesListResponse, error) {
 	var items []*domain.DBCChallenge
 	var err error
 
+	// Here we get only success tracks
 	items, err = ucase.challengesRepo.FetchAll(userId)
 	if err != nil {
 		return domain.ChallengesListResponse{}, errors.Wrap(err, "cannot fetch dbc-challenges by user id")
+	}
+
+	for _, item := range items {
+		// ToDo: Период генерации треков (на данный момент он равен 1 суток без возможности изменения)
+		period := domain.PeriodTypeEveryDay
+
+		// Отскочить на 5 последних треков (учитывая период их генерации)
+		startTime, err := ucase.periodTypeGenerator.Step(item.CreatedAt, time.Now(), period, -5)
+		if err != nil {
+			return domain.ChallengesListResponse{}, errors.Wrap(err, "PeriodTypeGenerator")
+		}
+
+		// Далее итерируемся на период дней (не забывает обрезать время при сравнении)
+		// и проверяем, если ли в БД выборке трек по этому дню.
+		// Если его нет, то создаем с Done = false (отсутствие трека в БД говорит о его не успешности)
+		err = ucase.periodTypeGenerator.StepForwardForEach(item.CreatedAt, startTime, period, 5, func(currentTime time.Time) {
+			currentTimeFormat := currentTime.Format("02-01-2016")
+			println(currentTimeFormat)
+
+			// Проверяем, есть ли трек в БД (если их нет, то пользователь не отмечал их)
+			_, ok := lo.Find(item.LastTracks, func(x *domain.DBCTrack) bool {
+				return x.Date.Format("02-01-2016") == currentTimeFormat
+			})
+			if !ok {
+				item.LastTracks = append(item.LastTracks, &domain.DBCTrack{
+					Date: currentTime,
+					Done: false,
+				})
+			}
+		})
+		if err != nil {
+			return domain.ChallengesListResponse{}, errors.Wrap(err, "PeriodTypeGenerator")
+		}
+
+		// Сортируем по времени
+		sort.Slice(item.LastTracks, func(i, j int) bool {
+			return item.LastTracks[i].Date.Before(item.LastTracks[j].Date)
+		})
 	}
 
 	return domain.ChallengesListResponse{
@@ -45,12 +91,12 @@ func (ucase *ChallengesUseCase) All(userId int32) (domain.ChallengesListResponse
 	}, nil
 }
 
-func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (domain.IdResponse, error) {
+func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (domain.CreateChallengeResponse, error) {
 
 	//
 	_, err := ucase.usersUseCase.CreateIfNotExists(domain.User{Id: form.UserId})
 	if err != nil {
-		return domain.IdResponse{}, errors.Wrap(err, "cannot insert user before creating task")
+		return domain.CreateChallengeResponse{}, errors.Wrap(err, "cannot insert user before creating task")
 	}
 
 	// Is challenge connected to category?
@@ -59,7 +105,7 @@ func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (dom
 		// Finding category
 		category, err := ucase.categoryRepo.FetchByName(form.UserId, *form.CategoryName)
 		if err != nil {
-			return domain.IdResponse{}, errors.Wrap(err, "cannot fetch category before creating task")
+			return domain.CreateChallengeResponse{}, errors.Wrap(err, "cannot fetch category before creating task")
 		}
 
 		// Creating if not exists
@@ -70,7 +116,7 @@ func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (dom
 			}
 			err = ucase.categoryRepo.Insert(category)
 			if err != nil {
-				return domain.IdResponse{}, errors.Wrap(err, "cannot insert new category before creating task")
+				return domain.CreateChallengeResponse{}, errors.Wrap(err, "cannot insert new category before creating task")
 			}
 		}
 
@@ -82,17 +128,17 @@ func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (dom
 	form.Name = strings.TrimSpace(form.Name)
 	challengeFound, err := ucase.challengesRepo.FetchByName(form.UserId, form.Name)
 	if err != nil {
-		return domain.IdResponse{}, errors.Wrap(err, "cannot check if challenge exists by name before creating task")
+		return domain.CreateChallengeResponse{}, errors.Wrap(err, "cannot check if challenge exists by name before creating task")
 	}
 	if challengeFound != nil {
-		return domain.IdResponse{
+		return domain.CreateChallengeResponse{
 			StatusCode: domain.AlreadyExists,
 		}, nil
 	}
 
 	// Validation of challenge form
 	if form.Name == "" {
-		return domain.IdResponse{
+		return domain.CreateChallengeResponse{
 			StatusCode: domain.ValidationError,
 		}, nil
 	}
@@ -107,13 +153,14 @@ func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (dom
 	}
 	err = ucase.challengesRepo.Insert(challenge)
 	if err != nil {
-		return domain.IdResponse{}, errors.Wrap(err, "cannot insert new challenge before creating task")
+		return domain.CreateChallengeResponse{}, errors.Wrap(err, "cannot insert new challenge before creating task")
 	}
 
 	//
-	return domain.IdResponse{
+	return domain.CreateChallengeResponse{
 		StatusCode: domain.Success,
 		Id:         challenge.Id,
+		CategoryId: categoryId,
 	}, nil
 }
 

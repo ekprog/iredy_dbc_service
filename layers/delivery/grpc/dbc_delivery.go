@@ -36,7 +36,7 @@ func (d *DBCDeliveryService) Init() error {
 	return nil
 }
 
-func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateChallengeRequest) (*pb.IdResponse, error) {
+func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateChallengeRequest) (*pb.CreateChallengesResponse, error) {
 	userId, err := app.ExtractRequestUserId(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot extract user_id from context")
@@ -52,7 +52,7 @@ func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateCh
 		return nil, errors.Wrap(err, "CreateChallenge")
 	}
 
-	response := &pb.IdResponse{
+	response := &pb.CreateChallengesResponse{
 		Status: &pb.Status{
 			Code:    uCaseRes.StatusCode,
 			Message: uCaseRes.StatusCode,
@@ -61,6 +61,7 @@ func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateCh
 
 	if uCaseRes.StatusCode == domain.Success {
 		response.Id = uCaseRes.Id
+		response.CategoryId = uCaseRes.CategoryId
 	}
 
 	return response, nil
@@ -118,6 +119,7 @@ func (d *DBCDeliveryService) GetChallenges(ctx context.Context, r *pb.GetChallen
 				Id:         pItem.Id,
 				UserId:     pItem.UserId,
 				Name:       pItem.Name,
+				CategoryId: pItem.CategoryId,
 				CreatedAt:  timestamppb.New(pItem.CreatedAt),
 				DeletedAt:  conv.NullableTime(pItem.DeletedAt),
 				UpdatedAt:  timestamppb.New(pItem.UpdatedAt),
@@ -128,6 +130,7 @@ func (d *DBCDeliveryService) GetChallenges(ctx context.Context, r *pb.GetChallen
 				t := &pb.DBTrack{
 					Date:       timestamppb.New(pTrack.Date),
 					DateString: pTrack.Date.Format("02-01-2006"),
+					Done:       pTrack.Done,
 				}
 				p.LastTracks = append(p.LastTracks, t)
 			}

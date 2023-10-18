@@ -1,16 +1,14 @@
 package domain
 
+// RESPONSE CODES
 const (
 	Success         string = "success"
-	AccessDenied    string = "access_denied"
 	ValidationError string = "validation_error"
 	NotFound        string = "not_found"
 	AlreadyExists   string = "already_exists"
-
-	ProjectNotFound string = "project_not_found"
-	TaskNotFound    string = "task_not_found"
 )
 
+// GENERAL RESPONSES
 type StatusResponse struct {
 	StatusCode string
 }
@@ -19,3 +17,10 @@ type IdResponse struct {
 	StatusCode string
 	Id         int32
 }
+
+// PERIOD_TYPE
+type PeriodType = string
+
+const (
+	PeriodTypeEveryDay PeriodType = "every_day"
+)

@@ -19,6 +19,10 @@ message UpdateCategoriesRequest {
   string name = 2;
 }
 
+message RemoveCategoriesRequest {
+  int32 id = 1;
+}
+
 
 
 // GET CHALLENGES
@@ -28,6 +32,12 @@ message GetChallengesRequest {}
 message GetChallengesResponse {
   Status status = 1;
   repeated DBCChallenge challenges = 2;
+}
+
+message CreateChallengesResponse {
+  Status status = 1;
+  int32 id = 2;
+  optional int32 category_id = 3;
 }
 
 // CREATE CHALLENGE
