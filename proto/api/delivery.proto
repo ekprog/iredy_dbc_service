@@ -19,6 +19,10 @@ message UpdateCategoriesRequest {
   string name = 2;
 }
 
+message RemoveCategoriesRequest {
+  int32 id = 1;
+}
+
 
 // GET CHALLENGES
 

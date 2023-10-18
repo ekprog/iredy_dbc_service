@@ -37,6 +37,7 @@ type DBCChallenge struct {
 
 type DBCTrack struct {
 	Date time.Time
+	Done bool
 }
 
 //

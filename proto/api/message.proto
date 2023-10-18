@@ -30,4 +30,5 @@ message DBCChallenge {
 message DBTrack {
   google.protobuf.Timestamp date = 1;
   string date_string = 2;
+  bool done = 3;
 }

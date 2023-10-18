@@ -1,0 +1,58 @@
+package services
+
+import (
+	"github.com/pkg/errors"
+	"microservice/app/core"
+	"microservice/layers/domain"
+	"time"
+)
+
+type PeriodTypeCallback func(time.Time)
+
+type PeriodTypeGenerator struct {
+	log core.Logger
+}
+
+func NewPeriodTypeGenerator(log core.Logger) *PeriodTypeGenerator {
+	return &PeriodTypeGenerator{
+		log: log,
+	}
+}
+
+// Просчитывает время на step шагов (может быть и положительное и отрицательное).
+// startDate - стартовое время периода (требуется для правильного рассчета).
+// nowDate - с какого дня начинать просчет.
+// step - шаг вперед или назад, начиная от nowDate.
+func (s *PeriodTypeGenerator) Step(startDate, nowDate time.Time, periodType domain.PeriodType, step int) (time.Time, error) {
+	if periodType != domain.PeriodTypeEveryDay {
+		return time.Time{}, errors.New("incorrect period type")
+	}
+
+	// ToDo: 24 - only for PeriodTypeEveryDay!
+	steppedTime := nowDate.Add(time.Duration(step*24) * time.Hour)
+
+	return steppedTime, nil
+}
+
+// Итерируется на step шагов вперед и вызывает callback с просчитанным временем (сравнение с обрезкой по дню)
+func (s *PeriodTypeGenerator) StepForwardForEach(startDate, nowDate time.Time, periodType domain.PeriodType, step uint, fn PeriodTypeCallback) error {
+	if periodType != domain.PeriodTypeEveryDay {
+		return errors.New("incorrect period type")
+	}
+
+	var err error
+	currentTime := nowDate
+
+	for i := uint(0); i < step; i++ {
+		// Here we have current step. Let's call fn
+		fn(currentTime)
+
+		// Making one step forward
+		currentTime, err = s.Step(startDate, currentTime, periodType, 1)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

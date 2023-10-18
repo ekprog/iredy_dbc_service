@@ -130,6 +130,7 @@ func (d *DBCDeliveryService) GetChallenges(ctx context.Context, r *pb.GetChallen
 				t := &pb.DBTrack{
 					Date:       timestamppb.New(pTrack.Date),
 					DateString: pTrack.Date.Format("02-01-2006"),
+					Done:       pTrack.Done,
 				}
 				p.LastTracks = append(p.LastTracks, t)
 			}

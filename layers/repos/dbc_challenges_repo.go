@@ -27,7 +27,8 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
     			c.created_at, 
     			c.updated_at,
     			c.deleted_at,
-    			t.date
+    			t.date,
+    			t.done
 			from dbc_challenges c
 				left join dbc_challenges_tracks t 
 				    on c.id = t.challenge_id
@@ -53,6 +54,8 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
 
 	for rows.Next() {
 		var date *time.Time
+		var done *bool
+
 		item := &domain.DBCChallenge{
 			UserId:     userId,
 			LastTracks: []*domain.DBCTrack{},
@@ -65,7 +68,8 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
 			&item.CreatedAt,
 			&item.UpdatedAt,
 			&item.DeletedAt,
-			&date)
+			&date,
+			&done)
 		if err != nil {
 			return nil, err
 		}
@@ -75,8 +79,11 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
 			order = append(order, item.Id)
 		}
 
-		if date != nil {
-			result[item.Id].LastTracks = append(result[item.Id].LastTracks, &domain.DBCTrack{Date: *date})
+		if date != nil && done != nil {
+			result[item.Id].LastTracks = append(result[item.Id].LastTracks, &domain.DBCTrack{
+				Date: *date,
+				Done: *done,
+			})
 		}
 	}
 
