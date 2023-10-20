@@ -54,3 +54,21 @@ message UpdateChallengeRequest {
   string name = 2;
   optional string desc = 3;
 }
+
+message GetUserResponse {
+  Status status = 1;
+  User user = 2;
+}
+
+message TrackDayRequest {
+  int32 challenge_id = 1;
+  string dateISO = 2;
+  bool done = 3;
+}
+
+message TrackDayResponse {
+  Status status = 1;
+  int32 last_series = 2;
+  int32 score_daily = 3;
+}
+

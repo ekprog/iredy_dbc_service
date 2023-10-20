@@ -6,6 +6,7 @@ const (
 	ValidationError string = "validation_error"
 	NotFound        string = "not_found"
 	AlreadyExists   string = "already_exists"
+	UserLogicError         = "user_error"
 )
 
 // GENERAL RESPONSES

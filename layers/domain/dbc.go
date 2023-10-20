@@ -25,7 +25,8 @@ type DBCChallenge struct {
 	CategoryId *int32
 
 	Name       string
-	Desc       string
+	Desc       *string
+	Image      *string
 	LastSeries int32
 
 	LastTracks []*DBCTrack
@@ -36,16 +37,23 @@ type DBCChallenge struct {
 }
 
 type DBCTrack struct {
-	Date time.Time
-	Done bool
+	UserId      int32
+	ChallengeId int32
+	Date        time.Time
+	Done        bool
 }
 
 //
 // REPOSITORIES
 //
 
+type DBCTrackRepository interface {
+	InsertOrUpdate(*DBCTrack) error
+	FindByDate(challengeId int32, t time.Time) (bool, error)
+}
+
 type DBCCategoryRepository interface {
-	FetchByUserId(int32) ([]*DBCCategory, error)
+	FetchNotEmptyByUserId(int32) ([]*DBCCategory, error)
 	FetchByName(int32, string) (*DBCCategory, error)
 	FetchById(int32) (*DBCCategory, error)
 	Insert(*DBCCategory) error
@@ -76,16 +84,19 @@ type ChallengesUseCase interface {
 	Create(form *CreateDBCChallengeForm) (CreateChallengeResponse, error)
 	Update(task *DBCChallenge) (StatusResponse, error)
 	Remove(userId, taskId int32) (StatusResponse, error)
+	TrackDay(form *DBCTrack) (UserGamifyResponse, error)
 }
 
-// IO FORMS
+// IO FORMS (FORMS)
 
 type CreateDBCChallengeForm struct {
 	UserId       int32
 	Name         string
-	Desc         string
+	Desc         *string
 	CategoryName *string
 }
+
+// IO FORMS (RESPONSES)
 
 type CreateChallengeResponse struct {
 	StatusCode string

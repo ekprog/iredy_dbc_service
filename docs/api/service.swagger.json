@@ -10,6 +10,9 @@
     },
     {
       "name": "DBCService"
+    },
+    {
+      "name": "UsersService"
     }
   ],
   "consumes": [
@@ -20,6 +23,22 @@
   ],
   "paths": {},
   "definitions": {
+    "CreateChallengesResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "categoryId": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
     "DBCCategory": {
       "type": "object",
       "properties": {
@@ -69,9 +88,18 @@
         "desc": {
           "type": "string"
         },
+        "image": {
+          "type": "string"
+        },
         "lastSeries": {
           "type": "integer",
           "format": "int32"
+        },
+        "lastTracks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DBTrack"
+          }
         },
         "createdAt": {
           "type": "string",
@@ -84,6 +112,21 @@
         "deletedAt": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "DBTrack": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "dateString": {
+          "type": "string"
+        },
+        "done": {
+          "type": "boolean"
         }
       }
     },
@@ -115,15 +158,14 @@
         }
       }
     },
-    "IdResponse": {
+    "GetUserResponse": {
       "type": "object",
       "properties": {
         "status": {
           "$ref": "#/definitions/Status"
         },
-        "id": {
-          "type": "integer",
-          "format": "int32"
+        "user": {
+          "$ref": "#/definitions/User"
         }
       }
     },
@@ -146,6 +188,35 @@
         }
       },
       "title": "Responses"
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "score": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "scoreDaily": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deletedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
     },
     "googlerpcStatus": {
       "type": "object",

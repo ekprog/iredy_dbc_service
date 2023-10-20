@@ -2,6 +2,7 @@ package repos
 
 import (
 	"database/sql"
+	"github.com/pkg/errors"
 	"microservice/app/core"
 	"microservice/layers/domain"
 )
@@ -13,6 +14,33 @@ type UsersRepo struct {
 
 func NewUsersRepo(log core.Logger, db *sql.DB) *UsersRepo {
 	return &UsersRepo{log: log, db: db}
+}
+
+func (r *UsersRepo) FetchById(id int32) (*domain.User, error) {
+	query := `select 
+    				score, 
+    				score_daily, 
+    				created_at, 
+    				updated_at, 
+    				deleted_at
+				from users where id=$1 limit 1`
+
+	user := &domain.User{Id: id}
+
+	err := r.db.QueryRow(query, id).Scan(
+		&user.Score,
+		&user.ScoreDaily,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.DeletedAt)
+	switch err {
+	case nil:
+		return user, nil
+	case sql.ErrNoRows:
+		return nil, nil
+	default:
+		return nil, errors.Wrap(err, "FetchById")
+	}
 }
 
 func (r *UsersRepo) Exist(id int32) (bool, error) {
@@ -42,6 +70,17 @@ func (r *UsersRepo) Remove(id int32) error {
 	_, err := r.db.Exec(query, id)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (r *UsersRepo) Update(user *domain.User) error {
+	query := `UPDATE users
+				SET score=$2, score_daily=$3, updated_at=now()
+				WHERE id=$1`
+	_, err := r.db.Exec(query, user.Id, user.Score, user.ScoreDaily)
+	if err != nil {
+		return errors.Wrap(err, "Update")
 	}
 	return nil
 }

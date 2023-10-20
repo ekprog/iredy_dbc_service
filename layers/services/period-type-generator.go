@@ -34,6 +34,29 @@ func (s *PeriodTypeGenerator) Step(startDate, nowDate time.Time, periodType doma
 	return steppedTime, nil
 }
 
+// Итерируется на step шагов назад и вызывает callback с просчитанным временем (сравнение с обрезкой по дню)
+func (s *PeriodTypeGenerator) StepBackwardForEach(startDate, nowDate time.Time, periodType domain.PeriodType, step uint, fn PeriodTypeCallback) error {
+	if periodType != domain.PeriodTypeEveryDay {
+		return errors.New("incorrect period type")
+	}
+
+	var err error
+	currentTime := nowDate
+
+	for i := uint(0); i < step; i++ {
+		// Here we have current step. Let's call fn
+		fn(currentTime)
+
+		// Making one step forward
+		currentTime, err = s.Step(startDate, currentTime, periodType, -1)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // Итерируется на step шагов вперед и вызывает callback с просчитанным временем (сравнение с обрезкой по дню)
 func (s *PeriodTypeGenerator) StepForwardForEach(startDate, nowDate time.Time, periodType domain.PeriodType, step uint, fn PeriodTypeCallback) error {
 	if periodType != domain.PeriodTypeEveryDay {

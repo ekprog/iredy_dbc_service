@@ -14,6 +14,7 @@ func initDependencies(di *dig.Container) error {
 
 	// Repository
 	_ = di.Provide(repos.NewUsersRepo, dig.As(new(domain.UsersRepository)))
+	_ = di.Provide(repos.NewDBCTracksRepo, dig.As(new(domain.DBCTrackRepository)))
 	_ = di.Provide(repos.NewDBCCategoriesRepo, dig.As(new(domain.DBCCategoryRepository)))
 	_ = di.Provide(repos.NewDBCChallengesRepo, dig.As(new(domain.DBCChallengesRepository)))
 
@@ -30,6 +31,10 @@ func initDependencies(di *dig.Container) error {
 
 	// Delivery
 	if err := app.InitDelivery(grpc.NewStatusDeliveryService); err != nil {
+		return err
+	}
+
+	if err := app.InitDelivery(grpc.NewUsersDeliveryService); err != nil {
 		return err
 	}
 

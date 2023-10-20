@@ -24,4 +24,11 @@ service DBCService {
   rpc CreateChallenge (CreateChallengeRequest) returns (CreateChallengesResponse) {}
   rpc UpdateChallenge (UpdateChallengeRequest) returns (StatusResponse) {}
   rpc RemoveChallenge (IdRequest) returns (StatusResponse) {}
+
+  rpc TrackDay (TrackDayRequest) returns (TrackDayResponse) {}
+}
+
+service UsersService {
+  rpc MyInfo (EmptyMessage) returns (GetUserResponse) {}
+  rpc Info (IdRequest) returns (GetUserResponse) {}
 }

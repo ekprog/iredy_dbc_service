@@ -6,6 +6,7 @@ import (
 	"microservice/app/core"
 	"microservice/layers/domain"
 	"microservice/layers/services"
+	"microservice/tools"
 	"sort"
 	"strings"
 	"time"
@@ -16,7 +17,7 @@ type ChallengesUseCase struct {
 	usersRepo           domain.UsersRepository
 	categoryRepo        domain.DBCCategoryRepository
 	challengesRepo      domain.DBCChallengesRepository
-	usersUseCase        domain.UsersUseCase
+	tracksRepo          domain.DBCTrackRepository
 	periodTypeGenerator *services.PeriodTypeGenerator
 }
 
@@ -25,13 +26,14 @@ func NewChallengesUseCase(log core.Logger,
 	projectsRepo domain.DBCCategoryRepository,
 	periodTypeGenerator *services.PeriodTypeGenerator,
 	tasksRepo domain.DBCChallengesRepository,
-	usersUseCase domain.UsersUseCase) *ChallengesUseCase {
+	usersUseCase domain.UsersUseCase,
+	tracksRepo domain.DBCTrackRepository) *ChallengesUseCase {
 	return &ChallengesUseCase{
 		log:                 log,
 		usersRepo:           usersRepo,
 		categoryRepo:        projectsRepo,
 		challengesRepo:      tasksRepo,
-		usersUseCase:        usersUseCase,
+		tracksRepo:          tracksRepo,
 		periodTypeGenerator: periodTypeGenerator,
 	}
 }
@@ -52,21 +54,18 @@ func (ucase *ChallengesUseCase) All(userId int32) (domain.ChallengesListResponse
 		period := domain.PeriodTypeEveryDay
 
 		// Отскочить на 5 последних треков (учитывая период их генерации)
-		startTime, err := ucase.periodTypeGenerator.Step(item.CreatedAt, time.Now(), period, -5)
-		if err != nil {
-			return domain.ChallengesListResponse{}, errors.Wrap(err, "PeriodTypeGenerator")
-		}
+		startTime := time.Now().UTC()
 
 		// Далее итерируемся на период дней (не забывает обрезать время при сравнении)
 		// и проверяем, если ли в БД выборке трек по этому дню.
 		// Если его нет, то создаем с Done = false (отсутствие трека в БД говорит о его не успешности)
-		err = ucase.periodTypeGenerator.StepForwardForEach(item.CreatedAt, startTime, period, 5, func(currentTime time.Time) {
-			currentTimeFormat := currentTime.Format("02-01-2016")
-			println(currentTimeFormat)
+		err = ucase.periodTypeGenerator.StepBackwardForEach(item.CreatedAt, startTime, period, 3, func(currentTime time.Time) {
+			//currentTimeFormat := currentTime.Format("02-01-2006")
+			//println(currentTimeFormat)
 
 			// Проверяем, есть ли трек в БД (если их нет, то пользователь не отмечал их)
 			_, ok := lo.Find(item.LastTracks, func(x *domain.DBCTrack) bool {
-				return x.Date.Format("02-01-2016") == currentTimeFormat
+				return tools.IsEqualDateTimeByDay(x.Date, currentTime)
 			})
 			if !ok {
 				item.LastTracks = append(item.LastTracks, &domain.DBCTrack{
@@ -94,9 +93,9 @@ func (ucase *ChallengesUseCase) All(userId int32) (domain.ChallengesListResponse
 func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (domain.CreateChallengeResponse, error) {
 
 	//
-	_, err := ucase.usersUseCase.CreateIfNotExists(domain.User{Id: form.UserId})
+	err := ucase.usersRepo.InsertIfNotExists(&domain.User{Id: form.UserId})
 	if err != nil {
-		return domain.CreateChallengeResponse{}, errors.Wrap(err, "cannot insert user before creating task")
+		return domain.CreateChallengeResponse{}, errors.Wrap(err, "Create")
 	}
 
 	// Is challenge connected to category?
@@ -203,5 +202,76 @@ func (ucase *ChallengesUseCase) Remove(userId, taskId int32) (domain.StatusRespo
 
 	return domain.StatusResponse{
 		StatusCode: domain.Success,
+	}, nil
+}
+
+func (ucase *ChallengesUseCase) TrackDay(form *domain.DBCTrack) (domain.UserGamifyResponse, error) {
+
+	// DRY
+	makeErr := func(err error) (domain.UserGamifyResponse, error) {
+		return domain.UserGamifyResponse{}, errors.Wrap(err, "TrackDay")
+	}
+
+	// Пользователя не проверяем, потому что наличие челленджа уже гарантирует наличие пользователя
+	challenge, err := ucase.challengesRepo.FetchById(form.ChallengeId)
+	if err != nil {
+		return makeErr(err)
+	}
+
+	// User is owner
+	if challenge == nil || challenge.UserId != form.UserId {
+		return domain.UserGamifyResponse{
+			StatusCode: domain.NotFound,
+		}, nil
+	}
+
+	// Check if track possible to change
+	// ToDo: Make 3 step back and check dates
+
+	// 1. Проверяем есть ли такой трек
+	prevDone, err := ucase.tracksRepo.FindByDate(challenge.Id, form.Date)
+	if err != nil {
+		return makeErr(err)
+	}
+
+	// Изменение не имеет смысла - те же значения
+	if form.Done == prevDone {
+		return domain.UserGamifyResponse{
+			StatusCode: domain.UserLogicError,
+		}, nil
+	}
+
+	// Рассчитываем изменение ScoreDaily (Score будет меняться в горутине каждые сутки)
+	scoreChange := int32(0)
+	if form.Done && !prevDone {
+		scoreChange = 1
+	} else if !form.Done && prevDone {
+		scoreChange = -1
+	}
+
+	// 2. Обновляем трек в БД
+	err = ucase.tracksRepo.InsertOrUpdate(form)
+	if err != nil {
+		return makeErr(err)
+	}
+
+	// Gamify update
+	// При изменении трека в любом случае меняется ScoreDaily
+	user, err := ucase.usersRepo.FetchById(form.UserId)
+	if err != nil {
+		return makeErr(err)
+	}
+
+	// Обновляем ScoreDaily у пользователя
+	user.ScoreDaily += scoreChange
+	err = ucase.usersRepo.Update(user)
+	if err != nil {
+		return makeErr(err)
+	}
+
+	return domain.UserGamifyResponse{
+		StatusCode: domain.Success,
+		ScoreDaily: user.ScoreDaily,
+		LastSeries: 0,
 	}, nil
 }

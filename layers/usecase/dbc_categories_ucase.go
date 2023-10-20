@@ -28,7 +28,7 @@ func (i *DBCCategoriesUCase) Get(userId int32) (domain.CategoryListResponse, err
 	var categories []*domain.DBCCategory
 	var err error
 
-	categories, err = i.categoriesRepo.FetchByUserId(userId)
+	categories, err = i.categoriesRepo.FetchNotEmptyByUserId(userId)
 	if err != nil {
 		return domain.CategoryListResponse{}, errors.Wrap(err, "cannot fetch categories by user id")
 	}

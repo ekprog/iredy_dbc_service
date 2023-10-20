@@ -15,15 +15,20 @@ func NewDBCCategoriesRepo(log core.Logger, db *sql.DB) *DBCCategoriesRepo {
 	return &DBCCategoriesRepo{log: log, db: db}
 }
 
-func (r *DBCCategoriesRepo) FetchByUserId(userId int32) ([]*domain.DBCCategory, error) {
+func (r *DBCCategoriesRepo) FetchNotEmptyByUserId(userId int32) ([]*domain.DBCCategory, error) {
 	query := `select 
-    			id, 
-    			name,
-    			created_at,
-    			updated_at,
-    			deleted_at
-			from dbc_challenge_categories
-			where user_id=$1 and deleted_at is null`
+				c.id,
+				c.name,
+				c.created_at,
+				c.updated_at,
+				c.deleted_at
+					from dbc_challenge_categories c
+							 left join dbc_challenges dc on c.id = dc.category_id
+						where c.user_id=$1 and
+							  c.deleted_at is null and
+							  dc.deleted_at is null
+					group by (c.id, c.name, c.created_at, c.updated_at, c.deleted_at)
+					having count(dc.id) > 0`
 	rows, err := r.db.Query(query, userId)
 	if err != nil {
 		return nil, err

@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS dbc_challenges
     category_id bigint                      default null,
 
     name        varchar(255)       not null,
+    image       varchar(255)                default null,
     "desc"      varchar(1000),
 
     -- Количество удачных последних challenge_item

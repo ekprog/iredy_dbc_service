@@ -23,6 +23,7 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
     			c.category_id,
     			c.name, 
     			c."desc", 
+    			c.image, 
     			c.last_series,
     			c.created_at, 
     			c.updated_at,
@@ -34,7 +35,6 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
 				    on c.id = t.challenge_id
 			where c.user_id=$1 and 
 			      c.deleted_at is null and 
-			      t.deleted_at is null and
 				  (
 				      t.id is null or
 				      t.id IN (SELECT ct.id
@@ -64,6 +64,7 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
 			&item.CategoryId,
 			&item.Name,
 			&item.Desc,
+			&item.Image,
 			&item.LastSeries,
 			&item.CreatedAt,
 			&item.UpdatedAt,
@@ -97,32 +98,31 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
 }
 
 func (r *DBCChallengesRepo) FetchById(id int32) (*domain.DBCChallenge, error) {
-	var task = &domain.DBCChallenge{
+	var item = &domain.DBCChallenge{
 		Id: id,
 	}
 	query := `select 
-    			user_id, 
-    			project_id, 
-    			name, 
+    			name,
+    			user_id,
+    			category_id, 
     			"desc", 
-    			priority, 
-    			done,
     			created_at, 
     			updated_at,
     			deleted_at
-			from tasks
+			from dbc_challenges
 			where id=$1
 			limit 1`
-	err := r.db.QueryRow(query, id).Scan(&task.UserId,
-		&task.CategoryId,
-		&task.Name,
-		&task.Desc,
-		&task.CreatedAt,
-		&task.UpdatedAt,
-		&task.DeletedAt)
+	err := r.db.QueryRow(query, id).Scan(
+		&item.Name,
+		&item.UserId,
+		&item.CategoryId,
+		&item.Desc,
+		&item.CreatedAt,
+		&item.UpdatedAt,
+		&item.DeletedAt)
 	switch err {
 	case nil:
-		return task, nil
+		return item, nil
 	case sql.ErrNoRows:
 		return nil, nil
 	default:

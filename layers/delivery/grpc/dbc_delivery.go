@@ -9,6 +9,7 @@ import (
 	"microservice/app/core"
 	"microservice/layers/domain"
 	pb "microservice/pkg/pb/api"
+	"microservice/tools"
 )
 
 type DBCDeliveryService struct {
@@ -46,7 +47,7 @@ func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateCh
 		UserId:       userId,
 		Name:         r.Name,
 		CategoryName: r.CategoryName,
-		Desc:         conv.ValueOrDefault(r.Desc),
+		Desc:         r.Desc,
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "CreateChallenge")
@@ -119,6 +120,9 @@ func (d *DBCDeliveryService) GetChallenges(ctx context.Context, r *pb.GetChallen
 				Id:         pItem.Id,
 				UserId:     pItem.UserId,
 				Name:       pItem.Name,
+				Image:      pItem.Image,
+				Desc:       pItem.Desc,
+				LastSeries: pItem.LastSeries,
 				CategoryId: pItem.CategoryId,
 				CreatedAt:  timestamppb.New(pItem.CreatedAt),
 				DeletedAt:  conv.NullableTime(pItem.DeletedAt),
@@ -174,6 +178,42 @@ func (d *DBCDeliveryService) GetCategories(ctx context.Context, r *pb.GetCategor
 
 			response.Categories = append(response.Categories, p)
 		}
+	}
+
+	return response, nil
+}
+
+func (d *DBCDeliveryService) TrackDay(ctx context.Context, r *pb.TrackDayRequest) (*pb.TrackDayResponse, error) {
+	userId, err := app.ExtractRequestUserId(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "TrackDay")
+	}
+
+	date, err := tools.ParseISO(r.DateISO)
+	if err != nil {
+		return nil, errors.Wrap(err, "TrackDay")
+	}
+
+	uCaseRes, err := d.dbcChallengesUCase.TrackDay(&domain.DBCTrack{
+		UserId:      userId,
+		ChallengeId: r.ChallengeId,
+		Date:        date,
+		Done:        r.Done,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "TrackDay")
+	}
+
+	response := &pb.TrackDayResponse{
+		Status: &pb.Status{
+			Code:    uCaseRes.StatusCode,
+			Message: uCaseRes.StatusCode,
+		},
+	}
+
+	if uCaseRes.StatusCode == domain.Success {
+		response.LastSeries = uCaseRes.LastSeries
+		response.ScoreDaily = uCaseRes.ScoreDaily
 	}
 
 	return response, nil
