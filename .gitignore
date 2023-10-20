@@ -1,7 +1,7 @@
 .env
-./logs/**/*
-./logs/all.log
-./logs/errors.log
+logs/**/*
+logs/all.log
+logs/errors.log
 ./cert/ca.*
 ./cert/service.*
 /pkg

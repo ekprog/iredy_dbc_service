@@ -64,3 +64,17 @@ func (i *DBCCategoriesUCase) Update(item *domain.DBCCategory) (domain.StatusResp
 		StatusCode: domain.Success,
 	}, nil
 }
+
+func (i *DBCCategoriesUCase) Remove(userId, Id int32) (domain.StatusResponse, error) {
+
+	var err error
+
+	err = i.categoriesRepo.Remove(userId, Id)
+	if err != nil {
+		return domain.StatusResponse{}, errors.Wrap(err, "cannot delete categories by user id")
+	}
+
+	return domain.StatusResponse{
+		StatusCode: domain.Success,
+	}, nil
+}
