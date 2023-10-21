@@ -2,12 +2,10 @@ package usecase
 
 import (
 	"github.com/pkg/errors"
-	"github.com/samber/lo"
 	"microservice/app/core"
 	"microservice/layers/domain"
 	"microservice/layers/services"
 	"microservice/tools"
-	"sort"
 	"strings"
 	"time"
 )
@@ -26,7 +24,6 @@ func NewChallengesUseCase(log core.Logger,
 	projectsRepo domain.DBCCategoryRepository,
 	periodTypeGenerator *services.PeriodTypeGenerator,
 	tasksRepo domain.DBCChallengesRepository,
-	usersUseCase domain.UsersUseCase,
 	tracksRepo domain.DBCTrackRepository) *ChallengesUseCase {
 	return &ChallengesUseCase{
 		log:                 log,
@@ -54,34 +51,45 @@ func (ucase *ChallengesUseCase) All(userId int32) (domain.ChallengesListResponse
 		period := domain.PeriodTypeEveryDay
 
 		// Отскочить на 5 последних треков (учитывая период их генерации)
-		startTime := time.Now().UTC()
+		startTime := tools.RoundDateTimeToDay(time.Now().UTC())
+
+		list, err := ucase.periodTypeGenerator.BackwardList(item.CreatedAt, startTime, period, 3)
+		if err != nil {
+			return domain.ChallengesListResponse{}, errors.Wrap(err, "All")
+		}
+
+		tracks, err := ucase.tracksRepo.FetchForChallengeByDates(item.Id, list)
+		if err != nil {
+			return domain.ChallengesListResponse{}, errors.Wrap(err, "All")
+		}
+		item.LastTracks = tracks
 
 		// Далее итерируемся на период дней (не забывает обрезать время при сравнении)
 		// и проверяем, если ли в БД выборке трек по этому дню.
 		// Если его нет, то создаем с Done = false (отсутствие трека в БД говорит о его не успешности)
-		err = ucase.periodTypeGenerator.StepBackwardForEach(item.CreatedAt, startTime, period, 3, func(currentTime time.Time) {
-			//currentTimeFormat := currentTime.Format("02-01-2006")
-			//println(currentTimeFormat)
-
-			// Проверяем, есть ли трек в БД (если их нет, то пользователь не отмечал их)
-			_, ok := lo.Find(item.LastTracks, func(x *domain.DBCTrack) bool {
-				return tools.IsEqualDateTimeByDay(x.Date, currentTime)
-			})
-			if !ok {
-				item.LastTracks = append(item.LastTracks, &domain.DBCTrack{
-					Date: currentTime,
-					Done: false,
-				})
-			}
-		})
-		if err != nil {
-			return domain.ChallengesListResponse{}, errors.Wrap(err, "PeriodTypeGenerator")
-		}
-
-		// Сортируем по времени
-		sort.Slice(item.LastTracks, func(i, j int) bool {
-			return item.LastTracks[i].Date.Before(item.LastTracks[j].Date)
-		})
+		//err = ucase.periodTypeGenerator.StepBackwardForEach(item.CreatedAt, startTime, period, 3, func(currentTime time.Time) {
+		//	//currentTimeFormat := currentTime.Format("02-01-2006")
+		//	//println(currentTimeFormat)
+		//
+		//	// Проверяем, есть ли трек в БД (если их нет, то пользователь не отмечал их)
+		//	_, ok := lo.Find(item.LastTracks, func(x *domain.DBCTrack) bool {
+		//		return tools.IsEqualDateTimeByDay(x.Date, currentTime)
+		//	})
+		//	if !ok {
+		//		item.LastTracks = append(item.LastTracks, &domain.DBCTrack{
+		//			Date: currentTime,
+		//			Done: false,
+		//		})
+		//	}
+		//})
+		//if err != nil {
+		//	return domain.ChallengesListResponse{}, errors.Wrap(err, "PeriodTypeGenerator")
+		//}
+		//
+		//// Сортируем по времени
+		//sort.Slice(item.LastTracks, func(i, j int) bool {
+		//	return item.LastTracks[i].Date.Before(item.LastTracks[j].Date)
+		//})
 	}
 
 	return domain.ChallengesListResponse{

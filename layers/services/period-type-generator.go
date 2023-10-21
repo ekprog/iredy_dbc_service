@@ -57,25 +57,14 @@ func (s *PeriodTypeGenerator) StepBackwardForEach(startDate, nowDate time.Time, 
 	return nil
 }
 
-// Итерируется на step шагов вперед и вызывает callback с просчитанным временем (сравнение с обрезкой по дню)
-func (s *PeriodTypeGenerator) StepForwardForEach(startDate, nowDate time.Time, periodType domain.PeriodType, step uint, fn PeriodTypeCallback) error {
-	if periodType != domain.PeriodTypeEveryDay {
-		return errors.New("incorrect period type")
+// Возвращает массив последних n итераций, начиная с nowDate
+func (s *PeriodTypeGenerator) BackwardList(startDate, nowDate time.Time, periodType domain.PeriodType, n uint) ([]time.Time, error) {
+	var list []time.Time
+	err := s.StepBackwardForEach(startDate, nowDate, periodType, n, func(t time.Time) {
+		list = append(list, t)
+	})
+	if err != nil {
+		return nil, err
 	}
-
-	var err error
-	currentTime := nowDate
-
-	for i := uint(0); i < step; i++ {
-		// Here we have current step. Let's call fn
-		fn(currentTime)
-
-		// Making one step forward
-		currentTime, err = s.Step(startDate, currentTime, periodType, 1)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return list, nil
 }

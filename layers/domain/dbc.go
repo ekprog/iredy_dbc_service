@@ -37,6 +37,7 @@ type DBCChallenge struct {
 }
 
 type DBCTrack struct {
+	Id          int64
 	UserId      int32
 	ChallengeId int32
 	Date        time.Time
@@ -50,6 +51,7 @@ type DBCTrack struct {
 type DBCTrackRepository interface {
 	InsertOrUpdate(*DBCTrack) error
 	FindByDate(challengeId int32, t time.Time) (bool, error)
+	FetchForChallengeByDates(challengeId int32, list []time.Time) ([]*DBCTrack, error)
 }
 
 type DBCCategoryRepository interface {
