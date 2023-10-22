@@ -18,31 +18,36 @@ func NewDBCChallengesRepo(log core.Logger, db *sql.DB) *DBCChallengesRepo {
 
 func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, error) {
 
-	query := `select 
-    			c.id,
-    			c.category_id,
-    			c.name, 
-    			c."desc", 
-    			c.image, 
-    			c.last_series,
-    			c.created_at, 
-    			c.updated_at,
-    			c.deleted_at,
-    			t.date,
-    			t.done
-			from dbc_challenges c
-				left join dbc_challenges_tracks t 
-				    on c.id = t.challenge_id
-			where c.user_id=$1 and 
-			      c.deleted_at is null and 
-				  (
-				      t.id is null or
-				      t.id IN (SELECT ct.id
-                 		FROM dbc_challenges_tracks ct
-                 		order by ct.date desc
-                 		LIMIT 5 OFFSET 0)
-				 )
-			order by c.created_at desc, t.date desc`
+	query := `select id,
+					 category_id,
+					 name,
+					 "desc",
+					 image,
+					 last_series,
+					 created_at,
+					 updated_at,
+					 deleted_at,
+					 date,
+					 done
+				from (select c.id,
+							 c.category_id,
+							 c.name,
+							 c."desc",
+							 c.image,
+							 c.last_series,
+							 c.created_at,
+							 c.updated_at,
+							 c.deleted_at,
+							 t.date,
+							 t.done,
+							 row_number() over (PARTITION BY c.id ORDER BY t.date) as num
+					  from dbc_challenges c
+							   left join dbc_challenges_tracks t
+										 on c.id = t.challenge_id
+					  where c.user_id = $1
+						and c.deleted_at is null
+					  order by c.id, t.date DESC) all_t
+				where all_t.num <= 3`
 
 	rows, err := r.db.Query(query, userId)
 	if err != nil {
