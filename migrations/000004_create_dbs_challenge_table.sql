@@ -2,20 +2,23 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS dbc_challenges
 (
-    id          SERIAL PRIMARY KEY NOT NULL,
-    user_id     bigint             not null,
-    category_id bigint                      default null,
+    id            SERIAL PRIMARY KEY NOT NULL,
+    user_id       bigint             not null,
+    category_id   bigint                      default null,
 
-    name        varchar(255)       not null,
-    image       varchar(255)                default null,
-    "desc"      varchar(1000),
+    -- Активность трекается пользователем?
+    is_auto_track bool               not null default false,
+
+    name          varchar(255)       not null,
+    image         varchar(255)                default null,
+    "desc"        varchar(1000),
 
     -- Количество удачных последних challenge_item
-    last_series integer            not null default 0,
+    last_series   integer            not null default 0,
 
-    created_at  timestamp(0)       NOT NULL DEFAULT now(),
-    updated_at  timestamp(0)       NOT NULL DEFAULT now(),
-    deleted_at  timestamp(0)                DEFAULT null,
+    created_at    timestamp(0)       NOT NULL DEFAULT now(),
+    updated_at    timestamp(0)       NOT NULL DEFAULT now(),
+    deleted_at    timestamp(0)                DEFAULT null,
 
     unique (user_id, name),
 

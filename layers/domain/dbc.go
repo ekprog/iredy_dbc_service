@@ -20,9 +20,11 @@ type DBCCategory struct {
 }
 
 type DBCChallenge struct {
-	Id         int32
-	UserId     int32
-	CategoryId *int32
+	Id           int32
+	UserId       int32
+	CategoryId   *int32
+	CategoryName *string
+	IsAutoTrack  bool
 
 	Name       string
 	Desc       *string
@@ -82,7 +84,7 @@ type DBCCategoryUseCase interface {
 	Remove(userId, taskId int32) (StatusResponse, error)
 }
 
-type ChallengesUseCase interface {
+type DBCChallengesUseCase interface {
 	All(userId int32) (ChallengesListResponse, error)
 	Create(form *CreateDBCChallengeForm) (CreateChallengeResponse, error)
 	Update(task *DBCChallenge) (StatusResponse, error)
@@ -97,6 +99,7 @@ type CreateDBCChallengeForm struct {
 	Name         string
 	Desc         *string
 	CategoryName *string
+	IsAutoTrack  bool
 }
 
 // IO FORMS (RESPONSES)

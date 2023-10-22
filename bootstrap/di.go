@@ -24,7 +24,7 @@ func initDependencies(di *dig.Container) error {
 	// Use Cases
 	_ = di.Provide(usecase.NewUsersUseCase, dig.As(new(domain.UsersUseCase)))
 	_ = di.Provide(usecase.NewDBCCategoriesUCase, dig.As(new(domain.DBCCategoryUseCase)))
-	_ = di.Provide(usecase.NewChallengesUseCase, dig.As(new(domain.ChallengesUseCase)))
+	_ = di.Provide(usecase.NewChallengesUseCase, dig.As(new(domain.DBCChallengesUseCase)))
 
 	_ = di.Provide(grpc.NewStatusDeliveryService)
 	_ = di.Provide(grpc.NewDBCDeliveryService)

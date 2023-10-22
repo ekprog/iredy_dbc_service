@@ -18,14 +18,17 @@ message DBCChallenge {
   int32 id = 1;
   int32 user_id = 2;
   optional int32 category_id = 3;
-  string name = 4;
-  optional string desc = 5;
-  optional string image = 6;
-  int32 last_series = 7;
-  repeated DBTrack last_tracks = 8;
-  google.protobuf.Timestamp created_at = 9;
-  google.protobuf.Timestamp updated_at = 10;
-  google.protobuf.Timestamp deleted_at = 11;
+  optional string category_name = 4;
+  bool is_auto_track = 5;
+  string name = 6;
+  optional string desc = 7;
+  optional string image = 8;
+  int32 last_series = 9;
+  repeated DBTrack last_tracks = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+  google.protobuf.Timestamp deleted_at = 13;
+
 }
 
 message DBTrack {

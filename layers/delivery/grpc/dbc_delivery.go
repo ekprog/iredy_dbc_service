@@ -17,13 +17,13 @@ type DBCDeliveryService struct {
 	log                core.Logger
 	usersUCase         domain.UsersUseCase
 	dbcCategoriesUCase domain.DBCCategoryUseCase
-	dbcChallengesUCase domain.ChallengesUseCase
+	dbcChallengesUCase domain.DBCChallengesUseCase
 }
 
 func NewDBCDeliveryService(log core.Logger,
 	usersUCase domain.UsersUseCase,
 	dbcCategoriesUCase domain.DBCCategoryUseCase,
-	dbcChallengesUCase domain.ChallengesUseCase) *DBCDeliveryService {
+	dbcChallengesUCase domain.DBCChallengesUseCase) *DBCDeliveryService {
 	return &DBCDeliveryService{
 		log:                log,
 		usersUCase:         usersUCase,
@@ -48,6 +48,7 @@ func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateCh
 		Name:         r.Name,
 		CategoryName: r.CategoryName,
 		Desc:         r.Desc,
+		IsAutoTrack:  r.IsAutoTrack,
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "CreateChallenge")
@@ -117,17 +118,19 @@ func (d *DBCDeliveryService) GetChallenges(ctx context.Context, r *pb.GetChallen
 	if uCaseRes.StatusCode == domain.Success {
 		for _, pItem := range uCaseRes.Challenges {
 			p := &pb.DBCChallenge{
-				Id:         pItem.Id,
-				UserId:     pItem.UserId,
-				Name:       pItem.Name,
-				Image:      pItem.Image,
-				Desc:       pItem.Desc,
-				LastSeries: pItem.LastSeries,
-				CategoryId: pItem.CategoryId,
-				CreatedAt:  timestamppb.New(pItem.CreatedAt),
-				DeletedAt:  conv.NullableTime(pItem.DeletedAt),
-				UpdatedAt:  timestamppb.New(pItem.UpdatedAt),
-				LastTracks: []*pb.DBTrack{},
+				Id:           pItem.Id,
+				UserId:       pItem.UserId,
+				IsAutoTrack:  pItem.IsAutoTrack,
+				Name:         pItem.Name,
+				Image:        pItem.Image,
+				Desc:         pItem.Desc,
+				LastSeries:   pItem.LastSeries,
+				CategoryId:   pItem.CategoryId,
+				CategoryName: pItem.CategoryName,
+				CreatedAt:    timestamppb.New(pItem.CreatedAt),
+				DeletedAt:    conv.NullableTime(pItem.DeletedAt),
+				UpdatedAt:    timestamppb.New(pItem.UpdatedAt),
+				LastTracks:   []*pb.DBTrack{},
 			}
 
 			for _, pTrack := range pItem.LastTracks {

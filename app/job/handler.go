@@ -1,16 +1,21 @@
 package job
 
 import (
-	"github.com/jasonlvhit/gocron"
 	"github.com/spf13/viper"
 	"go.uber.org/dig"
 	"reflect"
 	"runtime"
-	"strconv"
-	"strings"
 )
 
-func NewJob(job interface{}, period *gocron.Job) {
+func NewJob(job interface{}, scheduleUTC string) {
+	newJob(job, scheduleUTC, false)
+}
+
+func NewJobWithImmediately(job interface{}, scheduleUTC string) {
+	newJob(job, scheduleUTC, true)
+}
+
+func newJob(job interface{}, scheduleUTC string, immediately bool) {
 
 	name := runtime.FuncForPC(reflect.ValueOf(job).Pointer()).Name()
 
@@ -21,9 +26,13 @@ func NewJob(job interface{}, period *gocron.Job) {
 	}
 
 	err = scope.Invoke(func(j Job) {
-		err := period.Do(j.Run)
+		_, err := s.Cron(scheduleUTC).Do(j.Run)
 		if err != nil {
-			log.Fatal("cannot DO cron %s", name)
+			log.Fatal("cannot DO cron %s: %s", name, err.Error())
+		}
+
+		if immediately {
+			immediatelyJobs[name] = j
 		}
 	})
 	if err != nil {
@@ -39,37 +48,15 @@ func Start() error {
 		return nil
 	}
 
-	go gocron.Start()
+	// Run immediately
+	for name, job := range immediatelyJobs {
+		err := job.Run()
+		if err != nil {
+			log.Fatal("cannot RUN JOB immediately %s: %s", name, err.Error())
+		}
+	}
+
+	// Run schedule
+	s.StartAsync()
 	return nil
-}
-
-func Time(time string) *gocron.Job {
-
-	split := strings.Split(time, " ")
-	if len(split) != 2 {
-		return nil
-	}
-	timeVal, err := strconv.ParseUint(split[0], 10, 64)
-	if err != nil {
-		return nil
-	}
-	timeId := split[1]
-
-	job := gocron.Every(timeVal)
-	switch timeId {
-	case "seconds":
-		job = job.Seconds()
-	case "second":
-		job = job.Second()
-	case "minute":
-		job = job.Minute()
-	case "minutes":
-		job = job.Minutes()
-	case "hour":
-		job = job.Hour()
-	case "hours":
-		job = job.Hours()
-	}
-
-	return job
 }

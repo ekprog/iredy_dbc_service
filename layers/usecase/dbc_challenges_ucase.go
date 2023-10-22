@@ -46,11 +46,17 @@ func (ucase *ChallengesUseCase) All(userId int32) (domain.ChallengesListResponse
 		return domain.ChallengesListResponse{}, errors.Wrap(err, "cannot fetch dbc-challenges by user id")
 	}
 
+	// Добавляем к Активным челленжам последние 3 трека
 	for _, item := range items {
+
+		if item.IsAutoTrack {
+			continue
+		}
+
 		// ToDo: Период генерации треков (на данный момент он равен 1 суток без возможности изменения)
 		period := domain.PeriodTypeEveryDay
 
-		// Отскочить на 5 последних треков (учитывая период их генерации)
+		// Отскочить на 3 последних треков (учитывая период их генерации)
 		startTime := tools.RoundDateTimeToDay(time.Now().UTC())
 
 		list, err := ucase.periodTypeGenerator.BackwardList(item.CreatedAt, startTime, period, 3)
@@ -107,7 +113,7 @@ func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (dom
 	}
 
 	// Is challenge connected to category?
-	categoryId := new(int32)
+	var categoryId *int32
 	if form.CategoryName != nil {
 		// Finding category
 		category, err := ucase.categoryRepo.FetchByName(form.UserId, *form.CategoryName)
@@ -128,7 +134,7 @@ func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (dom
 		}
 
 		// Set category Id for next step
-		*categoryId = category.Id
+		categoryId = &category.Id
 	}
 
 	// Check if challenge with same name already exists
@@ -152,11 +158,12 @@ func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (dom
 
 	// Creating challenge
 	challenge := &domain.DBCChallenge{
-		UserId:     form.UserId,
-		CategoryId: categoryId,
-		Name:       form.Name,
-		Desc:       form.Desc,
-		LastSeries: 0,
+		UserId:      form.UserId,
+		CategoryId:  categoryId,
+		Name:        form.Name,
+		Desc:        form.Desc,
+		IsAutoTrack: form.IsAutoTrack,
+		LastSeries:  0,
 	}
 	err = ucase.challengesRepo.Insert(challenge)
 	if err != nil {

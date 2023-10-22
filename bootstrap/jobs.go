@@ -1,7 +1,11 @@
 package bootstrap
 
+import (
+	"microservice/app/job"
+	"microservice/jobs"
+)
+
 func initJobs() error {
-	//job.NewJob("test1", jobs.TestJob, job.Time("1 second"))
-	//job.NewJob("smart_task_generator", jobs.SmartTaskJob, job.Time("10 second"))
+	job.NewJobWithImmediately(jobs.NewDBCTrackerJob, "0 23 * * *")
 	return nil
 }
