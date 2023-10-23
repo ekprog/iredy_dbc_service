@@ -15,7 +15,56 @@ func NewDBCChallengesRepo(log core.Logger, db *sql.DB) *DBCChallengesRepo {
 	return &DBCChallengesRepo{log: log, db: db}
 }
 
-func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, error) {
+func (r *DBCChallengesRepo) FetchAll(limit, offset int64) ([]*domain.DBCChallenge, error) {
+
+	query := `select c.id,
+    			 c.user_id,
+				 c.category_id,
+				 cat.name as category_name,
+				 c.is_auto_track,
+				 c.name,
+				 c."desc",
+				 c.image,
+				 c.last_series,
+				 c.created_at,
+				 c.updated_at,
+				 c.deleted_at
+		  from dbc_challenges c
+		  		left join dbc_challenge_categories cat on c.category_id = cat.id
+		  where c.deleted_at is null 
+		  order by c.id
+		  limit $1 offset $2`
+
+	rows, err := r.db.Query(query, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*domain.DBCChallenge
+
+	for rows.Next() {
+		item := &domain.DBCChallenge{}
+		err := rows.Scan(&item.Id,
+			&item.UserId,
+			&item.CategoryId,
+			&item.CategoryName,
+			&item.IsAutoTrack,
+			&item.Name,
+			&item.Image,
+			&item.LastSeries,
+			&item.CreatedAt,
+			&item.UpdatedAt,
+			&item.DeletedAt)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, item)
+	}
+	return result, nil
+}
+
+func (r *DBCChallengesRepo) FetchUsersAll(userId int32) ([]*domain.DBCChallenge, error) {
 
 	query := `select c.id,
 				 c.category_id,
@@ -65,7 +114,7 @@ func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, erro
 	return result, nil
 }
 
-//func (r *DBCChallengesRepo) FetchAll(userId int32) ([]*domain.DBCChallenge, error) {
+//func (r *DBCChallengesRepo) FetchUsersAll(userId int32) ([]*domain.DBCChallenge, error) {
 //
 //	query := `select id,
 //					 category_id,

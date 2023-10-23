@@ -4,38 +4,75 @@ import (
 	"github.com/pkg/errors"
 	"microservice/app/core"
 	"microservice/layers/domain"
+	"microservice/tools"
 	"time"
 )
 
 type PeriodTypeCallback func(time.Time)
 
-type PeriodTypeGenerator struct {
+type PeriodTypeProcessor struct {
 	log core.Logger
 }
 
-func NewPeriodTypeGenerator(log core.Logger) *PeriodTypeGenerator {
-	return &PeriodTypeGenerator{
+func NewPeriodTypeProcessor(log core.Logger) *PeriodTypeProcessor {
+	return &PeriodTypeProcessor{
 		log: log,
 	}
 }
 
-// Просчитывает время на step шагов (может быть и положительное и отрицательное).
-// startDate - стартовое время периода (требуется для правильного рассчета).
-// nowDate - с какого дня начинать просчет.
-// step - шаг вперед или назад, начиная от nowDate.
-func (s *PeriodTypeGenerator) Step(startDate, nowDate time.Time, periodType domain.PeriodType, step int) (time.Time, error) {
-	if periodType != domain.PeriodTypeEveryDay {
-		return time.Time{}, errors.New("incorrect period type")
+// Просчитывает время на 1 шаг
+// fromDate - с какого дня начинать просчет.
+// Текущий день не учитывается!
+func (s *PeriodTypeProcessor) StepBack(fromDate time.Time, periodType domain.GenerationPeriod) (time.Time, error) {
+
+	fromDate = tools.RoundDateTimeToDay(fromDate.UTC())
+
+	// Every day
+	if periodType.Type == domain.PeriodTypeEveryDay {
+		return fromDate.Add(time.Duration(-24) * time.Hour), nil
 	}
 
-	// ToDo: 24 - only for PeriodTypeEveryDay!
-	steppedTime := nowDate.Add(time.Duration(step*24) * time.Hour)
+	// Week day
+	if periodType.Type == domain.PeriodTypeWeekDays {
+		iDate := fromDate
 
-	return steppedTime, nil
+		// Максимум 7 итераций (если не нашли, то ошибка в данных периода)
+		for i := 0; i < 7; i++ {
+			iDate = iDate.Add(time.Duration(-24) * time.Hour)
+			weekDay := iDate.Weekday()
+			for _, item := range periodType.Data {
+				if item == int(weekDay) {
+					return iDate, nil
+				}
+			}
+		}
+
+		return time.Time{}, errors.New("Incorrect period type Data")
+	}
+
+	// Month dates
+	if periodType.Type == domain.PeriodTypeMonthDates {
+		iDate := fromDate
+
+		// Максимум 31 итераций (если не нашли, то ошибка в данных периода)
+		for i := 1; i <= 31; i++ {
+			iDate = iDate.Add(time.Duration(-24) * time.Hour)
+			monthDay := iDate.Day()
+			for _, item := range periodType.Data {
+				if item == monthDay {
+					return iDate, nil
+				}
+			}
+		}
+
+		return time.Time{}, errors.New("Incorrect month period type Data")
+	}
+
+	return time.Time{}, errors.New("Incorrect period type " + periodType.Type)
 }
 
 // Итерируется на step шагов назад и вызывает callback с просчитанным временем (сравнение с обрезкой по дню)
-func (s *PeriodTypeGenerator) StepBackwardForEach(startDate, nowDate time.Time, periodType domain.PeriodType, step uint, fn PeriodTypeCallback) error {
+func (s *PeriodTypeProcessor) StepBackwardForEach(startDate, nowDate time.Time, periodType domain.PeriodType, step uint, fn PeriodTypeCallback) error {
 	if periodType != domain.PeriodTypeEveryDay {
 		return errors.New("incorrect period type")
 	}
@@ -48,7 +85,9 @@ func (s *PeriodTypeGenerator) StepBackwardForEach(startDate, nowDate time.Time, 
 		fn(currentTime)
 
 		// Making one step forward
-		currentTime, err = s.Step(startDate, currentTime, periodType, -1)
+		currentTime, err = s.StepBack(currentTime, domain.GenerationPeriod{
+			Type: domain.PeriodTypeEveryDay,
+		})
 		if err != nil {
 			return err
 		}
@@ -58,7 +97,7 @@ func (s *PeriodTypeGenerator) StepBackwardForEach(startDate, nowDate time.Time, 
 }
 
 // Возвращает массив последних n итераций, начиная с nowDate
-func (s *PeriodTypeGenerator) BackwardList(startDate, nowDate time.Time, periodType domain.PeriodType, n uint) ([]time.Time, error) {
+func (s *PeriodTypeProcessor) BackwardList(startDate, nowDate time.Time, periodType domain.PeriodType, n uint) ([]time.Time, error) {
 	var list []time.Time
 	err := s.StepBackwardForEach(startDate, nowDate, periodType, n, func(t time.Time) {
 		list = append(list, t)

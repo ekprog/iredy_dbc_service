@@ -11,7 +11,7 @@ var (
 	log             core.Logger
 	di              *dig.Container
 	s               *gocron.Scheduler
-	immediatelyJobs map[string]Job
+	immediatelyJobs map[string]func() error
 )
 
 type Job interface {
@@ -24,6 +24,6 @@ func Init(logger core.Logger, di_ *dig.Container) error {
 	s = gocron.NewScheduler(time.UTC)
 	s.SingletonModeAll()
 	s.WaitForScheduleAll()
-	immediatelyJobs = make(map[string]Job)
+	immediatelyJobs = make(map[string]func() error)
 	return nil
 }

@@ -23,5 +23,12 @@ type IdResponse struct {
 type PeriodType = string
 
 const (
-	PeriodTypeEveryDay PeriodType = "every_day"
+	PeriodTypeEveryDay   PeriodType = "every_day"
+	PeriodTypeWeekDays   PeriodType = "week_days"
+	PeriodTypeMonthDates PeriodType = "month_dates"
 )
+
+type GenerationPeriod struct {
+	Type PeriodType
+	Data []int
+}

@@ -19,7 +19,8 @@ func initDependencies(di *dig.Container) error {
 	_ = di.Provide(repos.NewDBCChallengesRepo, dig.As(new(domain.DBCChallengesRepository)))
 
 	// Services
-	_ = di.Provide(services.NewPeriodTypeGenerator)
+	_ = di.Provide(services.NewPeriodTypeProcessor)
+	_ = di.Provide(services.NewDBCTrackProcessor)
 
 	// Use Cases
 	_ = di.Provide(usecase.NewUsersUseCase, dig.As(new(domain.UsersUseCase)))

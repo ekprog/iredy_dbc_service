@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"github.com/pkg/errors"
 	"microservice/app/core"
 	"microservice/layers/domain"
@@ -16,15 +17,17 @@ type ChallengesUseCase struct {
 	categoryRepo        domain.DBCCategoryRepository
 	challengesRepo      domain.DBCChallengesRepository
 	tracksRepo          domain.DBCTrackRepository
-	periodTypeGenerator *services.PeriodTypeGenerator
+	periodTypeGenerator *services.PeriodTypeProcessor
+	trackProcessor      *services.DBCTrackProcessor
 }
 
 func NewChallengesUseCase(log core.Logger,
 	usersRepo domain.UsersRepository,
 	projectsRepo domain.DBCCategoryRepository,
-	periodTypeGenerator *services.PeriodTypeGenerator,
+	periodTypeGenerator *services.PeriodTypeProcessor,
 	tasksRepo domain.DBCChallengesRepository,
-	tracksRepo domain.DBCTrackRepository) *ChallengesUseCase {
+	tracksRepo domain.DBCTrackRepository,
+	trackProcessor *services.DBCTrackProcessor) *ChallengesUseCase {
 	return &ChallengesUseCase{
 		log:                 log,
 		usersRepo:           usersRepo,
@@ -32,6 +35,7 @@ func NewChallengesUseCase(log core.Logger,
 		challengesRepo:      tasksRepo,
 		tracksRepo:          tracksRepo,
 		periodTypeGenerator: periodTypeGenerator,
+		trackProcessor:      trackProcessor,
 	}
 }
 
@@ -41,7 +45,7 @@ func (ucase *ChallengesUseCase) All(userId int32) (domain.ChallengesListResponse
 	var err error
 
 	// Here we get only success tracks
-	items, err = ucase.challengesRepo.FetchAll(userId)
+	items, err = ucase.challengesRepo.FetchUsersAll(userId)
 	if err != nil {
 		return domain.ChallengesListResponse{}, errors.Wrap(err, "cannot fetch dbc-challenges by user id")
 	}
@@ -89,7 +93,7 @@ func (ucase *ChallengesUseCase) All(userId int32) (domain.ChallengesListResponse
 		//	}
 		//})
 		//if err != nil {
-		//	return domain.ChallengesListResponse{}, errors.Wrap(err, "PeriodTypeGenerator")
+		//	return domain.ChallengesListResponse{}, errors.Wrap(err, "PeriodTypeProcessor")
 		//}
 		//
 		//// Сортируем по времени
@@ -220,7 +224,7 @@ func (ucase *ChallengesUseCase) Remove(userId, taskId int32) (domain.StatusRespo
 	}, nil
 }
 
-func (ucase *ChallengesUseCase) TrackDay(form *domain.DBCTrack) (domain.UserGamifyResponse, error) {
+func (ucase *ChallengesUseCase) TrackDay(ctx context.Context, form *domain.DBCTrack) (domain.UserGamifyResponse, error) {
 
 	// DRY
 	makeErr := func(err error) (domain.UserGamifyResponse, error) {
@@ -244,7 +248,7 @@ func (ucase *ChallengesUseCase) TrackDay(form *domain.DBCTrack) (domain.UserGami
 	// ToDo: Make 3 step back and check dates
 
 	// 1. Проверяем есть ли такой трек
-	prevDone, err := ucase.tracksRepo.FindByDate(challenge.Id, form.Date)
+	prevDone, err := ucase.tracksRepo.CheckDoneByDate(ctx, challenge.Id, form.Date)
 	if err != nil {
 		return makeErr(err)
 	}
@@ -265,7 +269,7 @@ func (ucase *ChallengesUseCase) TrackDay(form *domain.DBCTrack) (domain.UserGami
 	}
 
 	// 2. Обновляем трек в БД
-	err = ucase.tracksRepo.InsertOrUpdate(form)
+	err = ucase.tracksRepo.InsertOrUpdate(ctx, form)
 	if err != nil {
 		return makeErr(err)
 	}

@@ -197,7 +197,7 @@ func (d *DBCDeliveryService) TrackDay(ctx context.Context, r *pb.TrackDayRequest
 		return nil, errors.Wrap(err, "TrackDay")
 	}
 
-	uCaseRes, err := d.dbcChallengesUCase.TrackDay(&domain.DBCTrack{
+	uCaseRes, err := d.dbcChallengesUCase.TrackDay(ctx, &domain.DBCTrack{
 		UserId:      userId,
 		ChallengeId: r.ChallengeId,
 		Date:        date,

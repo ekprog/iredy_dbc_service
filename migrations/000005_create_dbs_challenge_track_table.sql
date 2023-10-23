@@ -9,6 +9,14 @@ CREATE TABLE IF NOT EXISTS dbc_challenges_tracks
     "date"       date               not null DEFAULT null,
     "done"       bool               not null DEFAULT false,
 
+
+    -- Какой счет и последняя серия на текущий трек? (цепочка пред-просчитанных величин)
+    last_series  int                not null default 0,
+    score        int                not null default 0,
+
+    -- Счет зафиксирован у пользователя?
+    "processed"  bool               not null DEFAULT false,
+
     created_at   timestamp(0)       NOT NULL DEFAULT now(),
     updated_at   timestamp(0)       NOT NULL DEFAULT now(),
 

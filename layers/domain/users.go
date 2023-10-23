@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type User struct {
 	Id         int32
@@ -18,6 +21,7 @@ type UsersRepository interface {
 	InsertIfNotExists(*User) error
 	Remove(int32) error
 	Update(*User) error
+	TransferDailyScores(ctx context.Context, userId int64, scoreInc int) error
 }
 
 type UsersUseCase interface {

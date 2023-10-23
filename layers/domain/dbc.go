@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"time"
 )
 
@@ -44,6 +45,9 @@ type DBCTrack struct {
 	ChallengeId int32
 	Date        time.Time
 	Done        bool
+
+	LastSeries int32
+	Score      int32
 }
 
 //
@@ -51,9 +55,11 @@ type DBCTrack struct {
 //
 
 type DBCTrackRepository interface {
-	InsertOrUpdate(*DBCTrack) error
-	FindByDate(challengeId int32, t time.Time) (bool, error)
+	InsertOrUpdate(context.Context, *DBCTrack) error
+	CheckDoneByDate(ctx context.Context, challengeId int32, t time.Time) (bool, error)
 	FetchForChallengeByDates(challengeId int32, list []time.Time) ([]*DBCTrack, error)
+	FetchNotProcessed(challengeId int32, timeSince time.Time) ([]*DBCTrack, error)
+	SetProcessed(ctx context.Context, trackIds []int64) error
 }
 
 type DBCCategoryRepository interface {
@@ -66,7 +72,8 @@ type DBCCategoryRepository interface {
 }
 
 type DBCChallengesRepository interface {
-	FetchAll(userId int32) ([]*DBCChallenge, error)
+	FetchUsersAll(userId int32) ([]*DBCChallenge, error)
+	FetchAll(limit, offset int64) ([]*DBCChallenge, error)
 	FetchById(int32) (*DBCChallenge, error)
 	FetchByName(int32, string) (*DBCChallenge, error)
 	Insert(*DBCChallenge) error
@@ -89,7 +96,8 @@ type DBCChallengesUseCase interface {
 	Create(form *CreateDBCChallengeForm) (CreateChallengeResponse, error)
 	Update(task *DBCChallenge) (StatusResponse, error)
 	Remove(userId, taskId int32) (StatusResponse, error)
-	TrackDay(form *DBCTrack) (UserGamifyResponse, error)
+
+	TrackDay(ctx context.Context, form *DBCTrack) (UserGamifyResponse, error)
 }
 
 // IO FORMS (FORMS)

@@ -2,6 +2,9 @@ package bootstrap
 
 import (
 	"database/sql"
+	trmsql "github.com/avito-tech/go-transaction-manager/sql"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/context"
+	"github.com/avito-tech/go-transaction-manager/trm/manager"
 	"github.com/pkg/errors"
 	"microservice/app"
 	"microservice/app/core"
@@ -54,6 +57,22 @@ func Run(rootPath ...string) error {
 		return db
 	}); err != nil {
 		return errors.Wrap(err, "cannot provide db")
+	}
+
+	if err = di.Provide(func() *trmsql.CtxGetter {
+		return trmsql.DefaultCtxGetter
+	}); err != nil {
+		return errors.Wrap(err, "cannot provide tx getter")
+	}
+
+	trManager := manager.Must(
+		trmsql.NewDefaultFactory(db),
+		manager.WithCtxManager(trmcontext.DefaultManager),
+	)
+	if err = di.Provide(func() *manager.Manager {
+		return trManager
+	}); err != nil {
+		return errors.Wrap(err, "cannot provide tx manager")
 	}
 
 	if err = di.Provide(func() core.Logger {

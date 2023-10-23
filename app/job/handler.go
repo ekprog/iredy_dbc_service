@@ -26,13 +26,24 @@ func newJob(job interface{}, scheduleUTC string, immediately bool) {
 	}
 
 	err = scope.Invoke(func(j Job) {
-		_, err := s.Cron(scheduleUTC).Do(j.Run)
+
+		runnable := func() error {
+			log.Debug("Started %s", name)
+			err := j.Run()
+			if err != nil {
+				return err
+			}
+			log.Debug("Finished %s", name)
+			return nil
+		}
+
+		_, err := s.Cron(scheduleUTC).Do(runnable)
 		if err != nil {
 			log.Fatal("cannot DO cron %s: %s", name, err.Error())
 		}
 
 		if immediately {
-			immediatelyJobs[name] = j
+			immediatelyJobs[name] = runnable
 		}
 	})
 	if err != nil {
@@ -49,8 +60,8 @@ func Start() error {
 	}
 
 	// Run immediately
-	for name, job := range immediatelyJobs {
-		err := job.Run()
+	for name, runnable := range immediatelyJobs {
+		err := runnable()
 		if err != nil {
 			log.Fatal("cannot RUN JOB immediately %s: %s", name, err.Error())
 		}
