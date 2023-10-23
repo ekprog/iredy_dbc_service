@@ -6,7 +6,6 @@ import (
 	"microservice/app/core"
 	"microservice/layers/domain"
 	"microservice/layers/services"
-	"microservice/tools"
 	"strings"
 	"time"
 )
@@ -58,12 +57,12 @@ func (ucase *ChallengesUseCase) All(userId int32) (domain.ChallengesListResponse
 		}
 
 		// ToDo: Период генерации треков (на данный момент он равен 1 суток без возможности изменения)
-		period := domain.PeriodTypeEveryDay
+		period := domain.GenerationPeriod{
+			Type: domain.PeriodTypeEveryDay,
+		}
 
 		// Отскочить на 3 последних треков (учитывая период их генерации)
-		startTime := tools.RoundDateTimeToDay(time.Now().UTC())
-
-		list, err := ucase.periodTypeGenerator.BackwardList(item.CreatedAt, startTime, period, 3)
+		list, err := ucase.periodTypeGenerator.BackwardList(time.Now(), period, 3)
 		if err != nil {
 			return domain.ChallengesListResponse{}, errors.Wrap(err, "All")
 		}

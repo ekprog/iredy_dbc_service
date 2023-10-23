@@ -72,34 +72,32 @@ func (s *PeriodTypeProcessor) StepBack(fromDate time.Time, periodType domain.Gen
 }
 
 // Итерируется на step шагов назад и вызывает callback с просчитанным временем (сравнение с обрезкой по дню)
-func (s *PeriodTypeProcessor) StepBackwardForEach(startDate, nowDate time.Time, periodType domain.PeriodType, step uint, fn PeriodTypeCallback) error {
-	if periodType != domain.PeriodTypeEveryDay {
-		return errors.New("incorrect period type")
-	}
-
+func (s *PeriodTypeProcessor) StepBackwardForEach(fromDate time.Time, period domain.GenerationPeriod, step uint, fn PeriodTypeCallback) error {
 	var err error
-	currentTime := nowDate
+	currentTime := fromDate.UTC()
 
 	for i := uint(0); i < step; i++ {
-		// Here we have current step. Let's call fn
-		fn(currentTime)
-
 		// Making one step forward
-		currentTime, err = s.StepBack(currentTime, domain.GenerationPeriod{
-			Type: domain.PeriodTypeEveryDay,
-		})
+		currentTime, err = s.StepBack(currentTime, period)
 		if err != nil {
 			return err
 		}
+
+		// Here we have current step. Let's call fn
+		fn(currentTime)
 	}
 
 	return nil
 }
 
-// Возвращает массив последних n итераций, начиная с nowDate
-func (s *PeriodTypeProcessor) BackwardList(startDate, nowDate time.Time, periodType domain.PeriodType, n uint) ([]time.Time, error) {
+// Возвращает массив последних n итераций, начиная с fromDate (текущий день будет учитываться)
+func (s *PeriodTypeProcessor) BackwardList(fromDate time.Time, period domain.GenerationPeriod, n uint) ([]time.Time, error) {
+
+	// Чтобы текущий день тоже учитывался (если он входит в период)
+	fromDate = fromDate.UTC().Add(24 * time.Hour)
+
 	var list []time.Time
-	err := s.StepBackwardForEach(startDate, nowDate, periodType, n, func(t time.Time) {
+	err := s.StepBackwardForEach(fromDate, period, n, func(t time.Time) {
 		list = append(list, t)
 	})
 	if err != nil {
