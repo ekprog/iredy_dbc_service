@@ -163,6 +163,37 @@ func (r *DBCTracksRepo) FetchForChallengeByDates(challengeId int64, list []time.
 	return result, nil
 }
 
+func (r *DBCTracksRepo) GetAllForChallengeAfter(ctx context.Context, challengeId int64, date time.Time) ([]*domain.DBCTrack, error) {
+	date = tools.RoundDateTimeToDay(date.UTC())
+
+	query := `select 
+    				id,
+    				user_id,
+    				date,
+    				done, 
+       				last_series, 
+       				score from dbc_challenges_tracks 
+            		where challenge_id=$1 and "date" > $2
+            		order by "date"`
+
+	rows, err := r.getter.DefaultTrOrDB(ctx, r.db).QueryContext(ctx, query, challengeId, date)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*domain.DBCTrack
+	for rows.Next() {
+		item := &domain.DBCTrack{}
+		err := rows.Scan(&item.Id, &item.UserId, &item.Date, &item.Done, &item.LastSeries, &item.Score)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, item)
+	}
+
+	return result, nil
+}
+
 // Возвращает треки, подлежащие учету в dailyScore
 // timeSince - время ДО которого искать (зависит от типа генерации треков в челлендже)
 func (r *DBCTracksRepo) FetchNotProcessed(challengeId int64, timeSince time.Time) ([]*domain.DBCTrack, error) {
@@ -242,6 +273,34 @@ func (r *DBCTracksRepo) InsertNew(ctx context.Context, tracks []*domain.DBCTrack
                                    score) VALUES %s`, values)
 
 	query = fmt.Sprintf(query)
+
+	_, err := r.getter.DefaultTrOrDB(ctx, r.db).ExecContext(ctx, query)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *DBCTracksRepo) UpdateSome(ctx context.Context, tracks []*domain.DBCTrack) error {
+
+	if len(tracks) == 0 {
+		return nil
+	}
+
+	valuesArr := lo.Map(tracks, func(track *domain.DBCTrack, index int) string {
+		return fmt.Sprintf(`(%d, %d, %d)`,
+			track.Id,
+			track.LastSeries,
+			track.Score,
+		)
+	})
+	values := strings.Join(valuesArr, ",")
+
+	query := `update dbc_challenges_tracks as t set
+				score = c.score, last_series = c.last_series, updated_at=now() 
+		  	 from (values %s) as c(id, last_series, score)
+			 where c.id = t.id`
+	query = fmt.Sprintf(query, values)
 
 	_, err := r.getter.DefaultTrOrDB(ctx, r.db).ExecContext(ctx, query)
 	if err != nil {

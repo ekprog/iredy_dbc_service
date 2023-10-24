@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"github.com/avito-tech/go-transaction-manager/trm/manager"
 	"github.com/pkg/errors"
 	"math"
 	"microservice/app/core"
@@ -10,13 +11,16 @@ import (
 )
 
 type DBCTrackProcessor struct {
-	log                 core.Logger
+	log        core.Logger
+	trxManager *manager.Manager
+
 	trackProcessor      *PeriodTypeProcessor
 	challengeRepository domain.DBCChallengesRepository
 	trackRepository     domain.DBCTrackRepository
 }
 
 func NewDBCTrackProcessor(log core.Logger,
+	trxManager *manager.Manager,
 	trackProcessor *PeriodTypeProcessor,
 	challengeRepository domain.DBCChallengesRepository,
 	trackRepository domain.DBCTrackRepository) *DBCTrackProcessor {
@@ -25,6 +29,7 @@ func NewDBCTrackProcessor(log core.Logger,
 		trackProcessor:      trackProcessor,
 		challengeRepository: challengeRepository,
 		trackRepository:     trackRepository,
+		trxManager:          trxManager,
 	}
 }
 
@@ -75,6 +80,7 @@ func (s *DBCTrackProcessor) MakeTrack(ctx context.Context, challengeId int64, da
 	}
 
 	var absentDates []time.Time
+	var absentTracks []*domain.DBCTrack
 
 	// ВАРИАНТ 1: Предыдущий трек есть и мы просто отталкиваемся от него при расчетах
 	if prevTrack != nil {
@@ -109,7 +115,6 @@ func (s *DBCTrackProcessor) MakeTrack(ctx context.Context, challengeId int64, da
 			lastSeries = firstTrackBefore.LastSeries
 			lastScore = firstTrackBefore.Score
 
-			var absentTracks []*domain.DBCTrack
 			for _, absentDate := range absentDates {
 
 				// Рассчитываем score
@@ -125,36 +130,69 @@ func (s *DBCTrackProcessor) MakeTrack(ctx context.Context, challengeId int64, da
 				}
 				absentTracks = append(absentTracks, absentTrack)
 			}
-
-			// Вставляем в БД недостающую цепочку
-			if len(absentTracks) > 0 {
-				err = s.trackRepository.InsertNew(ctx, absentTracks)
-				if err != nil {
-					return false, errors.Wrap(err, "InsertNew")
-				}
-			}
 		}
 	}
 
 	//
 	// lastSeries и lastScore просчитаны для последнего элемента.
 	// Все пропуски треков также заполнены.
-	// Можно вставлять новый трек.
+	// Можно рассчитать новый трек.
 	//
 
-	lastScore, lastSeries = s.nextTrackPoints(lastScore, lastSeries, value)
-
-	err = s.trackRepository.InsertOrUpdate(ctx, &domain.DBCTrack{
-		Id:          0,
+	lastSeries, lastScore = s.nextTrackPoints(lastScore, lastSeries, value)
+	currentTrack := &domain.DBCTrack{
 		UserId:      challenge.UserId,
 		ChallengeId: challenge.Id,
 		Date:        date,
 		Done:        value,
 		LastSeries:  lastSeries,
 		Score:       lastScore,
+	}
+
+	//
+	// Трек не обязательно является крайним, поэтому важно перерассчитать все треки, которые идут
+	// после него
+	//
+	afterList, err := s.trackRepository.GetAllForChallengeAfter(ctx, challengeId, date)
+	if err != nil {
+		return false, errors.Wrap(err, "GetAllForChallengeAfter")
+	}
+	for _, track := range afterList {
+		lastScore, lastSeries = s.nextTrackPoints(lastScore, lastSeries, track.Done)
+		track.LastSeries = lastSeries
+		track.Score = lastScore
+	}
+
+	// Теперь записываем все критические изменения с учетом транзакций
+	// ToDo: можно все отправить одним запросом на вставку/обновление
+	err = s.trxManager.Do(ctx, func(ctx context.Context) error {
+
+		// Вставляем в БД недостающую цепочку
+		if len(absentTracks) > 0 {
+			err = s.trackRepository.InsertNew(ctx, absentTracks)
+			if err != nil {
+				return errors.Wrap(err, "InsertNew")
+			}
+		}
+
+		// Вставляем/Обновляем текущий трек
+		err = s.trackRepository.InsertOrUpdate(ctx, currentTrack)
+		if err != nil {
+			return errors.Wrap(err, "InsertOrUpdate")
+		}
+
+		// Обновляем все треки ПОСЛЕ
+		if len(afterList) > 0 {
+			err = s.trackRepository.UpdateSome(ctx, afterList)
+			if err != nil {
+				return errors.Wrap(err, "UpdateSome")
+			}
+		}
+
+		return nil
 	})
 	if err != nil {
-		return false, errors.Wrap(err, "InsertOrUpdate")
+		return false, errors.Wrap(err, "TrxManager")
 	}
 
 	return true, nil
