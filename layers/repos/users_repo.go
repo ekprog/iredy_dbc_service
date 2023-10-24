@@ -1,7 +1,6 @@
 package repos
 
 import (
-	"context"
 	"database/sql"
 	trmsql "github.com/avito-tech/go-transaction-manager/sql"
 	"github.com/pkg/errors"
@@ -20,10 +19,7 @@ func NewUsersRepo(log core.Logger, db *sql.DB, getter *trmsql.CtxGetter) *UsersR
 }
 
 func (r *UsersRepo) FetchById(id int64) (*domain.User, error) {
-	query := `select 
-    				score, 
-    				score_daily, 
-    				created_at, 
+	query := `select created_at, 
     				updated_at, 
     				deleted_at
 				from users where id=$1 limit 1`
@@ -31,8 +27,6 @@ func (r *UsersRepo) FetchById(id int64) (*domain.User, error) {
 	user := &domain.User{Id: id}
 
 	err := r.db.QueryRow(query, id).Scan(
-		&user.Score,
-		&user.ScoreDaily,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 		&user.DeletedAt)
@@ -80,25 +74,12 @@ func (r *UsersRepo) Remove(id int64) error {
 func (r *UsersRepo) Update(user *domain.User) error {
 
 	query := `UPDATE users
-				SET score=$2, score_daily=$3, updated_at=now()
+				SET updated_at=now()
 				WHERE id=$1`
 
 	_, err := r.db.Exec(query, user.Id, user.Score, user.ScoreDaily)
 	if err != nil {
-		return errors.Wrap(err, "Update")
-	}
-	return nil
-}
-
-func (r *UsersRepo) TransferDailyScores(ctx context.Context, userId int64, scoreInc int) error {
-
-	query := `UPDATE users
-				SET score=score+$2, score_daily=score_daily-$2, updated_at=now()
-				WHERE id=$1`
-
-	_, err := r.getter.DefaultTrOrDB(ctx, r.db).ExecContext(ctx, query, userId, scoreInc)
-	if err != nil {
-		return errors.Wrap(err, "UpdateScores")
+		return err
 	}
 	return nil
 }

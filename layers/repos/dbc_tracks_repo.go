@@ -30,16 +30,18 @@ func NewDBCTracksRepo(log core.Logger, db *sql.DB, getter *trmsql.CtxGetter) *DB
 }
 
 func (r *DBCTracksRepo) InsertOrUpdate(ctx context.Context, track *domain.DBCTrack) error {
-	query := `INSERT INTO dbc_challenges_tracks (user_id, challenge_id, "date", done, last_series, score) 
-					VALUES ($1, $2, $3, $4, $5, $6) 
-			   ON CONFLICT(challenge_id, "date") DO UPDATE SET done=$4, last_series=$5, score=$6, updated_at=now();`
+	query := `INSERT INTO dbc_challenges_tracks (user_id, challenge_id, "date", done, last_series, score, score_daily) 
+					VALUES ($1, $2, $3, $4, $5, $6, $7) 
+			   ON CONFLICT(challenge_id, "date") 
+			       DO UPDATE SET done=$4, last_series=$5, score=$6, score_daily=$7, updated_at=now();`
 	_, err := r.getter.DefaultTrOrDB(ctx, r.db).ExecContext(ctx, query,
 		track.UserId,
 		track.ChallengeId,
 		track.Date.UTC(),
 		track.Done,
 		track.LastSeries,
-		track.Score)
+		track.Score,
+		track.ScoreDaily)
 	if err != nil {
 		return err
 	}
@@ -67,7 +69,8 @@ func (r *DBCTracksRepo) GetLastForChallengeBefore(ctx context.Context, challenge
     				date,
     				done, 
        				last_series, 
-       				score from dbc_challenges_tracks 
+       				score,
+       				score_daily from dbc_challenges_tracks 
             		where challenge_id=$1 and "date" < $2
             		order by "date" desc
             		limit 1`
@@ -82,7 +85,43 @@ func (r *DBCTracksRepo) GetLastForChallengeBefore(ctx context.Context, challenge
 		&track.Date,
 		&track.Done,
 		&track.LastSeries,
-		&track.Score)
+		&track.Score,
+		&track.ScoreDaily)
+	switch err {
+	case nil:
+		return track, nil
+	case sql.ErrNoRows:
+		return nil, nil
+	default:
+		return nil, errors.Wrap(err, "GetLastForChallengeBefore")
+	}
+}
+
+func (r *DBCTracksRepo) GetLastForChallenge(ctx context.Context, challengeId int64) (track *domain.DBCTrack, err error) {
+	query := `select 
+    				id,
+    				user_id,
+    				date,
+    				done, 
+       				last_series, 
+       				score,
+       				score_daily from dbc_challenges_tracks 
+            		where challenge_id=$1
+            		order by "date" desc
+            		limit 1`
+
+	track = &domain.DBCTrack{
+		ChallengeId: challengeId,
+	}
+
+	err = r.getter.DefaultTrOrDB(ctx, r.db).QueryRowContext(ctx, query, challengeId).Scan(
+		&track.Id,
+		&track.UserId,
+		&track.Date,
+		&track.Done,
+		&track.LastSeries,
+		&track.Score,
+		&track.ScoreDaily)
 	switch err {
 	case nil:
 		return track, nil
@@ -101,7 +140,8 @@ func (r *DBCTracksRepo) GetByDate(ctx context.Context, challengeId int64, date t
     				user_id,
     				done, 
        				last_series, 
-       				score from dbc_challenges_tracks 
+       				score,
+       				score_daily from dbc_challenges_tracks 
             		where challenge_id=$1 and date=$2
             		limit 1`
 
@@ -115,7 +155,8 @@ func (r *DBCTracksRepo) GetByDate(ctx context.Context, challengeId int64, date t
 		&track.UserId,
 		&track.Done,
 		&track.LastSeries,
-		&track.Score)
+		&track.Score,
+		&track.ScoreDaily)
 	switch err {
 	case nil:
 		return track, nil
@@ -172,7 +213,8 @@ func (r *DBCTracksRepo) GetAllForChallengeAfter(ctx context.Context, challengeId
     				date,
     				done, 
        				last_series, 
-       				score from dbc_challenges_tracks 
+       				score,
+       				score_daily from dbc_challenges_tracks 
             		where challenge_id=$1 and "date" > $2
             		order by "date"`
 
@@ -184,7 +226,7 @@ func (r *DBCTracksRepo) GetAllForChallengeAfter(ctx context.Context, challengeId
 	var result []*domain.DBCTrack
 	for rows.Next() {
 		item := &domain.DBCTrack{}
-		err := rows.Scan(&item.Id, &item.UserId, &item.Date, &item.Done, &item.LastSeries, &item.Score)
+		err := rows.Scan(&item.Id, &item.UserId, &item.Date, &item.Done, &item.LastSeries, &item.Score, &item.ScoreDaily)
 		if err != nil {
 			return nil, err
 		}
@@ -253,13 +295,14 @@ func (r *DBCTracksRepo) InsertNew(ctx context.Context, tracks []*domain.DBCTrack
 	}
 
 	valuesArr := lo.Map(tracks, func(track *domain.DBCTrack, index int) string {
-		return fmt.Sprintf(`(%d, %d, '%s'::date, %v, %d, %d)`,
+		return fmt.Sprintf(`(%d, %d, '%s'::date, %v, %d, %d, %d)`,
 			track.UserId,
 			track.ChallengeId,
 			track.Date.Format("2006-01-02"),
 			track.Done,
 			track.LastSeries,
 			track.Score,
+			track.ScoreDaily,
 		)
 	})
 	values := strings.Join(valuesArr, ",")
@@ -270,7 +313,8 @@ func (r *DBCTracksRepo) InsertNew(ctx context.Context, tracks []*domain.DBCTrack
                                    date, 
                                    done, 
                                    last_series, 
-                                   score) VALUES %s`, values)
+                                   score,
+                                   score_daily) VALUES %s`, values)
 
 	query = fmt.Sprintf(query)
 
@@ -288,17 +332,18 @@ func (r *DBCTracksRepo) UpdateSome(ctx context.Context, tracks []*domain.DBCTrac
 	}
 
 	valuesArr := lo.Map(tracks, func(track *domain.DBCTrack, index int) string {
-		return fmt.Sprintf(`(%d, %d, %d)`,
+		return fmt.Sprintf(`(%d, %d, %d, %d)`,
 			track.Id,
 			track.LastSeries,
 			track.Score,
+			track.ScoreDaily,
 		)
 	})
 	values := strings.Join(valuesArr, ",")
 
 	query := `update dbc_challenges_tracks as t set
-				score = c.score, last_series = c.last_series, updated_at=now() 
-		  	 from (values %s) as c(id, last_series, score)
+				score = c.score, score_daily=c.score_daily, last_series = c.last_series, updated_at=now() 
+		  	 from (values %s) as c(id, last_series, score, score_daily)
 			 where c.id = t.id`
 	query = fmt.Sprintf(query, values)
 

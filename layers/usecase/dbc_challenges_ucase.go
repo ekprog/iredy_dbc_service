@@ -18,6 +18,7 @@ type ChallengesUseCase struct {
 	tracksRepo          domain.DBCTrackRepository
 	periodTypeGenerator *services.PeriodTypeProcessor
 	trackProcessor      *services.DBCTrackProcessor
+	challengeRepository domain.DBCChallengesRepository
 }
 
 func NewChallengesUseCase(log core.Logger,
@@ -26,6 +27,7 @@ func NewChallengesUseCase(log core.Logger,
 	periodTypeGenerator *services.PeriodTypeProcessor,
 	tasksRepo domain.DBCChallengesRepository,
 	tracksRepo domain.DBCTrackRepository,
+	challengeRepository domain.DBCChallengesRepository,
 	trackProcessor *services.DBCTrackProcessor) *ChallengesUseCase {
 	return &ChallengesUseCase{
 		log:                 log,
@@ -35,6 +37,7 @@ func NewChallengesUseCase(log core.Logger,
 		tracksRepo:          tracksRepo,
 		periodTypeGenerator: periodTypeGenerator,
 		trackProcessor:      trackProcessor,
+		challengeRepository: challengeRepository,
 	}
 }
 
@@ -225,7 +228,37 @@ func (ucase *ChallengesUseCase) Remove(userId, taskId int64) (domain.StatusRespo
 
 func (ucase *ChallengesUseCase) TrackDay(ctx context.Context, form *domain.DBCTrack) (domain.UserGamifyResponse, error) {
 
-	return domain.UserGamifyResponse{}, nil
+	status, err := ucase.trackProcessor.MakeTrack(ctx, form.ChallengeId, form.Date, form.Done)
+	if err != nil {
+		return domain.UserGamifyResponse{}, errors.Wrap(err, "MakeTrack")
+	}
+	if !status {
+		return domain.UserGamifyResponse{
+			StatusCode: domain.ServerError,
+		}, nil
+	}
+
+	scores, err := ucase.trackProcessor.CalculateScores(ctx, form.UserId)
+	if err != nil {
+		return domain.UserGamifyResponse{}, errors.Wrap(err, "CalculateScores")
+	}
+
+	// Получаем челлендж
+	challenge, err := ucase.challengeRepository.FetchById(ctx, form.ChallengeId)
+	if err != nil {
+		return domain.UserGamifyResponse{}, errors.Wrap(err, "FetchById")
+	}
+	if challenge == nil {
+		return domain.UserGamifyResponse{
+			StatusCode: domain.NotFound,
+		}, nil
+	}
+
+	return domain.UserGamifyResponse{
+		StatusCode: domain.Success,
+		LastSeries: challenge.LastSeries,
+		ScoreDaily: scores.ScoreDaily,
+	}, nil
 	//
 	//// DRY
 	//makeErr := func(err error) (domain.UserGamifyResponse, error) {

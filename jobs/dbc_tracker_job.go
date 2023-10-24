@@ -45,9 +45,9 @@ func (job *DBCTrackerJob) Run() error {
 	ctx := context.Background()
 	challengeId := int64(24)
 
-	date, _ := time.Parse("2006-01-02", "2023-10-19")
+	date, _ := time.Parse("2006-01-02", "2023-10-16")
 
-	isDone, err := job.trackProc.MakeTrack(ctx, challengeId, date, false)
+	isDone, err := job.trackProc.MakeTrack(ctx, challengeId, date, true)
 	if err != nil {
 		return err
 	}

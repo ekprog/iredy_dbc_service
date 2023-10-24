@@ -31,7 +31,7 @@ func (d *UsersDeliveryService) Init() error {
 }
 
 func (d *UsersDeliveryService) Info(ctx context.Context, r *pb.IdRequest) (*pb.GetUserResponse, error) {
-	uCaseRes, err := d.usersUCase.Info(r.Id)
+	uCaseRes, err := d.usersUCase.Info(ctx, r.Id)
 	if err != nil {
 		return nil, errors.Wrap(err, "Info")
 	}
@@ -64,7 +64,7 @@ func (d *UsersDeliveryService) MyInfo(ctx context.Context, r *pb.EmptyMessage) (
 		return nil, errors.Wrap(err, "cannot extract user_id from context")
 	}
 
-	uCaseRes, err := d.usersUCase.Info(userId)
+	uCaseRes, err := d.usersUCase.Info(ctx, userId)
 	if err != nil {
 		return nil, errors.Wrap(err, "MyInfo")
 	}

@@ -85,6 +85,17 @@ func (s *PeriodTypeProcessor) StepBack(fromDate time.Time, periodType domain.Gen
 	return time.Time{}, errors.New("Incorrect period type " + periodType.Type)
 }
 
+func (s *PeriodTypeProcessor) StepBackN(fromDate time.Time, period domain.GenerationPeriod, n int) (time.Time, error) {
+	var err error
+	for i := 0; i < n; i++ {
+		fromDate, err = s.StepBack(fromDate, period)
+		if err != nil {
+			return time.Time{}, err
+		}
+	}
+	return fromDate, nil
+}
+
 // Итерируется на step шагов назад и вызывает callback с просчитанным временем (сравнение с обрезкой по дню)
 func (s *PeriodTypeProcessor) StepBackwardForEach(fromDate time.Time, period domain.GenerationPeriod, step uint, fn PeriodTypeCallback) error {
 	var err error

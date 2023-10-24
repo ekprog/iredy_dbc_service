@@ -63,6 +63,7 @@ func (s *DBCTrackProcessor) MakeTrack(ctx context.Context, challengeId int64, da
 	//
 	lastSeries := int64(0) // Здесь будет посчитанная цепочка (last_series) предыдущего трека (после вставки пропуском, если они есть)
 	lastScore := int64(0)  // Здесь будет посчитанная цепочка (score) предыдущего трека (после вставки пропуском, если они есть)
+	var diff int64
 
 	//
 	// Текущий трек может быть сделан без заполнения предыдущих, поэтому важно все пропуски заполнить и
@@ -118,7 +119,7 @@ func (s *DBCTrackProcessor) MakeTrack(ctx context.Context, challengeId int64, da
 			for _, absentDate := range absentDates {
 
 				// Рассчитываем score
-				lastScore, lastSeries = s.nextTrackPoints(lastScore, lastSeries, false)
+				lastScore, lastSeries, diff = s.nextTrackPoints(lastScore, lastSeries, false)
 
 				absentTrack := &domain.DBCTrack{
 					UserId:      challenge.UserId,
@@ -127,6 +128,7 @@ func (s *DBCTrackProcessor) MakeTrack(ctx context.Context, challengeId int64, da
 					Done:        false,      // незаполненный трек будет ложным
 					LastSeries:  lastSeries, // после ложного трека серия будет нулевой
 					Score:       lastScore,  // после ложного трека пользователь получает 20% от предыдущего
+					ScoreDaily:  diff,
 				}
 				absentTracks = append(absentTracks, absentTrack)
 			}
@@ -139,7 +141,7 @@ func (s *DBCTrackProcessor) MakeTrack(ctx context.Context, challengeId int64, da
 	// Можно рассчитать новый трек.
 	//
 
-	lastSeries, lastScore = s.nextTrackPoints(lastScore, lastSeries, value)
+	lastSeries, lastScore, diff = s.nextTrackPoints(lastScore, lastSeries, value)
 	currentTrack := &domain.DBCTrack{
 		UserId:      challenge.UserId,
 		ChallengeId: challenge.Id,
@@ -147,6 +149,7 @@ func (s *DBCTrackProcessor) MakeTrack(ctx context.Context, challengeId int64, da
 		Done:        value,
 		LastSeries:  lastSeries,
 		Score:       lastScore,
+		ScoreDaily:  diff,
 	}
 
 	//
@@ -158,9 +161,10 @@ func (s *DBCTrackProcessor) MakeTrack(ctx context.Context, challengeId int64, da
 		return false, errors.Wrap(err, "GetAllForChallengeAfter")
 	}
 	for _, track := range afterList {
-		lastScore, lastSeries = s.nextTrackPoints(lastScore, lastSeries, track.Done)
+		lastScore, lastSeries, diff = s.nextTrackPoints(lastScore, lastSeries, track.Done)
 		track.LastSeries = lastSeries
 		track.Score = lastScore
+		track.ScoreDaily = diff
 	}
 
 	// Теперь записываем все критические изменения с учетом транзакций
@@ -198,11 +202,67 @@ func (s *DBCTrackProcessor) MakeTrack(ctx context.Context, challengeId int64, da
 	return true, nil
 }
 
-func (s *DBCTrackProcessor) nextTrackPoints(lastScore int64, lastSeries int64, currentValue bool) (int64, int64) {
+func (s *DBCTrackProcessor) CalculateScores(ctx context.Context, userId int64) (domain.ScorePoints, error) {
+	nowDate := time.Now() // ToDo: Location should be like user has (Moscow default)
+
+	// Для каждого челленжда вычисляем scores
+	challenges, err := s.challengeRepository.FetchUsersAll(userId)
+	if err != nil {
+		return domain.ScorePoints{}, errors.Wrap(err, "FetchUsersAll")
+	}
+
+	totalScore := int64(0)
+	totalDailyScore := int64(0)
+	for _, challenge := range challenges {
+
+		// ToDo: real period
+		period := domain.GenerationPeriod{Type: domain.PeriodTypeEveryDay}
+
+		// Вычисляем дату на стыке score и dailyScore
+		dateProcessed, err := s.trackProcessor.StepBackN(nowDate, period, 3)
+		if err != nil {
+			return domain.ScorePoints{}, errors.Wrap(err, "StepBackN")
+		}
+
+		lastProcessedTrack, err := s.trackRepository.GetByDate(ctx, challenge.Id, dateProcessed)
+		if err != nil {
+			return domain.ScorePoints{}, errors.Wrap(err, "GetByDate")
+		}
+		if lastProcessedTrack != nil {
+			totalScore += lastProcessedTrack.Score
+		}
+
+		//
+		dailyTracks, err := s.trackRepository.GetAllForChallengeAfter(ctx, challenge.Id, dateProcessed)
+		if err != nil {
+			return domain.ScorePoints{}, errors.Wrap(err, "GetAllForChallengeAfter")
+		}
+
+		// Последние не заполненные не трогаем
+		trueStart := false
+		for i := len(dailyTracks) - 1; i >= 0; i-- {
+			if dailyTracks[i].Done {
+				trueStart = true
+			}
+
+			if trueStart {
+				totalDailyScore += dailyTracks[i].ScoreDaily
+			}
+		}
+	}
+
+	return domain.ScorePoints{
+		Score:      totalScore,
+		ScoreDaily: totalDailyScore,
+	}, nil
+}
+
+func (s *DBCTrackProcessor) nextTrackPoints(lastScore int64, lastSeries int64, currentValue bool) (int64, int64, int64) {
 
 	if !currentValue {
-		return int64(math.Floor(float64(lastScore) * 0.2)), 0
+		x := int64(math.Floor(float64(lastScore) * 0.2))
+		return x, 0, x - lastScore
 	} else {
-		return lastScore + 1, lastSeries + 1
+		return lastScore + 1, lastSeries + 1, 1
 	}
 }

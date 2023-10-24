@@ -6,7 +6,9 @@ import (
 )
 
 type User struct {
-	Id         int64
+	Id int64
+
+	// Данные вычисляются в рантайме
 	Score      int64
 	ScoreDaily int64
 
@@ -21,11 +23,10 @@ type UsersRepository interface {
 	InsertIfNotExists(*User) error
 	Remove(int64) error
 	Update(*User) error
-	TransferDailyScores(ctx context.Context, userId int64, scoreInc int) error
 }
 
 type UsersUseCase interface {
-	Info(int64) (GetUserResponse, error)
+	Info(context.Context, int64) (GetUserResponse, error)
 	CreateIfNotExists(*User) (CreateUserResponse, error)
 	Remove(int64) (RemoveUserResponse, error)
 }

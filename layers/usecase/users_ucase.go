@@ -1,22 +1,31 @@
 package usecase
 
 import (
+	"context"
 	"github.com/pkg/errors"
 	"microservice/app/core"
 	"microservice/layers/domain"
+	"microservice/layers/services"
 )
 
 type UsersUseCase struct {
-	log  core.Logger
-	repo domain.UsersRepository
+	log       core.Logger
+	repo      domain.UsersRepository
+	trackProc *services.DBCTrackProcessor
 }
 
-func NewUsersUseCase(log core.Logger, repo domain.UsersRepository) *UsersUseCase {
-	return &UsersUseCase{log: log, repo: repo}
+func NewUsersUseCase(log core.Logger,
+	repo domain.UsersRepository,
+	trackProc *services.DBCTrackProcessor) *UsersUseCase {
+	return &UsersUseCase{
+		log:       log,
+		repo:      repo,
+		trackProc: trackProc,
+	}
 }
 
-func (i *UsersUseCase) Info(id int64) (domain.GetUserResponse, error) {
-	user, err := i.repo.FetchById(id)
+func (ucase *UsersUseCase) Info(ctx context.Context, id int64) (domain.GetUserResponse, error) {
+	user, err := ucase.repo.FetchById(id)
 	if err != nil {
 		return domain.GetUserResponse{}, errors.Wrap(err, "Info")
 	}
@@ -27,14 +36,22 @@ func (i *UsersUseCase) Info(id int64) (domain.GetUserResponse, error) {
 		}, nil
 	}
 
+	scores, err := ucase.trackProc.CalculateScores(ctx, id)
+	if err != nil {
+		return domain.GetUserResponse{}, errors.Wrap(err, "CalculateScores")
+	}
+
+	user.Score = scores.Score
+	user.ScoreDaily = scores.ScoreDaily
+
 	return domain.GetUserResponse{
 		StatusCode: domain.Success,
 		User:       *user,
 	}, nil
 }
 
-func (i *UsersUseCase) CreateIfNotExists(user *domain.User) (domain.CreateUserResponse, error) {
-	err := i.repo.InsertIfNotExists(user)
+func (ucase *UsersUseCase) CreateIfNotExists(user *domain.User) (domain.CreateUserResponse, error) {
+	err := ucase.repo.InsertIfNotExists(user)
 	if err != nil {
 		return domain.CreateUserResponse{}, errors.Wrap(err, "cannot insert user")
 	}
@@ -44,8 +61,8 @@ func (i *UsersUseCase) CreateIfNotExists(user *domain.User) (domain.CreateUserRe
 	}, nil
 }
 
-func (i *UsersUseCase) Remove(userId int64) (domain.RemoveUserResponse, error) {
-	err := i.repo.Remove(userId)
+func (ucase *UsersUseCase) Remove(userId int64) (domain.RemoveUserResponse, error) {
+	err := ucase.repo.Remove(userId)
 	if err != nil {
 		return domain.RemoveUserResponse{}, errors.Wrap(err, "cannot remove user")
 	}
