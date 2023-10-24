@@ -9,6 +9,7 @@ import (
 	"github.com/samber/lo"
 	"microservice/app/core"
 	"microservice/layers/domain"
+	"microservice/tools"
 	"strconv"
 	"strings"
 	"time"
@@ -45,23 +46,87 @@ func (r *DBCTracksRepo) InsertOrUpdate(ctx context.Context, track *domain.DBCTra
 	return nil
 }
 
-func (r *DBCTracksRepo) CheckDoneByDate(ctx context.Context, challengeId int32, t time.Time) (done bool, err error) {
-	query := `select done from dbc_challenges_tracks 
-            		where challenge_id=$1 and date=$2
+func (r *DBCTracksRepo) Count(ctx context.Context, challengeId int64) (c int64, err error) {
+	query := `select  count(id) 
+				from dbc_challenges_tracks 
+            	where challenge_id=$1`
+
+	err = r.getter.DefaultTrOrDB(ctx, r.db).QueryRowContext(ctx, query, challengeId).Scan(&c)
+	if err != nil {
+		return -1, errors.Wrap(err, "Count")
+	}
+	return c, nil
+}
+
+func (r *DBCTracksRepo) GetLastForChallengeBefore(ctx context.Context, challengeId int64, date time.Time) (track *domain.DBCTrack, err error) {
+	date = tools.RoundDateTimeToDay(date.UTC())
+
+	query := `select 
+    				id,
+    				user_id,
+    				date,
+    				done, 
+       				last_series, 
+       				score from dbc_challenges_tracks 
+            		where challenge_id=$1 and "date" < $2
+            		order by "date" desc
             		limit 1`
 
-	err = r.getter.DefaultTrOrDB(ctx, r.db).QueryRowContext(ctx, query, challengeId, t.UTC()).Scan(&done)
+	track = &domain.DBCTrack{
+		ChallengeId: challengeId,
+	}
+
+	err = r.getter.DefaultTrOrDB(ctx, r.db).QueryRowContext(ctx, query, challengeId, date).Scan(
+		&track.Id,
+		&track.UserId,
+		&track.Date,
+		&track.Done,
+		&track.LastSeries,
+		&track.Score)
 	switch err {
 	case nil:
-		return done, nil
+		return track, nil
 	case sql.ErrNoRows:
-		return false, nil
+		return nil, nil
 	default:
-		return false, err
+		return nil, errors.Wrap(err, "GetLastForChallenge")
 	}
 }
 
-func (r *DBCTracksRepo) FetchForChallengeByDates(challengeId int32, list []time.Time) ([]*domain.DBCTrack, error) {
+func (r *DBCTracksRepo) GetByDate(ctx context.Context, challengeId int64, date time.Time) (track *domain.DBCTrack, err error) {
+	date = tools.RoundDateTimeToDay(date)
+
+	query := `select 
+    				id,
+    				user_id,
+    				done, 
+       				last_series, 
+       				score from dbc_challenges_tracks 
+            		where challenge_id=$1 and date=$2
+            		limit 1`
+
+	track = &domain.DBCTrack{
+		ChallengeId: challengeId,
+		Date:        date,
+	}
+
+	err = r.getter.DefaultTrOrDB(ctx, r.db).QueryRowContext(ctx, query, challengeId, date.UTC()).Scan(
+		&track.Id,
+		&track.UserId,
+		&track.Done,
+		&track.LastSeries,
+		&track.Score)
+	switch err {
+	case nil:
+		return track, nil
+	case sql.ErrNoRows:
+		return nil, nil
+	default:
+		return nil, errors.Wrap(err, "GetByDate")
+	}
+}
+
+func (r *DBCTracksRepo) FetchForChallengeByDates(challengeId int64, list []time.Time) ([]*domain.DBCTrack, error) {
 
 	dateStrings := lo.Map(list, func(item time.Time, index int) string {
 		return fmt.Sprintf("('%s'::date)", item.UTC().Format("2006-01-02"))
@@ -100,7 +165,7 @@ func (r *DBCTracksRepo) FetchForChallengeByDates(challengeId int32, list []time.
 
 // Возвращает треки, подлежащие учету в dailyScore
 // timeSince - время ДО которого искать (зависит от типа генерации треков в челлендже)
-func (r *DBCTracksRepo) FetchNotProcessed(challengeId int32, timeSince time.Time) ([]*domain.DBCTrack, error) {
+func (r *DBCTracksRepo) FetchNotProcessed(challengeId int64, timeSince time.Time) ([]*domain.DBCTrack, error) {
 	query := `select t.id,
        				t.date,
        				t.done
@@ -146,6 +211,41 @@ func (r *DBCTracksRepo) SetProcessed(ctx context.Context, trackIds []int64) erro
 	_, err := r.getter.DefaultTrOrDB(ctx, r.db).ExecContext(ctx, query)
 	if err != nil {
 		return errors.Wrap(err, "SetProcessed")
+	}
+	return nil
+}
+
+func (r *DBCTracksRepo) InsertNew(ctx context.Context, tracks []*domain.DBCTrack) error {
+
+	if len(tracks) == 0 {
+		return nil
+	}
+
+	valuesArr := lo.Map(tracks, func(track *domain.DBCTrack, index int) string {
+		return fmt.Sprintf(`(%d, %d, '%s'::date, %v, %d, %d)`,
+			track.UserId,
+			track.ChallengeId,
+			track.Date.Format("2006-01-02"),
+			track.Done,
+			track.LastSeries,
+			track.Score,
+		)
+	})
+	values := strings.Join(valuesArr, ",")
+
+	query := fmt.Sprintf(`INSERT INTO dbc_challenges_tracks (
+                                   user_id, 
+                                   challenge_id, 
+                                   date, 
+                                   done, 
+                                   last_series, 
+                                   score) VALUES %s`, values)
+
+	query = fmt.Sprintf(query)
+
+	_, err := r.getter.DefaultTrOrDB(ctx, r.db).ExecContext(ctx, query)
+	if err != nil {
+		return err
 	}
 	return nil
 }

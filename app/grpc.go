@@ -174,16 +174,16 @@ func anyLogging(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo
 
 // Tools
 
-func ExtractRequestUserId(ctx context.Context) (int32, error) {
+func ExtractRequestUserId(ctx context.Context) (int64, error) {
 	m, ok := metadata.FromIncomingContext(ctx)
 	if ok {
 		userIds := m.Get("user_id")
 		if len(userIds) > 0 {
-			userId, err := strconv.ParseInt(userIds[0], 10, 32)
+			userId, err := strconv.ParseInt(userIds[0], 10, 64)
 			if err != nil {
 				return -1, errors.Wrap(err, "cannot parse user_id")
 			}
-			return int32(userId), nil
+			return userId, nil
 		}
 	}
 	return -1, errors.New("user_id was not found into context")

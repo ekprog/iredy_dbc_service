@@ -1,14 +1,14 @@
 package domain
 
 type UserGamify struct {
-	Score      int32
-	ScoreDaily int32
+	Score      int64
+	ScoreDaily int64
 }
 
 // IO FORMS (RESPONSES)
 
 type UserGamifyResponse struct {
 	StatusCode string
-	LastSeries int32
-	ScoreDaily int32
+	LastSeries int64
+	ScoreDaily int64
 }

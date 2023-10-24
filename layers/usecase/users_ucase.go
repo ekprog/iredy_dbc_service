@@ -15,7 +15,7 @@ func NewUsersUseCase(log core.Logger, repo domain.UsersRepository) *UsersUseCase
 	return &UsersUseCase{log: log, repo: repo}
 }
 
-func (i *UsersUseCase) Info(id int32) (domain.GetUserResponse, error) {
+func (i *UsersUseCase) Info(id int64) (domain.GetUserResponse, error) {
 	user, err := i.repo.FetchById(id)
 	if err != nil {
 		return domain.GetUserResponse{}, errors.Wrap(err, "Info")
@@ -44,7 +44,7 @@ func (i *UsersUseCase) CreateIfNotExists(user *domain.User) (domain.CreateUserRe
 	}, nil
 }
 
-func (i *UsersUseCase) Remove(userId int32) (domain.RemoveUserResponse, error) {
+func (i *UsersUseCase) Remove(userId int64) (domain.RemoveUserResponse, error) {
 	err := i.repo.Remove(userId)
 	if err != nil {
 		return domain.RemoveUserResponse{}, errors.Wrap(err, "cannot remove user")

@@ -16,7 +16,7 @@ type StatusResponse struct {
 
 type IdResponse struct {
 	StatusCode string
-	Id         int32
+	Id         int64
 }
 
 // PERIOD_TYPE

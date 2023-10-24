@@ -39,7 +39,7 @@ func NewChallengesUseCase(log core.Logger,
 }
 
 // Returns all challenges of user with some last tracks (successful or not)
-func (ucase *ChallengesUseCase) All(userId int32) (domain.ChallengesListResponse, error) {
+func (ucase *ChallengesUseCase) All(userId int64) (domain.ChallengesListResponse, error) {
 	var items []*domain.DBCChallenge
 	var err error
 
@@ -116,7 +116,7 @@ func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (dom
 	}
 
 	// Is challenge connected to category?
-	var categoryId *int32
+	var categoryId *int64
 	if form.CategoryName != nil {
 		// Finding category
 		category, err := ucase.categoryRepo.FetchByName(form.UserId, *form.CategoryName)
@@ -181,9 +181,9 @@ func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (dom
 	}, nil
 }
 
-func (ucase *ChallengesUseCase) Update(challenge *domain.DBCChallenge) (domain.StatusResponse, error) {
+func (ucase *ChallengesUseCase) Update(ctx context.Context, challenge *domain.DBCChallenge) (domain.StatusResponse, error) {
 
-	fetchedChallenge, err := ucase.challengesRepo.FetchById(challenge.Id)
+	fetchedChallenge, err := ucase.challengesRepo.FetchById(ctx, challenge.Id)
 	if err != nil || fetchedChallenge == nil {
 		return domain.StatusResponse{
 			StatusCode: domain.NotFound,
@@ -200,7 +200,7 @@ func (ucase *ChallengesUseCase) Update(challenge *domain.DBCChallenge) (domain.S
 	}, nil
 }
 
-func (ucase *ChallengesUseCase) Remove(userId, taskId int32) (domain.StatusResponse, error) {
+func (ucase *ChallengesUseCase) Remove(userId, taskId int64) (domain.StatusResponse, error) {
 
 	//task, err := ucase.challengesRepo.FetchById(taskId)
 	//if err != nil {
@@ -225,71 +225,73 @@ func (ucase *ChallengesUseCase) Remove(userId, taskId int32) (domain.StatusRespo
 
 func (ucase *ChallengesUseCase) TrackDay(ctx context.Context, form *domain.DBCTrack) (domain.UserGamifyResponse, error) {
 
-	// DRY
-	makeErr := func(err error) (domain.UserGamifyResponse, error) {
-		return domain.UserGamifyResponse{}, errors.Wrap(err, "TrackDay")
-	}
-
-	// Пользователя не проверяем, потому что наличие челленджа уже гарантирует наличие пользователя
-	challenge, err := ucase.challengesRepo.FetchById(form.ChallengeId)
-	if err != nil {
-		return makeErr(err)
-	}
-
-	// User is owner
-	if challenge == nil || challenge.UserId != form.UserId {
-		return domain.UserGamifyResponse{
-			StatusCode: domain.NotFound,
-		}, nil
-	}
-
-	// Check if track possible to change
-	// ToDo: Make 3 step back and check dates
-
-	// 1. Проверяем есть ли такой трек
-	prevDone, err := ucase.tracksRepo.CheckDoneByDate(ctx, challenge.Id, form.Date)
-	if err != nil {
-		return makeErr(err)
-	}
-
-	// Изменение не имеет смысла - те же значения
-	if form.Done == prevDone {
-		return domain.UserGamifyResponse{
-			StatusCode: domain.UserLogicError,
-		}, nil
-	}
-
-	// Рассчитываем изменение ScoreDaily (Score будет меняться в горутине каждые сутки)
-	scoreChange := int32(0)
-	if form.Done && !prevDone {
-		scoreChange = 1
-	} else if !form.Done && prevDone {
-		scoreChange = -1
-	}
-
-	// 2. Обновляем трек в БД
-	err = ucase.tracksRepo.InsertOrUpdate(ctx, form)
-	if err != nil {
-		return makeErr(err)
-	}
-
-	// Gamify update
-	// При изменении трека в любом случае меняется ScoreDaily
-	user, err := ucase.usersRepo.FetchById(form.UserId)
-	if err != nil {
-		return makeErr(err)
-	}
-
-	// Обновляем ScoreDaily у пользователя
-	user.ScoreDaily += scoreChange
-	err = ucase.usersRepo.Update(user)
-	if err != nil {
-		return makeErr(err)
-	}
-
-	return domain.UserGamifyResponse{
-		StatusCode: domain.Success,
-		ScoreDaily: user.ScoreDaily,
-		LastSeries: 0,
-	}, nil
+	return domain.UserGamifyResponse{}, nil
+	//
+	//// DRY
+	//makeErr := func(err error) (domain.UserGamifyResponse, error) {
+	//	return domain.UserGamifyResponse{}, errors.Wrap(err, "TrackDay")
+	//}
+	//
+	//// Пользователя не проверяем, потому что наличие челленджа уже гарантирует наличие пользователя
+	//challenge, err := ucase.challengesRepo.FetchById(ctx, form.ChallengeId)
+	//if err != nil {
+	//	return makeErr(err)
+	//}
+	//
+	//// User is owner
+	//if challenge == nil || challenge.UserId != form.UserId {
+	//	return domain.UserGamifyResponse{
+	//		StatusCode: domain.NotFound,
+	//	}, nil
+	//}
+	//
+	//// Check if track possible to change
+	//// ToDo: Make 3 step back and check dates
+	//
+	//// 1. Проверяем есть ли такой трек
+	//prevDone, err := ucase.tracksRepo.CheckDoneByDate(ctx, challenge.Id, form.Date)
+	//if err != nil {
+	//	return makeErr(err)
+	//}
+	//
+	//// Изменение не имеет смысла - те же значения
+	//if form.Done == prevDone {
+	//	return domain.UserGamifyResponse{
+	//		StatusCode: domain.UserLogicError,
+	//	}, nil
+	//}
+	//
+	//// Рассчитываем изменение ScoreDaily (Score будет меняться в горутине каждые сутки)
+	//scoreChange := int64(0)
+	//if form.Done && !prevDone {
+	//	scoreChange = 1
+	//} else if !form.Done && prevDone {
+	//	scoreChange = -1
+	//}
+	//
+	//// 2. Обновляем трек в БД
+	//err = ucase.tracksRepo.InsertOrUpdate(ctx, form)
+	//if err != nil {
+	//	return makeErr(err)
+	//}
+	//
+	//// Gamify update
+	//// При изменении трека в любом случае меняется ScoreDaily
+	//user, err := ucase.usersRepo.FetchById(form.UserId)
+	//if err != nil {
+	//	return makeErr(err)
+	//}
+	//
+	//// Обновляем ScoreDaily у пользователя
+	//user.ScoreDaily += scoreChange
+	//err = ucase.usersRepo.Update(user)
+	//if err != nil {
+	//	return makeErr(err)
+	//}
+	//
+	//return domain.UserGamifyResponse{
+	//	StatusCode: domain.Success,
+	//	ScoreDaily: user.ScoreDaily,
+	//	LastSeries: 0,
+	//}, nil
 }

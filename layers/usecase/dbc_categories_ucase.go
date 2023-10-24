@@ -23,7 +23,7 @@ func NewDBCCategoriesUCase(log core.Logger,
 	}
 }
 
-func (i *DBCCategoriesUCase) Get(userId int32) (domain.CategoryListResponse, error) {
+func (i *DBCCategoriesUCase) Get(userId int64) (domain.CategoryListResponse, error) {
 
 	var categories []*domain.DBCCategory
 	var err error
@@ -65,7 +65,7 @@ func (i *DBCCategoriesUCase) Update(item *domain.DBCCategory) (domain.StatusResp
 	}, nil
 }
 
-func (i *DBCCategoriesUCase) Remove(userId, Id int32) (domain.StatusResponse, error) {
+func (i *DBCCategoriesUCase) Remove(userId, Id int64) (domain.StatusResponse, error) {
 
 	var err error
 

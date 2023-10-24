@@ -15,7 +15,7 @@ func NewDBCCategoriesRepo(log core.Logger, db *sql.DB) *DBCCategoriesRepo {
 	return &DBCCategoriesRepo{log: log, db: db}
 }
 
-func (r *DBCCategoriesRepo) FetchNotEmptyByUserId(userId int32) ([]*domain.DBCCategory, error) {
+func (r *DBCCategoriesRepo) FetchNotEmptyByUserId(userId int64) ([]*domain.DBCCategory, error) {
 	query := `select 
 				c.id,
 				c.name,
@@ -53,7 +53,7 @@ func (r *DBCCategoriesRepo) FetchNotEmptyByUserId(userId int32) ([]*domain.DBCCa
 	return result, nil
 }
 
-func (r *DBCCategoriesRepo) FetchById(id int32) (*domain.DBCCategory, error) {
+func (r *DBCCategoriesRepo) FetchById(id int64) (*domain.DBCCategory, error) {
 	var item = &domain.DBCCategory{
 		Id: id,
 	}
@@ -83,7 +83,7 @@ func (r *DBCCategoriesRepo) FetchById(id int32) (*domain.DBCCategory, error) {
 	}
 }
 
-func (r *DBCCategoriesRepo) FetchByName(userId int32, name string) (*domain.DBCCategory, error) {
+func (r *DBCCategoriesRepo) FetchByName(userId int64, name string) (*domain.DBCCategory, error) {
 	var item = &domain.DBCCategory{
 		UserId: userId,
 		Name:   name,
@@ -132,7 +132,7 @@ func (r *DBCCategoriesRepo) Update(item *domain.DBCCategory) error {
 	return nil
 }
 
-func (r *DBCCategoriesRepo) Remove(userId, id int32) error {
+func (r *DBCCategoriesRepo) Remove(userId, id int64) error {
 	query := `DELETE dbc_challenge_categories 
 				SET deleted_at=now()
 				WHERE id=$1 and user_id=$2`

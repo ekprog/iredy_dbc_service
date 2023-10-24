@@ -19,7 +19,7 @@ func NewUsersRepo(log core.Logger, db *sql.DB, getter *trmsql.CtxGetter) *UsersR
 	return &UsersRepo{log: log, db: db, getter: getter}
 }
 
-func (r *UsersRepo) FetchById(id int32) (*domain.User, error) {
+func (r *UsersRepo) FetchById(id int64) (*domain.User, error) {
 	query := `select 
     				score, 
     				score_daily, 
@@ -46,7 +46,7 @@ func (r *UsersRepo) FetchById(id int32) (*domain.User, error) {
 	}
 }
 
-func (r *UsersRepo) Exist(id int32) (bool, error) {
+func (r *UsersRepo) Exist(id int64) (bool, error) {
 	query := `select id from users where id=$1 limit 1`
 	err := r.db.QueryRow(query, id).Scan(&id)
 	switch err {
@@ -68,7 +68,7 @@ func (r *UsersRepo) InsertIfNotExists(user *domain.User) error {
 	return nil
 }
 
-func (r *UsersRepo) Remove(id int32) error {
+func (r *UsersRepo) Remove(id int64) error {
 	query := `UPDATE users set deleted_at=now() where id=$1;`
 	_, err := r.db.Exec(query, id)
 	if err != nil {

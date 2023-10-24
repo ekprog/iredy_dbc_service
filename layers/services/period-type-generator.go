@@ -5,6 +5,7 @@ import (
 	"microservice/app/core"
 	"microservice/layers/domain"
 	"microservice/tools"
+	"sort"
 	"time"
 )
 
@@ -18,6 +19,19 @@ func NewPeriodTypeProcessor(log core.Logger) *PeriodTypeProcessor {
 	return &PeriodTypeProcessor{
 		log: log,
 	}
+}
+
+// Является ли date одним из точек периода periodType?
+func (s *PeriodTypeProcessor) IsMatch(date time.Time, period domain.GenerationPeriod) (bool, error) {
+
+	dateTomorrow := tools.RoundDateTimeToDay(date.UTC().Add(24 * time.Hour))
+
+	nearest, err := s.StepBack(dateTomorrow, period)
+	if err != nil {
+		return false, errors.Wrap(err, "IsMatch")
+	}
+
+	return date.Equal(nearest), nil
 }
 
 // Просчитывает время на 1 шаг
@@ -103,5 +117,31 @@ func (s *PeriodTypeProcessor) BackwardList(fromDate time.Time, period domain.Gen
 	if err != nil {
 		return nil, err
 	}
+	return list, nil
+}
+
+// Окно с пропущенными датами между aDate и bDate
+func (s *PeriodTypeProcessor) AbsentWindow(aDate, bDate time.Time, period domain.GenerationPeriod) ([]time.Time, error) {
+	aDate = tools.RoundDateTimeToDay(aDate.UTC())
+	bDate = tools.RoundDateTimeToDay(bDate.UTC())
+
+	var list []time.Time
+	var err error
+
+	for aDate.Before(bDate) {
+		bDate, err = s.StepBack(bDate, period)
+		if err != nil {
+			return nil, errors.Wrap(err, "StepBack")
+		}
+		if aDate.Before(bDate) {
+			list = append(list, bDate)
+		}
+	}
+
+	// ВАЖНО: возвращаем отсортированный массив дат
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].Before(list[j])
+	})
+
 	return list, nil
 }

@@ -1,6 +1,7 @@
 package repos
 
 import (
+	"context"
 	"database/sql"
 	"microservice/app/core"
 	"microservice/layers/domain"
@@ -64,7 +65,7 @@ func (r *DBCChallengesRepo) FetchAll(limit, offset int64) ([]*domain.DBCChalleng
 	return result, nil
 }
 
-func (r *DBCChallengesRepo) FetchUsersAll(userId int32) ([]*domain.DBCChallenge, error) {
+func (r *DBCChallengesRepo) FetchUsersAll(userId int64) ([]*domain.DBCChallenge, error) {
 
 	query := `select c.id,
 				 c.category_id,
@@ -114,93 +115,7 @@ func (r *DBCChallengesRepo) FetchUsersAll(userId int32) ([]*domain.DBCChallenge,
 	return result, nil
 }
 
-//func (r *DBCChallengesRepo) FetchUsersAll(userId int32) ([]*domain.DBCChallenge, error) {
-//
-//	query := `select id,
-//					 category_id,
-//					 name,
-//					 "desc",
-//					 image,
-//					 last_series,
-//					 created_at,
-//					 updated_at,
-//					 deleted_at,
-//					 date,
-//					 done
-//				from (select c.id,
-//							 c.category_id,
-//							 c.name,
-//							 c."desc",
-//							 c.image,
-//							 c.last_series,
-//							 c.created_at,
-//							 c.updated_at,
-//							 c.deleted_at,
-//							 t.date,
-//							 t.done,
-//							 row_number() over (PARTITION BY c.id ORDER BY t.date) as num
-//					  from dbc_challenges c
-//							   left join dbc_challenges_tracks t
-//										 on c.id = t.challenge_id
-//					  where c.user_id = $1
-//						and c.deleted_at is null
-//					  order by c.id, t.date DESC) all_t
-//				where all_t.num <= 3`
-//
-//	rows, err := r.db.Query(query, userId)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	result := make(map[int32]*domain.DBCChallenge)
-//	var order []int32
-//
-//	for rows.Next() {
-//		var date *time.Time
-//		var done *bool
-//
-//		item := &domain.DBCChallenge{
-//			UserId:     userId,
-//			LastTracks: []*domain.DBCTrack{},
-//		}
-//		err := rows.Scan(&item.Id,
-//			&item.CategoryId,
-//			&item.Name,
-//			&item.Desc,
-//			&item.Image,
-//			&item.LastSeries,
-//			&item.CreatedAt,
-//			&item.UpdatedAt,
-//			&item.DeletedAt,
-//			&date,
-//			&done)
-//		if err != nil {
-//			return nil, err
-//		}
-//
-//		if _, ok := result[item.Id]; !ok {
-//			result[item.Id] = item
-//			order = append(order, item.Id)
-//		}
-//
-//		if date != nil && done != nil {
-//			result[item.Id].LastTracks = append(result[item.Id].LastTracks, &domain.DBCTrack{
-//				Date: *date,
-//				Done: *done,
-//			})
-//		}
-//	}
-//
-//	// To array
-//	values := make([]*domain.DBCChallenge, 0, len(result))
-//	for _, ind := range order {
-//		values = append(values, result[ind])
-//	}
-//
-//	return values, nil
-//}
-
-func (r *DBCChallengesRepo) FetchById(id int32) (*domain.DBCChallenge, error) {
+func (r *DBCChallengesRepo) FetchById(ctx context.Context, id int64) (*domain.DBCChallenge, error) {
 	var item = &domain.DBCChallenge{
 		Id: id,
 	}
@@ -218,7 +133,7 @@ func (r *DBCChallengesRepo) FetchById(id int32) (*domain.DBCChallenge, error) {
 					left join dbc_challenge_categories cat on c.category_id = cat.id
 			where c.id=$1
 			limit 1`
-	err := r.db.QueryRow(query, id).Scan(
+	err := r.db.QueryRowContext(ctx, query, id).Scan(
 		&item.Name,
 		&item.UserId,
 		&item.CategoryId,
@@ -238,7 +153,7 @@ func (r *DBCChallengesRepo) FetchById(id int32) (*domain.DBCChallenge, error) {
 	}
 }
 
-func (r *DBCChallengesRepo) FetchByName(userId int32, name string) (*domain.DBCChallenge, error) {
+func (r *DBCChallengesRepo) FetchByName(userId int64, name string) (*domain.DBCChallenge, error) {
 	var item = &domain.DBCChallenge{
 		UserId: userId,
 		Name:   name,
@@ -310,7 +225,7 @@ func (r *DBCChallengesRepo) Update(item *domain.DBCChallenge) error {
 	return nil
 }
 
-func (r *DBCChallengesRepo) Remove(id int32) error {
+func (r *DBCChallengesRepo) Remove(id int64) error {
 	query := `UPDATE dbc_challenges 
 				SET deleted_at=now()
 				WHERE id=$1`

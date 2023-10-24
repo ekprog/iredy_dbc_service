@@ -1,17 +1,21 @@
 package jobs
 
 import (
+	"context"
 	"github.com/avito-tech/go-transaction-manager/trm/manager"
+	"log"
 	"microservice/app/core"
 	"microservice/layers/domain"
 	"microservice/layers/services"
+	"time"
 )
 
 type DBCTrackerJob struct {
 	log        core.Logger
 	trxManager *manager.Manager
 
-	pProc *services.PeriodTypeProcessor
+	pProc     *services.PeriodTypeProcessor
+	trackProc *services.DBCTrackProcessor
 
 	challengesRepo domain.DBCChallengesRepository
 	tracksRepo     domain.DBCTrackRepository
@@ -23,7 +27,8 @@ func NewDBCTrackerJob(log core.Logger,
 	pProc *services.PeriodTypeProcessor,
 	challengesRepo domain.DBCChallengesRepository,
 	tracksRepo domain.DBCTrackRepository,
-	usersRepo domain.UsersRepository) *DBCTrackerJob {
+	usersRepo domain.UsersRepository,
+	trackProc *services.DBCTrackProcessor) *DBCTrackerJob {
 	return &DBCTrackerJob{
 		log:            log,
 		trxManager:     trxManager,
@@ -31,10 +36,24 @@ func NewDBCTrackerJob(log core.Logger,
 		usersRepo:      usersRepo,
 		challengesRepo: challengesRepo,
 		tracksRepo:     tracksRepo,
+		trackProc:      trackProc,
 	}
 }
 
 func (job *DBCTrackerJob) Run() error {
+
+	ctx := context.Background()
+	challengeId := int64(24)
+
+	date, _ := time.Parse("2006-01-02", "2023-10-25")
+
+	isDone, err := job.trackProc.MakeTrack(ctx, challengeId, date, true)
+	if err != nil {
+		return err
+	}
+	if !isDone {
+		log.Fatal("isDone == false")
+	}
 
 	// Задача: Найти для каждого челленджа все такие неучтенные треки, для которых срок в N последний
 	// итераций прошел (пользователю разрешается менять только последние N трек-дня)

@@ -6,9 +6,9 @@ import (
 )
 
 type User struct {
-	Id         int32
-	Score      int32
-	ScoreDaily int32
+	Id         int64
+	Score      int64
+	ScoreDaily int64
 
 	UpdatedAt time.Time
 	CreatedAt time.Time
@@ -16,18 +16,18 @@ type User struct {
 }
 
 type UsersRepository interface {
-	FetchById(int32) (*User, error)
-	Exist(int32) (bool, error)
+	FetchById(int64) (*User, error)
+	Exist(int64) (bool, error)
 	InsertIfNotExists(*User) error
-	Remove(int32) error
+	Remove(int64) error
 	Update(*User) error
 	TransferDailyScores(ctx context.Context, userId int64, scoreInc int) error
 }
 
 type UsersUseCase interface {
-	Info(int32) (GetUserResponse, error)
+	Info(int64) (GetUserResponse, error)
 	CreateIfNotExists(*User) (CreateUserResponse, error)
-	Remove(int32) (RemoveUserResponse, error)
+	Remove(int64) (RemoveUserResponse, error)
 }
 
 type GetUserResponse struct {
@@ -37,10 +37,10 @@ type GetUserResponse struct {
 
 type CreateUserResponse struct {
 	StatusCode string
-	Id         int32
+	Id         int64
 }
 
 type RemoveUserResponse struct {
 	StatusCode string
-	Id         int32
+	Id         int64
 }
