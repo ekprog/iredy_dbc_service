@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/avito-tech/go-transaction-manager/trm/manager"
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	"math"
 	"microservice/app/core"
 	"microservice/layers/domain"
@@ -20,19 +21,22 @@ type DBCProcessor struct {
 	periodProc          *PeriodTypeProcessor
 	challengeRepository domain.DBCChallengesRepository
 	trackRepository     domain.DBCTrackRepository
+	userRepo            domain.UsersRepository
 }
 
 func NewDBCTrackProcessor(log core.Logger,
 	trxManager *manager.Manager,
 	trackProcessor *PeriodTypeProcessor,
 	challengeRepository domain.DBCChallengesRepository,
-	trackRepository domain.DBCTrackRepository) *DBCProcessor {
+	trackRepository domain.DBCTrackRepository,
+	userRepo domain.UsersRepository) *DBCProcessor {
 	return &DBCProcessor{
 		log:                 log,
 		periodProc:          trackProcessor,
 		challengeRepository: challengeRepository,
 		trackRepository:     trackRepository,
 		trxManager:          trxManager,
+		userRepo:            userRepo,
 	}
 }
 
@@ -133,16 +137,13 @@ func (s *DBCProcessor) MakeTrack(ctx context.Context, challengeId int64, date ti
 	return true, nil
 }
 
-func (s *DBCProcessor) CalculateScores(ctx context.Context, userId int64) (domain.ScorePoints, error) {
-	nowDate := time.Now() // ToDo: Location should be like user has (Moscow default)
-
+func (s *DBCProcessor) CalculateDailyScore(ctx context.Context, userId int64) (int64, error) {
 	// Для каждого челленжда вычисляем scores
 	challenges, err := s.challengeRepository.FetchUsersAll(userId)
 	if err != nil {
-		return domain.ScorePoints{}, errors.Wrap(err, "FetchUsersAll")
+		return -1, errors.Wrap(err, "FetchUsersAll")
 	}
 
-	totalScore := int64(0)
 	totalDailyScore := int64(0)
 	for _, challenge := range challenges {
 
@@ -150,23 +151,15 @@ func (s *DBCProcessor) CalculateScores(ctx context.Context, userId int64) (domai
 		period := domain.GenerationPeriod{Type: domain.PeriodTypeEveryDay}
 
 		// Вычисляем дату на стыке score и dailyScore
-		dateProcessed, err := s.periodProc.StepBackN(nowDate, period, DBC_MAX_STEP_CAN_CHANGE)
+		dateProcessed, err := s.getSeparatorDateDailyBefore(period)
 		if err != nil {
-			return domain.ScorePoints{}, errors.Wrap(err, "StepBackN")
-		}
-
-		lastProcessedTrack, err := s.trackRepository.GetByDate(ctx, challenge.Id, dateProcessed)
-		if err != nil {
-			return domain.ScorePoints{}, errors.Wrap(err, "GetByDate")
-		}
-		if lastProcessedTrack != nil {
-			totalScore += lastProcessedTrack.Score
+			return -1, errors.Wrap(err, "getSeparatorDateDaily")
 		}
 
 		//
 		dailyTracks, err := s.trackRepository.GetAllForChallengeAfter(ctx, challenge.Id, dateProcessed)
 		if err != nil {
-			return domain.ScorePoints{}, errors.Wrap(err, "GetAllForChallengeAfter")
+			return -1, errors.Wrap(err, "GetAllForChallengeAfter")
 		}
 
 		// Последние не заполненные не трогаем
@@ -182,24 +175,67 @@ func (s *DBCProcessor) CalculateScores(ctx context.Context, userId int64) (domai
 		}
 	}
 
-	return domain.ScorePoints{
-		Score:      totalScore,
-		ScoreDaily: totalDailyScore,
-	}, nil
+	return totalDailyScore, nil
 }
 
 // Обрабатывает все треки для учета User.Score и Challenge.LastSeries
 func (s *DBCProcessor) ProcessChallengeTracks(ctx context.Context, challenge *domain.DBCChallenge) error {
 
+	period := domain.GenerationPeriod{Type: domain.PeriodTypeEveryDay}
+
+	dailyDate, err := s.getSeparatorDateDaily(period)
+	if err != nil {
+		return errors.Wrap(err, "getSeparatorDateDaily")
+	}
+
+	// Рассчитываем Score
+	tracks, err := s.trackRepository.GetAllNotProcessedForChallengeBefore(ctx, challenge.Id, dailyDate)
+	if err != nil {
+		return errors.Wrap(err, "GetLastNotProcessedForChallengeBefore")
+	}
+
+	score := lo.Reduce(tracks, func(agg int64, track *domain.DBCTrack, index int) int64 {
+		return agg + track.ScoreDaily
+	}, 0)
+
+	tracksIds := lo.Map(tracks, func(item *domain.DBCTrack, index int) int64 {
+		return item.Id
+	})
+
+	// Рассчитываем LastSeries
+	lastTrack, err := s.trackRepository.GetLastForChallengeBefore(ctx, challenge.Id, dailyDate)
+	if err != nil {
+		return errors.Wrap(err, "GetLastForChallengeBefore")
+	}
+	if lastTrack != nil {
+		challenge.LastSeries = lastTrack.LastSeries
+	} else {
+		challenge.LastSeries = 0
+	}
+
+	err = s.trxManager.Do(ctx, func(ctx context.Context) error {
+		err = s.userRepo.AddScore(ctx, challenge.UserId, score)
+		if err != nil {
+			return errors.Wrap(err, "AddScore")
+		}
+
+		err = s.trackRepository.SetProcessed(ctx, tracksIds)
+		if err != nil {
+			return errors.Wrap(err, "SetProcessed")
+		}
+
+		err = s.challengeRepository.Update(challenge)
+		if err != nil {
+			return errors.Wrap(err, "ChallengeUpdate")
+		}
+
+		return nil
+	})
+	if err != nil {
+		return errors.Wrap(err, "trxManager")
+	}
+
 	return nil
-
-	//period := domain.GenerationPeriod{Type: domain.PeriodTypeEveryDay}
-	//
-	//date, err := s.getSeparatorDate(period)
-	//if err != nil {
-	//	return errors.Wrap(err, "getSeparatorDate")
-	//}
-
 }
 
 //
@@ -207,10 +243,22 @@ func (s *DBCProcessor) ProcessChallengeTracks(ctx context.Context, challenge *do
 //
 
 // Получение последней даты, которую можно менять (3ий шаг назад)
-func (s *DBCProcessor) getSeparatorDate(period domain.GenerationPeriod) (time.Time, error) {
+func (s *DBCProcessor) getSeparatorDateDaily(period domain.GenerationPeriod) (time.Time, error) {
 	date := tools.RoundDateTimeToDay(time.Now().UTC().Add(24 * time.Hour))
 
 	backDate, err := s.periodProc.StepBackN(date, period, DBC_MAX_STEP_CAN_CHANGE)
+	if err != nil {
+		return time.Time{}, errors.Wrap(err, "StepBackN")
+	}
+
+	return backDate, nil
+}
+
+// Получение первой даты, которую уже нельзя менять (4ий шаг назад)
+func (s *DBCProcessor) getSeparatorDateDailyBefore(period domain.GenerationPeriod) (time.Time, error) {
+	date := tools.RoundDateTimeToDay(time.Now().UTC().Add(24 * time.Hour))
+
+	backDate, err := s.periodProc.StepBackN(date, period, DBC_MAX_STEP_CAN_CHANGE+1)
 	if err != nil {
 		return time.Time{}, errors.Wrap(err, "StepBackN")
 	}

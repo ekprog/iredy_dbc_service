@@ -64,9 +64,9 @@ type DBCTrackRepository interface {
 	SetProcessed(ctx context.Context, trackIds []int64) error
 	Count(ctx context.Context, challengeId int64) (int64, error)
 	GetLastForChallengeBefore(ctx context.Context, challengeId int64, date time.Time) (*DBCTrack, error)
-	GetLastNotProcessedForChallengeBefore(ctx context.Context, challengeId int64, date time.Time) (*DBCTrack, error)
 	GetLastForChallenge(ctx context.Context, challengeId int64) (*DBCTrack, error)
 	GetAllForChallengeAfter(ctx context.Context, challengeId int64, date time.Time) ([]*DBCTrack, error)
+	GetAllNotProcessedForChallengeBefore(ctx context.Context, challengeId int64, date time.Time) ([]*DBCTrack, error)
 	InsertNew(ctx context.Context, tracks []*DBCTrack) error
 	UpdateSome(ctx context.Context, tracks []*DBCTrack) error
 }

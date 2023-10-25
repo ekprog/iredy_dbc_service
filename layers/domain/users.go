@@ -23,6 +23,7 @@ type UsersRepository interface {
 	InsertIfNotExists(*User) error
 	Remove(int64) error
 	Update(*User) error
+	AddScore(ctx context.Context, userId, score int64) error
 }
 
 type UsersUseCase interface {

@@ -36,13 +36,12 @@ func (ucase *UsersUseCase) Info(ctx context.Context, id int64) (domain.GetUserRe
 		}, nil
 	}
 
-	scores, err := ucase.trackProc.CalculateScores(ctx, id)
+	dailyScore, err := ucase.trackProc.CalculateDailyScore(ctx, id)
 	if err != nil {
 		return domain.GetUserResponse{}, errors.Wrap(err, "CalculateScores")
 	}
 
-	user.Score = scores.Score
-	user.ScoreDaily = scores.ScoreDaily
+	user.ScoreDaily = dailyScore
 
 	return domain.GetUserResponse{
 		StatusCode: domain.Success,

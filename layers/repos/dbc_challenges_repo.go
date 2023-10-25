@@ -51,6 +51,7 @@ func (r *DBCChallengesRepo) FetchAll(limit, offset int64) ([]*domain.DBCChalleng
 			&item.CategoryName,
 			&item.IsAutoTrack,
 			&item.Name,
+			&item.Desc,
 			&item.Image,
 			&item.LastSeries,
 			&item.CreatedAt,
@@ -213,12 +214,13 @@ func (r *DBCChallengesRepo) Insert(item *domain.DBCChallenge) error {
 
 func (r *DBCChallengesRepo) Update(item *domain.DBCChallenge) error {
 	query := `UPDATE dbc_challenges 
-				SET name=$2, "desc"=$3, updated_at=now()
+				SET name=$2, "desc"=$3, last_series=$4, updated_at=now()
 				WHERE id=$1`
 	_, err := r.db.Exec(query,
 		item.Id,
 		item.Name,
-		item.Desc)
+		item.Desc,
+		item.LastSeries)
 	if err != nil {
 		return err
 	}

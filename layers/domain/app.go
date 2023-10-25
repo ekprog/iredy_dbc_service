@@ -20,12 +20,6 @@ type IdResponse struct {
 	Id         int64
 }
 
-// SCORES
-type ScorePoints struct {
-	Score      int64
-	ScoreDaily int64
-}
-
 // PERIOD_TYPE
 type PeriodType = string
 

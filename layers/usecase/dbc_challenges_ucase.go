@@ -238,7 +238,7 @@ func (ucase *ChallengesUseCase) TrackDay(ctx context.Context, form *domain.DBCTr
 		}, nil
 	}
 
-	scores, err := ucase.trackProcessor.CalculateScores(ctx, form.UserId)
+	dailyScore, err := ucase.trackProcessor.CalculateDailyScore(ctx, form.UserId)
 	if err != nil {
 		return domain.UserGamifyResponse{}, errors.Wrap(err, "CalculateScores")
 	}
@@ -257,7 +257,7 @@ func (ucase *ChallengesUseCase) TrackDay(ctx context.Context, form *domain.DBCTr
 	return domain.UserGamifyResponse{
 		StatusCode: domain.Success,
 		LastSeries: challenge.LastSeries,
-		ScoreDaily: scores.ScoreDaily,
+		ScoreDaily: dailyScore,
 	}, nil
 	//
 	//// DRY

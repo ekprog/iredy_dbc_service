@@ -4,11 +4,9 @@ import (
 	"context"
 	"github.com/avito-tech/go-transaction-manager/trm/manager"
 	"github.com/pkg/errors"
-	"log"
 	"microservice/app/core"
 	"microservice/layers/domain"
 	"microservice/layers/services"
-	"time"
 )
 
 type DBCTrackerJob struct {
@@ -44,19 +42,19 @@ func NewDBCTrackerJob(log core.Logger,
 func (job *DBCTrackerJob) Run() error {
 
 	ctx := context.Background()
-	challengeId := int64(24)
-
-	date, _ := time.Parse("2006-01-02", "2023-10-24")
-
-	isDone, err := job.dbcProc.MakeTrack(ctx, challengeId, date, true)
-	if err != nil {
-		return err
-	}
-	if !isDone {
-		log.Fatal("isDone == false")
-	}
-
-	return nil
+	//challengeId := int64(24)
+	//
+	//date, _ := time.Parse("2006-01-02", "2023-10-13")
+	//
+	//isDone, err := job.dbcProc.MakeTrack(ctx, challengeId, date, false)
+	//if err != nil {
+	//	return err
+	//}
+	//if !isDone {
+	//	log.Fatal("isDone == false")
+	//}
+	//
+	//return nil
 
 	//Делим на чанки по 1000 и обрабатываем
 	chunkSize := int64(1000)
@@ -64,7 +62,7 @@ func (job *DBCTrackerJob) Run() error {
 	for {
 		items, err := job.challengesRepo.FetchAll(chunkSize, offset)
 		if err != nil {
-			return errors.Wrap(err, "DBCTrackerJob")
+			return errors.Wrap(err, "FetchAll")
 		}
 		offset += chunkSize
 
@@ -78,7 +76,7 @@ func (job *DBCTrackerJob) Run() error {
 			}
 			err := job.dbcProc.ProcessChallengeTracks(ctx, item)
 			if err != nil {
-				return errors.Wrap(err, "ProcessChallengeTracks.handleItem")
+				return errors.Wrap(err, "ProcessChallengeTracks")
 			}
 		}
 	}

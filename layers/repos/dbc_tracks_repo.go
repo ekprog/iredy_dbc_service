@@ -273,6 +273,38 @@ func (r *DBCTracksRepo) GetAllForChallengeAfter(ctx context.Context, challengeId
 	return result, nil
 }
 
+func (r *DBCTracksRepo) GetAllNotProcessedForChallengeBefore(ctx context.Context, challengeId int64, date time.Time) ([]*domain.DBCTrack, error) {
+	date = tools.RoundDateTimeToDay(date.UTC())
+
+	query := `select 
+    				id,
+    				user_id,
+    				date,
+    				done, 
+       				last_series, 
+       				score,
+       				score_daily from dbc_challenges_tracks 
+            		where challenge_id=$1 and "date" < $2 and processed = false
+            		order by "date"`
+
+	rows, err := r.getter.DefaultTrOrDB(ctx, r.db).QueryContext(ctx, query, challengeId, date)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*domain.DBCTrack
+	for rows.Next() {
+		item := &domain.DBCTrack{}
+		err := rows.Scan(&item.Id, &item.UserId, &item.Date, &item.Done, &item.LastSeries, &item.Score, &item.ScoreDaily)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, item)
+	}
+
+	return result, nil
+}
+
 // Возвращает треки, подлежащие учету в dailyScore
 // timeSince - время ДО которого искать (зависит от типа генерации треков в челлендже)
 func (r *DBCTracksRepo) FetchNotProcessed(challengeId int64, timeSince time.Time) ([]*domain.DBCTrack, error) {
@@ -431,6 +463,7 @@ func (r *DBCTracksRepo) InsertOrUpdateBulk(ctx context.Context, tracks []*domain
 					   "date" = excluded.date,
 					   score = excluded.score,
 					   score_daily = excluded.score_daily,
+					   last_series = excluded.last_series,
 					   done = excluded.done, 
 					   updated_at=now()`,
 		strings.Join(userIdList, ","),
