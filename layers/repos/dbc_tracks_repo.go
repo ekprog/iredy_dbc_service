@@ -97,6 +97,43 @@ func (r *DBCTracksRepo) GetLastForChallengeBefore(ctx context.Context, challenge
 	}
 }
 
+func (r *DBCTracksRepo) GetLastNotProcessedForChallengeBefore(ctx context.Context, challengeId int64, date time.Time) (track *domain.DBCTrack, err error) {
+	date = tools.RoundDateTimeToDay(date.UTC())
+
+	query := `select 
+    				id,
+    				user_id,
+    				date,
+    				done, 
+       				last_series, 
+       				score,
+       				score_daily from dbc_challenges_tracks 
+            		where challenge_id=$1 and "date" < $2 and processed = false
+            		order by "date" desc
+            		limit 1`
+
+	track = &domain.DBCTrack{
+		ChallengeId: challengeId,
+	}
+
+	err = r.getter.DefaultTrOrDB(ctx, r.db).QueryRowContext(ctx, query, challengeId, date).Scan(
+		&track.Id,
+		&track.UserId,
+		&track.Date,
+		&track.Done,
+		&track.LastSeries,
+		&track.Score,
+		&track.ScoreDaily)
+	switch err {
+	case nil:
+		return track, nil
+	case sql.ErrNoRows:
+		return nil, nil
+	default:
+		return nil, errors.Wrap(err, "GetLastForChallengeBefore")
+	}
+}
+
 func (r *DBCTracksRepo) GetLastForChallenge(ctx context.Context, challengeId int64) (track *domain.DBCTrack, err error) {
 	query := `select 
     				id,
@@ -352,4 +389,63 @@ func (r *DBCTracksRepo) UpdateSome(ctx context.Context, tracks []*domain.DBCTrac
 		return err
 	}
 	return nil
+}
+
+func (r *DBCTracksRepo) InsertOrUpdateBulk(ctx context.Context, tracks []*domain.DBCTrack) error {
+
+	if len(tracks) == 0 {
+		return nil
+	}
+
+	var userIdList, challengeIdList, lastSeriesList, scoreList, scoreDailyList, doneList, dateList []string
+
+	lo.ForEach(tracks, func(track *domain.DBCTrack, index int) {
+		userIdList = append(userIdList, fmt.Sprintf("%d", track.UserId))
+		challengeIdList = append(challengeIdList, fmt.Sprintf("%d", track.ChallengeId))
+		lastSeriesList = append(lastSeriesList, fmt.Sprintf("%d", track.LastSeries))
+		scoreList = append(scoreList, fmt.Sprintf("%d", track.Score))
+		scoreDailyList = append(scoreDailyList, fmt.Sprintf("%d", track.ScoreDaily))
+		doneList = append(doneList, fmt.Sprintf("%v", track.Done))
+		dateList = append(dateList, fmt.Sprintf("'%s'::date", track.Date.Format("2006-01-02")))
+	})
+
+	query := fmt.Sprintf(`
+		insert into dbc_challenges_tracks (
+			user_id,
+			challenge_id,
+			"date",
+			done,
+			last_series,
+			score,
+			score_daily
+		)
+		select unnest(array[%s]),
+			   unnest(array[%s]),
+			   unnest(array[%s]),
+			   unnest(array[%s]),
+			   unnest(array[%s]),
+			   unnest(array[%s]),
+				unnest(array[%s])
+		on conflict (challenge_id, "date") do
+			update set
+					   "date" = excluded.date,
+					   score = excluded.score,
+					   score_daily = excluded.score_daily,
+					   done = excluded.done, 
+					   updated_at=now()`,
+		strings.Join(userIdList, ","),
+		strings.Join(challengeIdList, ","),
+		strings.Join(dateList, ","),
+		strings.Join(doneList, ","),
+		strings.Join(lastSeriesList, ","),
+		strings.Join(scoreList, ","),
+		strings.Join(scoreDailyList, ","),
+	)
+
+	_, err := r.getter.DefaultTrOrDB(ctx, r.db).ExecContext(ctx, query)
+	if err != nil {
+		return err
+	}
+	return nil
+
 }

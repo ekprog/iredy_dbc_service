@@ -17,7 +17,7 @@ type ChallengesUseCase struct {
 	challengesRepo      domain.DBCChallengesRepository
 	tracksRepo          domain.DBCTrackRepository
 	periodTypeGenerator *services.PeriodTypeProcessor
-	trackProcessor      *services.DBCTrackProcessor
+	trackProcessor      *services.DBCProcessor
 	challengeRepository domain.DBCChallengesRepository
 }
 
@@ -28,7 +28,7 @@ func NewChallengesUseCase(log core.Logger,
 	tasksRepo domain.DBCChallengesRepository,
 	tracksRepo domain.DBCTrackRepository,
 	challengeRepository domain.DBCChallengesRepository,
-	trackProcessor *services.DBCTrackProcessor) *ChallengesUseCase {
+	trackProcessor *services.DBCProcessor) *ChallengesUseCase {
 	return &ChallengesUseCase{
 		log:                 log,
 		usersRepo:           usersRepo,

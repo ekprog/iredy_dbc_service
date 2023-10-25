@@ -3,6 +3,7 @@ package jobs
 import (
 	"context"
 	"github.com/avito-tech/go-transaction-manager/trm/manager"
+	"github.com/pkg/errors"
 	"log"
 	"microservice/app/core"
 	"microservice/layers/domain"
@@ -14,8 +15,8 @@ type DBCTrackerJob struct {
 	log        core.Logger
 	trxManager *manager.Manager
 
-	pProc     *services.PeriodTypeProcessor
-	trackProc *services.DBCTrackProcessor
+	pProc   *services.PeriodTypeProcessor
+	dbcProc *services.DBCProcessor
 
 	challengesRepo domain.DBCChallengesRepository
 	tracksRepo     domain.DBCTrackRepository
@@ -28,7 +29,7 @@ func NewDBCTrackerJob(log core.Logger,
 	challengesRepo domain.DBCChallengesRepository,
 	tracksRepo domain.DBCTrackRepository,
 	usersRepo domain.UsersRepository,
-	trackProc *services.DBCTrackProcessor) *DBCTrackerJob {
+	trackProc *services.DBCProcessor) *DBCTrackerJob {
 	return &DBCTrackerJob{
 		log:            log,
 		trxManager:     trxManager,
@@ -36,7 +37,7 @@ func NewDBCTrackerJob(log core.Logger,
 		usersRepo:      usersRepo,
 		challengesRepo: challengesRepo,
 		tracksRepo:     tracksRepo,
-		trackProc:      trackProc,
+		dbcProc:        trackProc,
 	}
 }
 
@@ -45,9 +46,9 @@ func (job *DBCTrackerJob) Run() error {
 	ctx := context.Background()
 	challengeId := int64(24)
 
-	date, _ := time.Parse("2006-01-02", "2023-10-16")
+	date, _ := time.Parse("2006-01-02", "2023-10-24")
 
-	isDone, err := job.trackProc.MakeTrack(ctx, challengeId, date, true)
+	isDone, err := job.dbcProc.MakeTrack(ctx, challengeId, date, true)
 	if err != nil {
 		return err
 	}
@@ -55,42 +56,32 @@ func (job *DBCTrackerJob) Run() error {
 		log.Fatal("isDone == false")
 	}
 
-	// Задача: Найти для каждого челленджа все такие неучтенные треки, для которых срок в N последний
-	// итераций прошел (пользователю разрешается менять только последние N трек-дня)
-	//
-	// ВАЖНО 1: данная операция крайне ресурсоемкая, так как обрабатывает каждый челлендж каждого пользователя
-	// отдельно (строить таблицу трек-дней), поэтому может занимать значительное время;
-	//
-	// ВАЖНО 2: важно помнить, что построение данной функции требует безопасность в плане много поточного
-	// доступа.
-	// 	- При обновлении Score и ScoreDaily не используем жесткое присвоение, а пользуемся +- операциями;
+	return nil
 
-	// Делим на чанки по 1000 и обрабатываем
-	//chunkSize := int64(1000)
-	//offset := int64(0)
-	//for {
-	//	items, err := job.challengesRepo.FetchAll(chunkSize, offset)
-	//	if err != nil {
-	//		return errors.Wrap(err, "DBCTrackerJob")
-	//	}
-	//	offset += chunkSize
-	//
-	//	if len(items) == 0 {
-	//		break
-	//	}
-	//
-	//	for _, item := range items {
-	//
-	//		if item.IsAutoTrack {
-	//			continue
-	//		}
-	//
-	//		err := job.handleItem(item)
-	//		if err != nil {
-	//			return errors.Wrap(err, "DBCTrackerJob.handleItem")
-	//		}
-	//	}
-	//}
+	//Делим на чанки по 1000 и обрабатываем
+	chunkSize := int64(1000)
+	offset := int64(0)
+	for {
+		items, err := job.challengesRepo.FetchAll(chunkSize, offset)
+		if err != nil {
+			return errors.Wrap(err, "DBCTrackerJob")
+		}
+		offset += chunkSize
+
+		if len(items) == 0 {
+			break
+		}
+
+		for _, item := range items {
+			if item.IsAutoTrack {
+				continue
+			}
+			err := job.dbcProc.ProcessChallengeTracks(ctx, item)
+			if err != nil {
+				return errors.Wrap(err, "ProcessChallengeTracks.handleItem")
+			}
+		}
+	}
 
 	return nil
 }

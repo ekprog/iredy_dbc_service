@@ -57,12 +57,14 @@ type DBCTrack struct {
 
 type DBCTrackRepository interface {
 	InsertOrUpdate(context.Context, *DBCTrack) error
+	InsertOrUpdateBulk(context.Context, []*DBCTrack) error
 	GetByDate(ctx context.Context, challengeId int64, t time.Time) (*DBCTrack, error)
 	FetchForChallengeByDates(challengeId int64, list []time.Time) ([]*DBCTrack, error)
 	FetchNotProcessed(challengeId int64, timeSince time.Time) ([]*DBCTrack, error)
 	SetProcessed(ctx context.Context, trackIds []int64) error
 	Count(ctx context.Context, challengeId int64) (int64, error)
 	GetLastForChallengeBefore(ctx context.Context, challengeId int64, date time.Time) (*DBCTrack, error)
+	GetLastNotProcessedForChallengeBefore(ctx context.Context, challengeId int64, date time.Time) (*DBCTrack, error)
 	GetLastForChallenge(ctx context.Context, challengeId int64) (*DBCTrack, error)
 	GetAllForChallengeAfter(ctx context.Context, challengeId int64, date time.Time) ([]*DBCTrack, error)
 	InsertNew(ctx context.Context, tracks []*DBCTrack) error

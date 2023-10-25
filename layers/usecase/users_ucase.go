@@ -11,12 +11,12 @@ import (
 type UsersUseCase struct {
 	log       core.Logger
 	repo      domain.UsersRepository
-	trackProc *services.DBCTrackProcessor
+	trackProc *services.DBCProcessor
 }
 
 func NewUsersUseCase(log core.Logger,
 	repo domain.UsersRepository,
-	trackProc *services.DBCTrackProcessor) *UsersUseCase {
+	trackProc *services.DBCProcessor) *UsersUseCase {
 	return &UsersUseCase{
 		log:       log,
 		repo:      repo,

@@ -24,7 +24,8 @@ func NewPeriodTypeProcessor(log core.Logger) *PeriodTypeProcessor {
 // Является ли date одним из точек периода periodType?
 func (s *PeriodTypeProcessor) IsMatch(date time.Time, period domain.GenerationPeriod) (bool, error) {
 
-	dateTomorrow := tools.RoundDateTimeToDay(date.UTC().Add(24 * time.Hour))
+	date = tools.RoundDateTimeToDay(date.UTC())
+	dateTomorrow := date.Add(24 * time.Hour)
 
 	nearest, err := s.StepBack(dateTomorrow, period)
 	if err != nil {
