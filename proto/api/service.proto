@@ -27,6 +27,7 @@ service DBCService {
   rpc RemoveChallenge (IdRequest) returns (StatusResponse) {}
 
   rpc TrackDay (TrackDayRequest) returns (TrackDayResponse) {}
+  rpc GetMonthTracks (GetMonthTracksRequest) returns (GetMonthTracksResponse) {}
 }
 
 service UsersService {

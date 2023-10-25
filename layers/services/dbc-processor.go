@@ -178,8 +178,67 @@ func (s *DBCProcessor) CalculateDailyScore(ctx context.Context, userId int64) (i
 	return totalDailyScore, nil
 }
 
-// Обрабатывает все треки для учета User.Score и Challenge.LastSeries
+// Обрабатывает все треки (Ручные) для учета User.Score и Challenge.LastSeries
 func (s *DBCProcessor) ProcessChallengeTracks(ctx context.Context, challenge *domain.DBCChallenge) error {
+
+	period := domain.GenerationPeriod{Type: domain.PeriodTypeEveryDay}
+
+	dailyDate, err := s.getSeparatorDateDaily(period)
+	if err != nil {
+		return errors.Wrap(err, "getSeparatorDateDaily")
+	}
+
+	// Рассчитываем Score
+	tracks, err := s.trackRepository.GetAllNotProcessedForChallengeBefore(ctx, challenge.Id, dailyDate)
+	if err != nil {
+		return errors.Wrap(err, "GetLastNotProcessedForChallengeBefore")
+	}
+
+	score := lo.Reduce(tracks, func(agg int64, track *domain.DBCTrack, index int) int64 {
+		return agg + track.ScoreDaily
+	}, 0)
+
+	tracksIds := lo.Map(tracks, func(item *domain.DBCTrack, index int) int64 {
+		return item.Id
+	})
+
+	// Рассчитываем LastSeries
+	lastTrack, err := s.trackRepository.GetLastForChallengeBefore(ctx, challenge.Id, dailyDate)
+	if err != nil {
+		return errors.Wrap(err, "GetLastForChallengeBefore")
+	}
+	if lastTrack != nil {
+		challenge.LastSeries = lastTrack.LastSeries
+	} else {
+		challenge.LastSeries = 0
+	}
+
+	err = s.trxManager.Do(ctx, func(ctx context.Context) error {
+		err = s.userRepo.AddScore(ctx, challenge.UserId, score)
+		if err != nil {
+			return errors.Wrap(err, "AddScore")
+		}
+
+		err = s.trackRepository.SetProcessed(ctx, tracksIds)
+		if err != nil {
+			return errors.Wrap(err, "SetProcessed")
+		}
+
+		err = s.challengeRepository.Update(challenge)
+		if err != nil {
+			return errors.Wrap(err, "ChallengeUpdate")
+		}
+
+		return nil
+	})
+	if err != nil {
+		return errors.Wrap(err, "trxManager")
+	}
+
+	return nil
+}
+
+func (s *DBCProcessor) ProcessAutoChallengeTracks(ctx context.Context, challenge *domain.DBCChallenge) error {
 
 	period := domain.GenerationPeriod{Type: domain.PeriodTypeEveryDay}
 
@@ -266,11 +325,12 @@ func (s *DBCProcessor) getSeparatorDateDailyBefore(period domain.GenerationPerio
 	return backDate, nil
 }
 
+// return lastScore, lastSeries, diff (сколько отнялось)
 func (s *DBCProcessor) nextTrackPoints(lastScore int64, lastSeries int64, currentValue bool) (int64, int64, int64) {
 
 	if !currentValue {
 		x := int64(math.Floor(float64(lastScore) * 0.2))
-		return x, 0, x - lastScore
+		return 0, 0, x - lastScore
 	} else {
 		return lastScore + 1, lastSeries + 1, 1
 	}

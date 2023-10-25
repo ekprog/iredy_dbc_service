@@ -75,3 +75,13 @@ message TrackDayResponse {
   int64 score_daily = 3;
 }
 
+message GetMonthTracksRequest {
+  int64 challenge_id = 1;
+  string dateISO = 2;
+}
+
+message GetMonthTracksResponse {
+  Status status = 1;
+  repeated DBTrack tracks = 2;
+}
+

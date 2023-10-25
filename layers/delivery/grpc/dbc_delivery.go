@@ -221,3 +221,44 @@ func (d *DBCDeliveryService) TrackDay(ctx context.Context, r *pb.TrackDayRequest
 
 	return response, nil
 }
+
+func (d *DBCDeliveryService) GetMonthTracks(ctx context.Context, r *pb.GetMonthTracksRequest) (*pb.GetMonthTracksResponse, error) {
+	userId, err := app.ExtractRequestUserId(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "ExtractRequestUserId")
+	}
+
+	date, err := tools.ParseISO(r.DateISO)
+	if err != nil {
+		return nil, errors.Wrap(err, "ParseISO")
+	}
+
+	uCaseRes, err := d.dbcChallengesUCase.GetMonthTracks(ctx, date, r.ChallengeId, userId)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetMonthTracks")
+	}
+
+	response := &pb.GetMonthTracksResponse{
+		Status: &pb.Status{
+			Code:    uCaseRes.StatusCode,
+			Message: uCaseRes.StatusCode,
+		},
+	}
+
+	if uCaseRes.StatusCode == domain.Success {
+		response.Tracks = []*pb.DBTrack{}
+		for _, pTrack := range uCaseRes.Tracks {
+			t := &pb.DBTrack{
+				Date:       timestamppb.New(pTrack.Date),
+				DateString: pTrack.Date.Format("02-01-2006"),
+				Done:       pTrack.Done,
+				LastSeries: pTrack.LastSeries,
+				Score:      pTrack.Score,
+				ScoreDaily: pTrack.ScoreDaily,
+			}
+			response.Tracks = append(response.Tracks, t)
+		}
+	}
+
+	return response, nil
+}

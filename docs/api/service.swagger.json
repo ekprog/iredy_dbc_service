@@ -30,12 +30,15 @@
           "$ref": "#/definitions/Status"
         },
         "id": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
         },
         "categoryId": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
+        },
+        "isAutoTrack": {
+          "type": "boolean"
         }
       }
     },
@@ -43,12 +46,12 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
         },
         "userId": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
         },
         "name": {
           "type": "string"
@@ -71,16 +74,22 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
         },
         "userId": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
         },
         "categoryId": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
+        },
+        "categoryName": {
+          "type": "string"
+        },
+        "isAutoTrack": {
+          "type": "boolean"
         },
         "name": {
           "type": "string"
@@ -92,8 +101,8 @@
           "type": "string"
         },
         "lastSeries": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
         },
         "lastTracks": {
           "type": "array",
@@ -127,6 +136,18 @@
         },
         "done": {
           "type": "boolean"
+        },
+        "lastSeries": {
+          "type": "string",
+          "format": "int64"
+        },
+        "score": {
+          "type": "string",
+          "format": "int64"
+        },
+        "scoreDaily": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -154,6 +175,20 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/DBCChallenge"
+          }
+        }
+      }
+    },
+    "GetMonthTracksResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "tracks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DBTrack"
           }
         }
       }
@@ -189,20 +224,36 @@
       },
       "title": "Responses"
     },
+    "TrackDayResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "lastSeries": {
+          "type": "string",
+          "format": "int64"
+        },
+        "scoreDaily": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
     "User": {
       "type": "object",
       "properties": {
         "id": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
         },
         "score": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
         },
         "scoreDaily": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
         },
         "createdAt": {
           "type": "string",

@@ -71,70 +71,21 @@ func (job *DBCTrackerJob) Run() error {
 		}
 
 		for _, item := range items {
+			// ToDo: ошибка для одного пользователя прерывает все?
 			if item.IsAutoTrack {
-				continue
-			}
-			err := job.dbcProc.ProcessChallengeTracks(ctx, item)
-			if err != nil {
-				return errors.Wrap(err, "ProcessChallengeTracks")
+
+				//err := job.dbcProc.ProcessAutoChallengeTracks(ctx, item)
+				//if err != nil {
+				//	return errors.Wrap(err, "ProcessAutoChallengeTracks")
+				//}
+			} else {
+				err := job.dbcProc.ProcessChallengeTracks(ctx, item)
+				if err != nil {
+					return errors.Wrap(err, "ProcessChallengeTracks")
+				}
 			}
 		}
 	}
 
 	return nil
 }
-
-//
-//func (job *DBCTrackerJob) handleItem(item *domain.DBCChallenge) error {
-//	// Рассчитываем дату, до которой нужно обработать челленджи
-//	// Учитываем: -2 чтобы попасть на стык
-//	timeSince, err := job.pProc.Step(item.CreatedAt, time.Now(), domain.PeriodTypeEveryDay, -3+1)
-//	if err != nil {
-//		return err
-//	}
-//
-//	// Ищем все неучтенные треки у данного челленджа
-//	// Все, что ДО timeSince - подлежит обработке
-//	needProcessed, err := job.tracksRepo.FetchNotProcessed(item.Id, timeSince)
-//	if err != nil {
-//		return err
-//	}
-//
-//	transferScore := 0
-//
-//	for _, track := range needProcessed {
-//		// Сколько очков дает данный трек?
-//		// ToDo: пока что всегда 1
-//		trackPointWeight := 1
-//
-//		if track.Done {
-//			transferScore += trackPointWeight
-//		}
-//	}
-//
-//	tracksIds := lo.Map(needProcessed, func(item *domain.DBCTrack, index int) int64 {
-//		return item.Id
-//	})
-//
-//	ctx := context.Background()
-//	err = job.trxManager.Do(ctx, func(ctx context.Context) error {
-//		// Set tracks as processed
-//		err := job.tracksRepo.SetProcessed(ctx, tracksIds)
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Updating user`s scores
-//		err = job.usersRepo.TransferDailyScores(ctx, int64(item.UserId), transferScore)
-//		if err != nil {
-//			return err
-//		}
-//
-//		return nil
-//	})
-//	if err != nil {
-//		return err
-//	}
-//
-//	return nil
-//}

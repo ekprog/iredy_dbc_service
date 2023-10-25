@@ -66,6 +66,7 @@ type DBCTrackRepository interface {
 	GetLastForChallengeBefore(ctx context.Context, challengeId int64, date time.Time) (*DBCTrack, error)
 	GetLastForChallenge(ctx context.Context, challengeId int64) (*DBCTrack, error)
 	GetAllForChallengeAfter(ctx context.Context, challengeId int64, date time.Time) ([]*DBCTrack, error)
+	GetAllForChallengeBetween(ctx context.Context, challengeId int64, from, to time.Time) ([]*DBCTrack, error)
 	GetAllNotProcessedForChallengeBefore(ctx context.Context, challengeId int64, date time.Time) ([]*DBCTrack, error)
 	InsertNew(ctx context.Context, tracks []*DBCTrack) error
 	UpdateSome(ctx context.Context, tracks []*DBCTrack) error
@@ -107,6 +108,7 @@ type DBCChallengesUseCase interface {
 	Remove(userId, taskId int64) (StatusResponse, error)
 
 	TrackDay(ctx context.Context, form *DBCTrack) (UserGamifyResponse, error)
+	GetMonthTracks(ctx context.Context, date time.Time, challengeId, userId int64) (*ChallengeMonthTracksResponse, error)
 }
 
 // IO FORMS (FORMS)
@@ -135,4 +137,9 @@ type ChallengesListResponse struct {
 type CategoryListResponse struct {
 	StatusCode string
 	Categories []*DBCCategory
+}
+
+type ChallengeMonthTracksResponse struct {
+	StatusCode string
+	Tracks     []*DBCTrack
 }

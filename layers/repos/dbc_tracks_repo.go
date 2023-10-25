@@ -273,6 +273,40 @@ func (r *DBCTracksRepo) GetAllForChallengeAfter(ctx context.Context, challengeId
 	return result, nil
 }
 
+func (r *DBCTracksRepo) GetAllForChallengeBetween(ctx context.Context, challengeId int64, from, to time.Time) ([]*domain.DBCTrack, error) {
+	from = tools.RoundDateTimeToDay(from.UTC())
+	to = tools.RoundDateTimeToDay(to.UTC())
+
+	query := `select 
+    				id,
+    				user_id,
+    				date,
+    				done, 
+       				last_series, 
+       				score,
+       				score_daily from dbc_challenges_tracks 
+            		where challenge_id=$1 and 
+            		      "date" >= $2 and "date" <= $3
+            		order by "date"`
+
+	rows, err := r.getter.DefaultTrOrDB(ctx, r.db).QueryContext(ctx, query, challengeId, from, to)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*domain.DBCTrack
+	for rows.Next() {
+		item := &domain.DBCTrack{}
+		err := rows.Scan(&item.Id, &item.UserId, &item.Date, &item.Done, &item.LastSeries, &item.Score, &item.ScoreDaily)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, item)
+	}
+
+	return result, nil
+}
+
 func (r *DBCTracksRepo) GetAllNotProcessedForChallengeBefore(ctx context.Context, challengeId int64, date time.Time) ([]*domain.DBCTrack, error) {
 	date = tools.RoundDateTimeToDay(date.UTC())
 

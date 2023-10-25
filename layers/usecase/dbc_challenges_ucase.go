@@ -6,6 +6,7 @@ import (
 	"microservice/app/core"
 	"microservice/layers/domain"
 	"microservice/layers/services"
+	"microservice/tools"
 	"strings"
 	"time"
 )
@@ -18,26 +19,23 @@ type ChallengesUseCase struct {
 	tracksRepo          domain.DBCTrackRepository
 	periodTypeGenerator *services.PeriodTypeProcessor
 	trackProcessor      *services.DBCProcessor
-	challengeRepository domain.DBCChallengesRepository
 }
 
 func NewChallengesUseCase(log core.Logger,
 	usersRepo domain.UsersRepository,
 	projectsRepo domain.DBCCategoryRepository,
 	periodTypeGenerator *services.PeriodTypeProcessor,
-	tasksRepo domain.DBCChallengesRepository,
+	challengesRepo domain.DBCChallengesRepository,
 	tracksRepo domain.DBCTrackRepository,
-	challengeRepository domain.DBCChallengesRepository,
 	trackProcessor *services.DBCProcessor) *ChallengesUseCase {
 	return &ChallengesUseCase{
 		log:                 log,
 		usersRepo:           usersRepo,
 		categoryRepo:        projectsRepo,
-		challengesRepo:      tasksRepo,
+		challengesRepo:      challengesRepo,
 		tracksRepo:          tracksRepo,
 		periodTypeGenerator: periodTypeGenerator,
 		trackProcessor:      trackProcessor,
-		challengeRepository: challengeRepository,
 	}
 }
 
@@ -244,7 +242,7 @@ func (ucase *ChallengesUseCase) TrackDay(ctx context.Context, form *domain.DBCTr
 	}
 
 	// Получаем челлендж
-	challenge, err := ucase.challengeRepository.FetchById(ctx, form.ChallengeId)
+	challenge, err := ucase.challengesRepo.FetchById(ctx, form.ChallengeId)
 	if err != nil {
 		return domain.UserGamifyResponse{}, errors.Wrap(err, "FetchById")
 	}
@@ -259,72 +257,30 @@ func (ucase *ChallengesUseCase) TrackDay(ctx context.Context, form *domain.DBCTr
 		LastSeries: challenge.LastSeries,
 		ScoreDaily: dailyScore,
 	}, nil
-	//
-	//// DRY
-	//makeErr := func(err error) (domain.UserGamifyResponse, error) {
-	//	return domain.UserGamifyResponse{}, errors.Wrap(err, "TrackDay")
-	//}
-	//
-	//// Пользователя не проверяем, потому что наличие челленджа уже гарантирует наличие пользователя
-	//challenge, err := ucase.challengesRepo.FetchById(ctx, form.ChallengeId)
-	//if err != nil {
-	//	return makeErr(err)
-	//}
-	//
-	//// User is owner
-	//if challenge == nil || challenge.UserId != form.UserId {
-	//	return domain.UserGamifyResponse{
-	//		StatusCode: domain.NotFound,
-	//	}, nil
-	//}
-	//
-	//// Check if track possible to change
-	//// ToDo: Make 3 step back and check dates
-	//
-	//// 1. Проверяем есть ли такой трек
-	//prevDone, err := ucase.tracksRepo.CheckDoneByDate(ctx, challenge.Id, form.Date)
-	//if err != nil {
-	//	return makeErr(err)
-	//}
-	//
-	//// Изменение не имеет смысла - те же значения
-	//if form.Done == prevDone {
-	//	return domain.UserGamifyResponse{
-	//		StatusCode: domain.UserLogicError,
-	//	}, nil
-	//}
-	//
-	//// Рассчитываем изменение ScoreDaily (Score будет меняться в горутине каждые сутки)
-	//scoreChange := int64(0)
-	//if form.Done && !prevDone {
-	//	scoreChange = 1
-	//} else if !form.Done && prevDone {
-	//	scoreChange = -1
-	//}
-	//
-	//// 2. Обновляем трек в БД
-	//err = ucase.tracksRepo.InsertOrUpdate(ctx, form)
-	//if err != nil {
-	//	return makeErr(err)
-	//}
-	//
-	//// Gamify update
-	//// При изменении трека в любом случае меняется ScoreDaily
-	//user, err := ucase.usersRepo.FetchById(form.UserId)
-	//if err != nil {
-	//	return makeErr(err)
-	//}
-	//
-	//// Обновляем ScoreDaily у пользователя
-	//user.ScoreDaily += scoreChange
-	//err = ucase.usersRepo.Update(user)
-	//if err != nil {
-	//	return makeErr(err)
-	//}
-	//
-	//return domain.UserGamifyResponse{
-	//	StatusCode: domain.Success,
-	//	ScoreDaily: user.ScoreDaily,
-	//	LastSeries: 0,
-	//}, nil
+}
+
+func (ucase *ChallengesUseCase) GetMonthTracks(ctx context.Context, date time.Time, challengeId, userId int64) (*domain.ChallengeMonthTracksResponse, error) {
+
+	fromDate := tools.RoundDateTimeToMonth(date)
+	toDate := fromDate.AddDate(0, 1, -1)
+
+	challenge, err := ucase.challengesRepo.FetchById(ctx, challengeId)
+	if err != nil {
+		return nil, errors.Wrap(err, "FetchById")
+	}
+	if challenge == nil || challenge.UserId != userId {
+		return &domain.ChallengeMonthTracksResponse{
+			StatusCode: domain.NotFound,
+		}, nil
+	}
+
+	betweenTracks, err := ucase.tracksRepo.GetAllForChallengeBetween(ctx, challengeId, fromDate, toDate)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetAllForChallengeBetween")
+	}
+
+	return &domain.ChallengeMonthTracksResponse{
+		StatusCode: domain.Success,
+		Tracks:     betweenTracks,
+	}, nil
 }

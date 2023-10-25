@@ -35,6 +35,9 @@ message DBTrack {
   google.protobuf.Timestamp date = 1;
   string date_string = 2;
   bool done = 3;
+  int64 last_series = 4;
+  int64 score = 5;
+  int64 score_daily = 6;
 }
 
 message User {
