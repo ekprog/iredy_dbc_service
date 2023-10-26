@@ -21,6 +21,7 @@ func initDependencies(di *dig.Container) error {
 	// Services
 	_ = di.Provide(services.NewPeriodTypeProcessor)
 	_ = di.Provide(services.NewDBCTrackProcessor)
+	_ = di.Provide(services.NewAchievementsProcessor)
 
 	// Use Cases
 	_ = di.Provide(usecase.NewUsersUseCase, dig.As(new(domain.UsersUseCase)))

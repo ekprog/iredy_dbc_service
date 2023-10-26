@@ -19,7 +19,9 @@ type DBCProcessor struct {
 	log        core.Logger
 	trxManager *manager.Manager
 
-	periodProc          *PeriodTypeProcessor
+	periodProc *PeriodTypeProcessor
+	gamifyProc *AchievementsProcessor
+
 	challengeRepository domain.DBCChallengesRepository
 	trackRepository     domain.DBCTrackRepository
 	userRepo            domain.UsersRepository
@@ -28,12 +30,14 @@ type DBCProcessor struct {
 func NewDBCTrackProcessor(log core.Logger,
 	trxManager *manager.Manager,
 	trackProcessor *PeriodTypeProcessor,
+	gamifyProc *AchievementsProcessor,
 	challengeRepository domain.DBCChallengesRepository,
 	trackRepository domain.DBCTrackRepository,
 	userRepo domain.UsersRepository) *DBCProcessor {
 	return &DBCProcessor{
 		log:                 log,
 		periodProc:          trackProcessor,
+		gamifyProc:          gamifyProc,
 		challengeRepository: challengeRepository,
 		trackRepository:     trackRepository,
 		trxManager:          trxManager,
@@ -221,7 +225,7 @@ func (s *DBCProcessor) ProcessChallengeTracks(ctx context.Context, challenge *do
 	}
 
 	err = s.trxManager.Do(ctx, func(ctx context.Context) error {
-		err = s.userRepo.AddScore(ctx, challenge.UserId, score)
+		err := s.userRepo.AddScore(ctx, challenge.UserId, score)
 		if err != nil {
 			return errors.Wrap(err, "AddScore")
 		}
