@@ -44,14 +44,14 @@ func (job *DBCTrackerJob) Run() error {
 	ctx := context.Background()
 	//challengeId := int64(24)
 	//
-	//date, _ := time.Parse("2006-01-02", "2023-10-13")
+	//date, _ := time.Parse("2006-01-02", "2023-10-26")
 	//
 	//isDone, err := job.dbcProc.MakeTrack(ctx, challengeId, date, false)
 	//if err != nil {
 	//	return err
 	//}
 	//if !isDone {
-	//	log.Fatal("isDone == false")
+	//	panic("is DONE false")
 	//}
 	//
 	//return nil
@@ -70,18 +70,22 @@ func (job *DBCTrackerJob) Run() error {
 			break
 		}
 
+		var errorList []error
 		for _, item := range items {
 			// ToDo: ошибка для одного пользователя прерывает все?
+			// Also check what we should do with error list
+			// ETK Stack ?
 			if item.IsAutoTrack {
-
-				//err := job.dbcProc.ProcessAutoChallengeTracks(ctx, item)
-				//if err != nil {
-				//	return errors.Wrap(err, "ProcessAutoChallengeTracks")
-				//}
+				err := job.dbcProc.ProcessAutoChallengeTracks(ctx, item)
+				if err != nil {
+					errorList = append(errorList, errors.Wrap(err, "ProcessAutoChallengeTracks"))
+					continue
+				}
 			} else {
 				err := job.dbcProc.ProcessChallengeTracks(ctx, item)
 				if err != nil {
-					return errors.Wrap(err, "ProcessChallengeTracks")
+					errorList = append(errorList, errors.Wrap(err, "ProcessChallengeTracks"))
+					continue
 				}
 			}
 		}

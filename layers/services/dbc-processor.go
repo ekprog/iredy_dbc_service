@@ -13,6 +13,7 @@ import (
 )
 
 const DBC_MAX_STEP_CAN_CHANGE = 3
+const DBC_MAX_STEP_CAN_CHANGE_AUTO = 1
 
 type DBCProcessor struct {
 	log        core.Logger
@@ -183,9 +184,15 @@ func (s *DBCProcessor) ProcessChallengeTracks(ctx context.Context, challenge *do
 
 	period := domain.GenerationPeriod{Type: domain.PeriodTypeEveryDay}
 
-	dailyDate, err := s.getSeparatorDateDaily(period)
+	dailyDate, err := s.getSeparatorDateDaily(period, DBC_MAX_STEP_CAN_CHANGE)
 	if err != nil {
 		return errors.Wrap(err, "getSeparatorDateDaily")
+	}
+
+	// Fill all null values that were not set by user
+	err = s.fillAbsentTracksStepN(ctx, challenge, 3, false)
+	if err != nil {
+		return errors.Wrap(err, "fillAbsentTracks")
 	}
 
 	// Рассчитываем Score
@@ -242,9 +249,15 @@ func (s *DBCProcessor) ProcessAutoChallengeTracks(ctx context.Context, challenge
 
 	period := domain.GenerationPeriod{Type: domain.PeriodTypeEveryDay}
 
-	dailyDate, err := s.getSeparatorDateDaily(period)
+	dailyDate, err := s.getSeparatorDateDaily(period, DBC_MAX_STEP_CAN_CHANGE_AUTO)
 	if err != nil {
 		return errors.Wrap(err, "getSeparatorDateDaily")
+	}
+
+	// Fill all null values that were not set by user
+	err = s.fillAbsentTracksStepN(ctx, challenge, 1, true)
+	if err != nil {
+		return errors.Wrap(err, "fillAbsentTracks")
 	}
 
 	// Рассчитываем Score
@@ -302,10 +315,10 @@ func (s *DBCProcessor) ProcessAutoChallengeTracks(ctx context.Context, challenge
 //
 
 // Получение последней даты, которую можно менять (3ий шаг назад)
-func (s *DBCProcessor) getSeparatorDateDaily(period domain.GenerationPeriod) (time.Time, error) {
+func (s *DBCProcessor) getSeparatorDateDaily(period domain.GenerationPeriod, step int) (time.Time, error) {
 	date := tools.RoundDateTimeToDay(time.Now().UTC().Add(24 * time.Hour))
 
-	backDate, err := s.periodProc.StepBackN(date, period, DBC_MAX_STEP_CAN_CHANGE)
+	backDate, err := s.periodProc.StepBackN(date, period, step)
 	if err != nil {
 		return time.Time{}, errors.Wrap(err, "StepBackN")
 	}
@@ -334,4 +347,70 @@ func (s *DBCProcessor) nextTrackPoints(lastScore int64, lastSeries int64, curren
 	} else {
 		return lastScore + 1, lastSeries + 1, 1
 	}
+}
+
+// Fill absent tracks before step N with default .done value
+func (s *DBCProcessor) fillAbsentTracksStepN(ctx context.Context, challenge *domain.DBCChallenge, n int, value bool) error {
+
+	//
+	// Make step back 1 for auto track last track
+
+	// ToDO: Period should be binded with challenge
+	period := domain.GenerationPeriod{Type: domain.PeriodTypeEveryDay}
+
+	nowDate := tools.RoundDateTimeToDay(time.Now().UTC().Add(24 * time.Hour))
+
+	//
+	toDate, err := s.periodProc.StepBackN(nowDate, period, n)
+	if err != nil {
+		return errors.Wrap(err, "StepBack")
+	}
+
+	lastTrack, err := s.trackRepository.GetLastForChallengeBefore(ctx, challenge.Id, toDate)
+	if err != nil {
+		return errors.Wrap(err, "GetLastForChallengeBefore")
+	}
+
+	var fromDate time.Time
+	var lastScore, lastSeries, diff int64
+
+	// We did not make any tracks before?
+	// Lets make all track since created date
+	if lastTrack == nil {
+		fromDate = challenge.CreatedAt.Add(-24 * time.Hour)
+	} else {
+		fromDate = lastTrack.Date
+		lastScore = lastTrack.Score
+		lastSeries = lastTrack.LastSeries
+	}
+
+	windowDates, err := s.periodProc.AbsentWindow(fromDate, toDate, period)
+	if err != nil {
+		return errors.Wrap(err, "AbsentWindow")
+	}
+
+	//
+	var tracks []*domain.DBCTrack
+
+	for _, date := range windowDates {
+		// Рассчитываем score
+		lastScore, lastSeries, diff = s.nextTrackPoints(lastScore, lastSeries, value)
+
+		tracks = append(tracks, &domain.DBCTrack{
+			UserId:      challenge.UserId,
+			ChallengeId: challenge.Id,
+			Date:        date,
+			Done:        value,
+			LastSeries:  lastSeries,
+			Score:       lastScore,
+			ScoreDaily:  diff,
+		})
+	}
+
+	err = s.trackRepository.InsertOrUpdateBulk(ctx, tracks)
+	if err != nil {
+		return errors.Wrap(err, "InsertOrUpdateBulk")
+	}
+
+	return nil
 }

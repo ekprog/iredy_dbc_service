@@ -391,6 +391,7 @@ func (r *DBCTracksRepo) SetProcessed(ctx context.Context, trackIds []int64) erro
 	return nil
 }
 
+// With ignoring exists rows
 func (r *DBCTracksRepo) InsertNew(ctx context.Context, tracks []*domain.DBCTrack) error {
 
 	if len(tracks) == 0 {
@@ -417,7 +418,8 @@ func (r *DBCTracksRepo) InsertNew(ctx context.Context, tracks []*domain.DBCTrack
                                    done, 
                                    last_series, 
                                    score,
-                                   score_daily) VALUES %s`, values)
+                                   score_daily) VALUES %s
+									ON CONFLICT ("date", challenge_id) DO NOTHING`, values)
 
 	query = fmt.Sprintf(query)
 
