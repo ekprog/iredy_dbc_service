@@ -149,6 +149,7 @@ func (s *DBCProcessor) CalculateDailyScore(ctx context.Context, userId int64) (i
 		return -1, errors.Wrap(err, "FetchUsersAll")
 	}
 
+	// For Not Auto track
 	totalDailyScore := int64(0)
 	for _, challenge := range challenges {
 
@@ -156,7 +157,13 @@ func (s *DBCProcessor) CalculateDailyScore(ctx context.Context, userId int64) (i
 		period := domain.GenerationPeriod{Type: domain.PeriodTypeEveryDay}
 
 		// Вычисляем дату на стыке score и dailyScore
-		dateProcessed, err := s.getSeparatorDateDailyBefore(period)
+
+		n := DBC_MAX_STEP_CAN_CHANGE
+		if challenge.IsAutoTrack {
+			n = DBC_MAX_STEP_CAN_CHANGE_AUTO
+		}
+
+		dateProcessed, err := s.getSeparatorDateDailyBefore(period, n)
 		if err != nil {
 			return -1, errors.Wrap(err, "getSeparatorDateDaily")
 		}
@@ -167,15 +174,23 @@ func (s *DBCProcessor) CalculateDailyScore(ctx context.Context, userId int64) (i
 			return -1, errors.Wrap(err, "GetAllForChallengeAfter")
 		}
 
-		// Последние не заполненные не трогаем
-		trueStart := false
-		for i := len(dailyTracks) - 1; i >= 0; i-- {
-			if dailyTracks[i].Done {
-				trueStart = true
+		if challenge.IsAutoTrack {
+			if len(dailyTracks) >= 1 {
+				totalDailyScore += dailyTracks[len(dailyTracks)-1].ScoreDaily
+			} else {
+				totalDailyScore += 1 // Если не отмечен последний, то он автоматом будет +1
 			}
+		} else {
+			// Последние не заполненные не трогаем
+			trueStart := false
+			for i := len(dailyTracks) - 1; i >= 0; i-- {
+				if dailyTracks[i].Done {
+					trueStart = true
+				}
 
-			if trueStart {
-				totalDailyScore += dailyTracks[i].ScoreDaily
+				if trueStart {
+					totalDailyScore += dailyTracks[i].ScoreDaily
+				}
 			}
 		}
 	}
@@ -331,10 +346,10 @@ func (s *DBCProcessor) getSeparatorDateDaily(period domain.GenerationPeriod, ste
 }
 
 // Получение первой даты, которую уже нельзя менять (4ий шаг назад)
-func (s *DBCProcessor) getSeparatorDateDailyBefore(period domain.GenerationPeriod) (time.Time, error) {
+func (s *DBCProcessor) getSeparatorDateDailyBefore(period domain.GenerationPeriod, step int) (time.Time, error) {
 	date := tools.RoundDateTimeToDay(time.Now().UTC().Add(24 * time.Hour))
 
-	backDate, err := s.periodProc.StepBackN(date, period, DBC_MAX_STEP_CAN_CHANGE+1)
+	backDate, err := s.periodProc.StepBackN(date, period, step+1)
 	if err != nil {
 		return time.Time{}, errors.Wrap(err, "StepBackN")
 	}

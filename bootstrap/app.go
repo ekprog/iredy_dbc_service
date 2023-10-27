@@ -103,6 +103,10 @@ func Run(rootPath ...string) error {
 	// HERE CORE READY FOR WORK...
 	//
 	//
+	err = RunHooks()
+	if err != nil {
+		return errors.Wrap(err, "cannot run hooks")
+	}
 
 	// CRON
 	if err := initJobs(); err != nil {
@@ -115,6 +119,17 @@ func Run(rootPath ...string) error {
 
 	// Run gRPC and block
 	go app.RunGRPCServer()
+
+	// Kafka init deps
+	//domain.UserScoreChangedTopic, err = kafka.Topic[*domain.UserScoreChangedEvent]("user_score_changed")
+	//if err != nil {
+	//	return errors.Wrap(err, "cannot initialize kafka")
+	//}
+	//
+	//polling, err := domain.UserScoreChangedTopic.StartPolling()
+	//if err != nil {
+	//	return errors.Wrap(err, "cannot initialize kafka")
+	//}
 
 	// End context
 	<-ctx.Done()
