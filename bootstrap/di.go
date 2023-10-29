@@ -16,7 +16,8 @@ func initDependencies(di *dig.Container) error {
 	_ = di.Provide(repos.NewUsersRepo, dig.As(new(domain.UsersRepository)))
 	_ = di.Provide(repos.NewDBCTracksRepo, dig.As(new(domain.DBCTrackRepository)))
 	_ = di.Provide(repos.NewDBCCategoriesRepo, dig.As(new(domain.DBCCategoryRepository)))
-	_ = di.Provide(repos.NewDBCChallengesRepo, dig.As(new(domain.DBCChallengesRepository)))
+	_ = di.Provide(repos.NewDBCUserChallengesRepo, dig.As(new(domain.DBCUserChallengeRepository)))
+	_ = di.Provide(repos.NewDBCChallengesRepo, dig.As(new(domain.DBChallengeInfoRepository)))
 
 	// Services
 	_ = di.Provide(services.NewPeriodTypeProcessor)

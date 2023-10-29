@@ -43,7 +43,7 @@ func InitGRPCServer() (*grpc.Server, *runtime.ServeMux, error) {
 			return nil, nil, errors.New("cannot initialize GRPC Server")
 		}
 
-		// Create a certificate pool from the certificate authority
+		// UserCreate a certificate pool from the certificate authority
 		certPool := x509.NewCertPool()
 		ca, err := ioutil.ReadFile(caN)
 		if err != nil {
@@ -55,7 +55,7 @@ func InitGRPCServer() (*grpc.Server, *runtime.ServeMux, error) {
 			return nil, nil, errors.New("failed to append client certs")
 		}
 
-		// Create the TLS credentials
+		// UserCreate the TLS credentials
 		creds := credentials.NewTLS(&tls.Config{
 			ClientAuth:   tls.RequireAndVerifyClientCert,
 			Certificates: []tls.Certificate{certificate},
@@ -77,7 +77,7 @@ func InitGRPCServer() (*grpc.Server, *runtime.ServeMux, error) {
 
 	options = append(options, mv...)
 
-	// Create server
+	// UserCreate server
 	grpcServer = grpc.NewServer(options...)
 	if grpcServer == nil {
 		return nil, nil, errors.New("cannot initialize GRPC Server")

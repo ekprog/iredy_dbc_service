@@ -11,7 +11,7 @@ import (
 
 func InitStorage() error {
 
-	// Create dir of not exists
+	// UserCreate dir of not exists
 	p := viper.GetString("storage.path")
 	if _, err := os.Stat(p); errors.Is(err, os.ErrNotExist) {
 		err := os.Mkdir(p, os.ModePerm)

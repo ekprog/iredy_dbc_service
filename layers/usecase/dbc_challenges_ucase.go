@@ -12,11 +12,14 @@ import (
 )
 
 type ChallengesUseCase struct {
-	log                 core.Logger
-	usersRepo           domain.UsersRepository
-	categoryRepo        domain.DBCCategoryRepository
-	challengesRepo      domain.DBCChallengesRepository
-	tracksRepo          domain.DBCTrackRepository
+	log core.Logger
+
+	usersRepo          domain.UsersRepository
+	categoryRepo       domain.DBCCategoryRepository
+	userChallengesRepo domain.DBCUserChallengeRepository
+	challengesRepo     domain.DBChallengeInfoRepository
+	tracksRepo         domain.DBCTrackRepository
+
 	periodTypeGenerator *services.PeriodTypeProcessor
 	trackProcessor      *services.DBCProcessor
 }
@@ -25,14 +28,16 @@ func NewChallengesUseCase(log core.Logger,
 	usersRepo domain.UsersRepository,
 	projectsRepo domain.DBCCategoryRepository,
 	periodTypeGenerator *services.PeriodTypeProcessor,
-	challengesRepo domain.DBCChallengesRepository,
+	userChallengesRepo domain.DBCUserChallengeRepository,
 	tracksRepo domain.DBCTrackRepository,
+	challengesRepo domain.DBChallengeInfoRepository,
 	trackProcessor *services.DBCProcessor) *ChallengesUseCase {
 	return &ChallengesUseCase{
 		log:                 log,
 		usersRepo:           usersRepo,
 		categoryRepo:        projectsRepo,
 		challengesRepo:      challengesRepo,
+		userChallengesRepo:  userChallengesRepo,
 		tracksRepo:          tracksRepo,
 		periodTypeGenerator: periodTypeGenerator,
 		trackProcessor:      trackProcessor,
@@ -40,20 +45,23 @@ func NewChallengesUseCase(log core.Logger,
 }
 
 // Returns all challenges of user with some last tracks (successful or not)
-func (ucase *ChallengesUseCase) All(userId int64) (domain.ChallengesListResponse, error) {
-	var items []*domain.DBCChallenge
+func (ucase *ChallengesUseCase) UserAll(userId int64) (domain.ChallengesListResponse, error) {
+	var items []*domain.DBCUserChallenge
 	var err error
 
 	// Here we get only success tracks
-	items, err = ucase.challengesRepo.FetchUsersAll(userId)
+	items, err = ucase.userChallengesRepo.UserFetchAll(userId)
 	if err != nil {
 		return domain.ChallengesListResponse{}, errors.Wrap(err, "cannot fetch dbc-challenges by user id")
 	}
 
 	// Добавляем к Активным челленжам последние 3 трека
 	for _, item := range items {
+		if item.ChallengeInfo == nil {
+			return domain.ChallengesListResponse{}, errors.New("ChallengeInfo is nil")
+		}
 
-		if item.IsAutoTrack {
+		if item.ChallengeInfo.IsAutoTrack {
 			continue
 		}
 
@@ -65,12 +73,12 @@ func (ucase *ChallengesUseCase) All(userId int64) (domain.ChallengesListResponse
 		// Отскочить на 3 последних треков (учитывая период их генерации)
 		list, err := ucase.periodTypeGenerator.BackwardList(time.Now(), period, 3)
 		if err != nil {
-			return domain.ChallengesListResponse{}, errors.Wrap(err, "All")
+			return domain.ChallengesListResponse{}, errors.Wrap(err, "UserAll")
 		}
 
-		tracks, err := ucase.tracksRepo.FetchForChallengeByDates(item.Id, list)
+		tracks, err := ucase.tracksRepo.ChallengeFetchByDates(item.Id, list)
 		if err != nil {
-			return domain.ChallengesListResponse{}, errors.Wrap(err, "All")
+			return domain.ChallengesListResponse{}, errors.Wrap(err, "UserAll")
 		}
 		item.LastTracks = tracks
 
@@ -103,17 +111,17 @@ func (ucase *ChallengesUseCase) All(userId int64) (domain.ChallengesListResponse
 	}
 
 	return domain.ChallengesListResponse{
-		StatusCode: domain.Success,
-		Challenges: items,
+		StatusCode:     domain.Success,
+		UserChallenges: items,
 	}, nil
 }
 
-func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (domain.CreateChallengeResponse, error) {
+func (ucase *ChallengesUseCase) UserCreate(form *domain.CreateDBCChallengeForm) (domain.CreateChallengeResponse, error) {
 
 	//
 	err := ucase.usersRepo.InsertIfNotExists(&domain.User{Id: form.UserId})
 	if err != nil {
-		return domain.CreateChallengeResponse{}, errors.Wrap(err, "Create")
+		return domain.CreateChallengeResponse{}, errors.Wrap(err, "UserCreate")
 	}
 
 	// Is challenge connected to category?
@@ -143,7 +151,7 @@ func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (dom
 
 	// Check if challenge with same name already exists
 	form.Name = strings.TrimSpace(form.Name)
-	challengeFound, err := ucase.challengesRepo.FetchByName(form.UserId, form.Name)
+	challengeFound, err := ucase.userChallengesRepo.UserFetchByName(form.UserId, form.Name)
 	if err != nil {
 		return domain.CreateChallengeResponse{}, errors.Wrap(err, "cannot check if challenge exists by name before creating task")
 	}
@@ -161,37 +169,50 @@ func (ucase *ChallengesUseCase) Create(form *domain.CreateDBCChallengeForm) (dom
 	}
 
 	// Creating challenge
-	challenge := &domain.DBCChallenge{
-		UserId:      form.UserId,
-		CategoryId:  categoryId,
-		Name:        form.Name,
-		Desc:        form.Desc,
-		IsAutoTrack: form.IsAutoTrack,
-		LastSeries:  0,
+	challengeInfo := &domain.DBCChallengeInfo{
+		OwnerId:        form.UserId,
+		IsAutoTrack:    form.IsAutoTrack,
+		VisibilityType: "private",
+		Name:           form.Name,
+		Desc:           form.Desc,
+		Image:          nil,
 	}
-	err = ucase.challengesRepo.Insert(challenge)
+	if categoryId != nil {
+		challengeInfo.Category = &domain.DBCCategory{Id: *categoryId}
+	}
+	err = ucase.challengesRepo.Insert(challengeInfo)
 	if err != nil {
-		return domain.CreateChallengeResponse{}, errors.Wrap(err, "cannot insert new challenge before creating task")
+		return domain.CreateChallengeResponse{}, errors.Wrap(err, "challengesRepo.Insert")
+	}
+
+	// Binding challenge with user
+	challengeUser := &domain.DBCUserChallenge{
+		ChallengeInfo: &domain.DBCChallengeInfo{Id: challengeInfo.Id},
+		UserId:        form.UserId,
+	}
+	err = ucase.userChallengesRepo.Insert(challengeUser)
+	if err != nil {
+		return domain.CreateChallengeResponse{}, errors.Wrap(err, "userChallengesRepo.Insert")
 	}
 
 	//
 	return domain.CreateChallengeResponse{
 		StatusCode: domain.Success,
-		Id:         challenge.Id,
+		Id:         challengeUser.Id,
 		CategoryId: categoryId,
 	}, nil
 }
 
-func (ucase *ChallengesUseCase) Update(ctx context.Context, challenge *domain.DBCChallenge) (domain.StatusResponse, error) {
+func (ucase *ChallengesUseCase) Update(ctx context.Context, challenge *domain.DBCUserChallenge) (domain.StatusResponse, error) {
 
-	fetchedChallenge, err := ucase.challengesRepo.FetchById(ctx, challenge.Id)
+	fetchedChallenge, err := ucase.userChallengesRepo.FetchById(ctx, challenge.Id)
 	if err != nil || fetchedChallenge == nil {
 		return domain.StatusResponse{
 			StatusCode: domain.NotFound,
 		}, nil
 	}
 
-	err = ucase.challengesRepo.Update(challenge)
+	err = ucase.userChallengesRepo.Update(challenge)
 	if err != nil {
 		return domain.StatusResponse{}, errors.Wrap(err, "cannot update task")
 	}
@@ -203,7 +224,7 @@ func (ucase *ChallengesUseCase) Update(ctx context.Context, challenge *domain.DB
 
 func (ucase *ChallengesUseCase) Remove(userId, taskId int64) (domain.StatusResponse, error) {
 
-	//task, err := ucase.challengesRepo.FetchById(taskId)
+	//task, err := ucase.userChallengesRepo.FetchById(taskId)
 	//if err != nil {
 	//	return domain.StatusResponse{}, errors.Wrapf(err, "cannot fetch task by id %d", taskId)
 	//}
@@ -214,7 +235,7 @@ func (ucase *ChallengesUseCase) Remove(userId, taskId int64) (domain.StatusRespo
 	//	}, nil
 	//}
 	//
-	//err = ucase.challengesRepo.Remove(task.Id)
+	//err = ucase.userChallengesRepo.Remove(task.Id)
 	//if err != nil {
 	//	return domain.StatusResponse{}, errors.Wrap(err, "cannot remove task")
 	//}
@@ -242,7 +263,7 @@ func (ucase *ChallengesUseCase) TrackDay(ctx context.Context, form *domain.DBCTr
 	}
 
 	// Получаем челлендж
-	challenge, err := ucase.challengesRepo.FetchById(ctx, form.ChallengeId)
+	challenge, err := ucase.userChallengesRepo.FetchById(ctx, form.ChallengeId)
 	if err != nil {
 		return domain.UserGamifyResponse{}, errors.Wrap(err, "FetchById")
 	}
@@ -264,7 +285,7 @@ func (ucase *ChallengesUseCase) GetMonthTracks(ctx context.Context, date time.Ti
 	fromDate := tools.RoundDateTimeToMonth(date)
 	toDate := fromDate.AddDate(0, 1, -1)
 
-	challenge, err := ucase.challengesRepo.FetchById(ctx, challengeId)
+	challenge, err := ucase.userChallengesRepo.FetchById(ctx, challengeId)
 	if err != nil {
 		return nil, errors.Wrap(err, "FetchById")
 	}
@@ -274,9 +295,9 @@ func (ucase *ChallengesUseCase) GetMonthTracks(ctx context.Context, date time.Ti
 		}, nil
 	}
 
-	betweenTracks, err := ucase.tracksRepo.GetAllForChallengeBetween(ctx, challengeId, fromDate, toDate)
+	betweenTracks, err := ucase.tracksRepo.ChallengeFetchBetween(ctx, challengeId, fromDate, toDate)
 	if err != nil {
-		return nil, errors.Wrap(err, "GetAllForChallengeBetween")
+		return nil, errors.Wrap(err, "ChallengeFetchBetween")
 	}
 
 	return &domain.ChallengeMonthTracksResponse{

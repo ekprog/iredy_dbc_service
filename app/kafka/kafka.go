@@ -180,7 +180,7 @@ func (t *KafkaTopic[T]) CommitOffset(msg *Message[T]) error {
 	}
 	newOffset := *lastOffset + 1
 
-	// All last offsets before msg.Offset should be handled
+	// UserAll last offsets before msg.Offset should be handled
 	// If not then we have problems!
 	if newOffset != msg.Details.Offset+1 {
 		logger.Error("newOffset != msg.Offset+1 in topic %s", t.topic)

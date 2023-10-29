@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	trmsql "github.com/avito-tech/go-transaction-manager/sql"
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
 	"microservice/app/core"
 	"microservice/layers/domain"
 )
@@ -12,14 +13,21 @@ import (
 type UsersRepo struct {
 	log    core.Logger
 	db     *sql.DB
+	gormDB *gorm.DB
 	getter *trmsql.CtxGetter
 }
 
-func NewUsersRepo(log core.Logger, db *sql.DB, getter *trmsql.CtxGetter) *UsersRepo {
-	return &UsersRepo{log: log, db: db, getter: getter}
+func NewUsersRepo(log core.Logger, db *sql.DB, getter *trmsql.CtxGetter, gormDB *gorm.DB) *UsersRepo {
+	return &UsersRepo{
+		log:    log,
+		db:     db,
+		getter: getter,
+		gormDB: gormDB,
+	}
 }
 
 func (r *UsersRepo) FetchById(id int64) (*domain.User, error) {
+
 	query := `select 
     				score,
     				created_at, 

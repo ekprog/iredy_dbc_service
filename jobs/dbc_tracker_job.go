@@ -16,7 +16,7 @@ type DBCTrackerJob struct {
 	pProc   *services.PeriodTypeProcessor
 	dbcProc *services.DBCProcessor
 
-	challengesRepo domain.DBCChallengesRepository
+	challengesRepo domain.DBCUserChallengeRepository
 	tracksRepo     domain.DBCTrackRepository
 	usersRepo      domain.UsersRepository
 }
@@ -24,7 +24,7 @@ type DBCTrackerJob struct {
 func NewDBCTrackerJob(log core.Logger,
 	trxManager *manager.Manager,
 	pProc *services.PeriodTypeProcessor,
-	challengesRepo domain.DBCChallengesRepository,
+	challengesRepo domain.DBCUserChallengeRepository,
 	tracksRepo domain.DBCTrackRepository,
 	usersRepo domain.UsersRepository,
 	trackProc *services.DBCProcessor) *DBCTrackerJob {

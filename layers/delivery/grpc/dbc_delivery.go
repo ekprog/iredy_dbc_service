@@ -43,7 +43,7 @@ func (d *DBCDeliveryService) CreateChallenge(ctx context.Context, r *pb.CreateCh
 		return nil, errors.Wrap(err, "cannot extract user_id from context")
 	}
 
-	uCaseRes, err := d.dbcChallengesUCase.Create(&domain.CreateDBCChallengeForm{
+	uCaseRes, err := d.dbcChallengesUCase.UserCreate(&domain.CreateDBCChallengeForm{
 		UserId:       userId,
 		Name:         r.Name,
 		CategoryName: r.CategoryName,
@@ -102,7 +102,7 @@ func (d *DBCDeliveryService) GetChallenges(ctx context.Context, r *pb.GetChallen
 		return nil, errors.Wrap(err, "cannot extract user_id from context")
 	}
 
-	uCaseRes, err := d.dbcChallengesUCase.All(userId)
+	uCaseRes, err := d.dbcChallengesUCase.UserAll(userId)
 	if err != nil {
 		return nil, errors.Wrap(err, "GetChallenges")
 	}
@@ -116,21 +116,23 @@ func (d *DBCDeliveryService) GetChallenges(ctx context.Context, r *pb.GetChallen
 	}
 
 	if uCaseRes.StatusCode == domain.Success {
-		for _, pItem := range uCaseRes.Challenges {
+		for _, pItem := range uCaseRes.UserChallenges {
 			p := &pb.DBCChallenge{
-				Id:           pItem.Id,
-				UserId:       pItem.UserId,
-				IsAutoTrack:  pItem.IsAutoTrack,
-				Name:         pItem.Name,
-				Image:        pItem.Image,
-				Desc:         pItem.Desc,
-				LastSeries:   pItem.LastSeries,
-				CategoryId:   pItem.CategoryId,
-				CategoryName: pItem.CategoryName,
-				CreatedAt:    timestamppb.New(pItem.CreatedAt),
-				DeletedAt:    conv.NullableTime(pItem.DeletedAt),
-				UpdatedAt:    timestamppb.New(pItem.UpdatedAt),
-				LastTracks:   []*pb.DBTrack{},
+				Id:          pItem.Id,
+				UserId:      pItem.UserId,
+				IsAutoTrack: pItem.ChallengeInfo.IsAutoTrack,
+				Name:        pItem.ChallengeInfo.Name,
+				Image:       pItem.ChallengeInfo.Image,
+				Desc:        pItem.ChallengeInfo.Desc,
+				LastSeries:  pItem.LastSeries,
+				CreatedAt:   timestamppb.New(pItem.CreatedAt),
+				DeletedAt:   conv.NullableTime(pItem.DeletedAt),
+				UpdatedAt:   timestamppb.New(pItem.UpdatedAt),
+				LastTracks:  []*pb.DBTrack{},
+			}
+			if pItem.ChallengeInfo.Category != nil {
+				p.CategoryId = &pItem.ChallengeInfo.Category.Id
+				p.CategoryName = &pItem.ChallengeInfo.Category.Name
 			}
 
 			for _, pTrack := range pItem.LastTracks {

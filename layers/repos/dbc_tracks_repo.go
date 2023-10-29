@@ -60,7 +60,7 @@ func (r *DBCTracksRepo) Count(ctx context.Context, challengeId int64) (c int64, 
 	return c, nil
 }
 
-func (r *DBCTracksRepo) GetLastForChallengeBefore(ctx context.Context, challengeId int64, date time.Time) (track *domain.DBCTrack, err error) {
+func (r *DBCTracksRepo) ChallengeFetchLastBefore(ctx context.Context, challengeId int64, date time.Time) (track *domain.DBCTrack, err error) {
 	date = tools.RoundDateTimeToDay(date.UTC())
 
 	query := `select 
@@ -93,7 +93,7 @@ func (r *DBCTracksRepo) GetLastForChallengeBefore(ctx context.Context, challenge
 	case sql.ErrNoRows:
 		return nil, nil
 	default:
-		return nil, errors.Wrap(err, "GetLastForChallengeBefore")
+		return nil, errors.Wrap(err, "ChallengeFetchLastBefore")
 	}
 }
 
@@ -130,11 +130,11 @@ func (r *DBCTracksRepo) GetLastNotProcessedForChallengeBefore(ctx context.Contex
 	case sql.ErrNoRows:
 		return nil, nil
 	default:
-		return nil, errors.Wrap(err, "GetLastForChallengeBefore")
+		return nil, errors.Wrap(err, "ChallengeFetchLastBefore")
 	}
 }
 
-func (r *DBCTracksRepo) GetLastForChallenge(ctx context.Context, challengeId int64) (track *domain.DBCTrack, err error) {
+func (r *DBCTracksRepo) ChallengeFetchLast(ctx context.Context, challengeId int64) (track *domain.DBCTrack, err error) {
 	query := `select 
     				id,
     				user_id,
@@ -165,7 +165,7 @@ func (r *DBCTracksRepo) GetLastForChallenge(ctx context.Context, challengeId int
 	case sql.ErrNoRows:
 		return nil, nil
 	default:
-		return nil, errors.Wrap(err, "GetLastForChallenge")
+		return nil, errors.Wrap(err, "ChallengeFetchLast")
 	}
 }
 
@@ -204,7 +204,7 @@ func (r *DBCTracksRepo) GetByDate(ctx context.Context, challengeId int64, date t
 	}
 }
 
-func (r *DBCTracksRepo) FetchForChallengeByDates(challengeId int64, list []time.Time) ([]*domain.DBCTrack, error) {
+func (r *DBCTracksRepo) ChallengeFetchByDates(challengeId int64, list []time.Time) ([]*domain.DBCTrack, error) {
 
 	dateStrings := lo.Map(list, func(item time.Time, index int) string {
 		return fmt.Sprintf("('%s'::date)", item.UTC().Format("2006-01-02"))
@@ -225,7 +225,7 @@ func (r *DBCTracksRepo) FetchForChallengeByDates(challengeId int64, list []time.
 
 	rows, err := r.db.Query(query, challengeId)
 	if err != nil {
-		return nil, errors.Wrap(err, "FetchForChallengeByDates")
+		return nil, errors.Wrap(err, "ChallengeFetchByDates")
 	}
 
 	var result []*domain.DBCTrack
@@ -241,7 +241,7 @@ func (r *DBCTracksRepo) FetchForChallengeByDates(challengeId int64, list []time.
 	return result, nil
 }
 
-func (r *DBCTracksRepo) GetAllForChallengeAfter(ctx context.Context, challengeId int64, date time.Time) ([]*domain.DBCTrack, error) {
+func (r *DBCTracksRepo) ChallengeFetchAfter(ctx context.Context, challengeId int64, date time.Time) ([]*domain.DBCTrack, error) {
 	date = tools.RoundDateTimeToDay(date.UTC())
 
 	query := `select 
@@ -273,7 +273,7 @@ func (r *DBCTracksRepo) GetAllForChallengeAfter(ctx context.Context, challengeId
 	return result, nil
 }
 
-func (r *DBCTracksRepo) GetAllForChallengeBetween(ctx context.Context, challengeId int64, from, to time.Time) ([]*domain.DBCTrack, error) {
+func (r *DBCTracksRepo) ChallengeFetchBetween(ctx context.Context, challengeId int64, from, to time.Time) ([]*domain.DBCTrack, error) {
 	from = tools.RoundDateTimeToDay(from.UTC())
 	to = tools.RoundDateTimeToDay(to.UTC())
 
@@ -307,7 +307,7 @@ func (r *DBCTracksRepo) GetAllForChallengeBetween(ctx context.Context, challenge
 	return result, nil
 }
 
-func (r *DBCTracksRepo) GetAllNotProcessedForChallengeBefore(ctx context.Context, challengeId int64, date time.Time) ([]*domain.DBCTrack, error) {
+func (r *DBCTracksRepo) NotProcessedChallengeFetchAllBefore(ctx context.Context, challengeId int64, date time.Time) ([]*domain.DBCTrack, error) {
 	date = tools.RoundDateTimeToDay(date.UTC())
 
 	query := `select 

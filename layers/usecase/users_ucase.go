@@ -25,6 +25,13 @@ func NewUsersUseCase(log core.Logger,
 }
 
 func (ucase *UsersUseCase) Info(ctx context.Context, id int64) (domain.GetUserResponse, error) {
+	err := ucase.repo.InsertIfNotExists(&domain.User{
+		Id: id,
+	})
+	if err != nil {
+		return domain.GetUserResponse{}, errors.Wrap(err, "InsertIfNotExists")
+	}
+
 	user, err := ucase.repo.FetchById(id)
 	if err != nil {
 		return domain.GetUserResponse{}, errors.Wrap(err, "Info")

@@ -6,6 +6,7 @@ import (
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/context"
 	"github.com/avito-tech/go-transaction-manager/trm/manager"
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
 	"microservice/app"
 	"microservice/app/core"
 	"microservice/app/job"
@@ -38,6 +39,11 @@ func Run(rootPath ...string) error {
 		return errors.Wrap(err, "error while init db")
 	}
 
+	gormDB, err := app.InitGorm()
+	if err != nil {
+		return errors.Wrap(err, "error while init gorm db")
+	}
+
 	// Migrations
 	err = app.RunMigrations(rootPath...)
 	if err != nil {
@@ -57,6 +63,12 @@ func Run(rootPath ...string) error {
 		return db
 	}); err != nil {
 		return errors.Wrap(err, "cannot provide db")
+	}
+
+	if err = di.Provide(func() *gorm.DB {
+		return gormDB
+	}); err != nil {
+		return errors.Wrap(err, "cannot provide gorm db")
 	}
 
 	if err = di.Provide(func() *trmsql.CtxGetter {

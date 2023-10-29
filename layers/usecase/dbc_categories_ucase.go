@@ -10,7 +10,7 @@ type DBCCategoriesUCase struct {
 	log            core.Logger
 	categoriesRepo domain.DBCCategoryRepository
 	usersRepo      domain.UsersRepository
-	tasksRepo      domain.DBCChallengesRepository
+	tasksRepo      domain.DBCUserChallengeRepository
 }
 
 func NewDBCCategoriesUCase(log core.Logger,

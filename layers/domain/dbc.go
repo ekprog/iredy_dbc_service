@@ -10,28 +10,37 @@ import (
 //
 
 type DBCCategory struct {
-	Id     int64
-	UserId int64
+	Id        int64
+	UserId    int64
+	Name      string
+	UpdatedAt time.Time
+	CreatedAt time.Time
+	DeletedAt *time.Time
+}
 
-	Name string
+type DBCChallengeInfo struct {
+	Id       int64
+	OwnerId  int64
+	Category *DBCCategory
+
+	IsAutoTrack    bool
+	VisibilityType string
+
+	Name  string
+	Desc  *string
+	Image *string
 
 	UpdatedAt time.Time
 	CreatedAt time.Time
 	DeletedAt *time.Time
 }
 
-type DBCChallenge struct {
-	Id           int64
-	UserId       int64
-	CategoryId   *int64
-	CategoryName *string
-	IsAutoTrack  bool
+type DBCUserChallenge struct {
+	Id            int64
+	ChallengeInfo *DBCChallengeInfo
 
-	Name       string
-	Desc       *string
-	Image      *string
+	UserId     int64
 	LastSeries int64
-
 	LastTracks []*DBCTrack
 
 	UpdatedAt time.Time
@@ -51,27 +60,7 @@ type DBCTrack struct {
 	ScoreDaily int64
 }
 
-//
 // REPOSITORIES
-//
-
-type DBCTrackRepository interface {
-	InsertOrUpdate(context.Context, *DBCTrack) error
-	InsertOrUpdateBulk(context.Context, []*DBCTrack) error
-	GetByDate(ctx context.Context, challengeId int64, t time.Time) (*DBCTrack, error)
-	FetchForChallengeByDates(challengeId int64, list []time.Time) ([]*DBCTrack, error)
-	FetchNotProcessed(challengeId int64, timeSince time.Time) ([]*DBCTrack, error)
-	SetProcessed(ctx context.Context, trackIds []int64) error
-	Count(ctx context.Context, challengeId int64) (int64, error)
-	GetLastForChallengeBefore(ctx context.Context, challengeId int64, date time.Time) (*DBCTrack, error)
-	GetLastForChallenge(ctx context.Context, challengeId int64) (*DBCTrack, error)
-	GetAllForChallengeAfter(ctx context.Context, challengeId int64, date time.Time) ([]*DBCTrack, error)
-	GetAllForChallengeBetween(ctx context.Context, challengeId int64, from, to time.Time) ([]*DBCTrack, error)
-	GetAllNotProcessedForChallengeBefore(ctx context.Context, challengeId int64, date time.Time) ([]*DBCTrack, error)
-	InsertNew(ctx context.Context, tracks []*DBCTrack) error
-	UpdateSome(ctx context.Context, tracks []*DBCTrack) error
-}
-
 type DBCCategoryRepository interface {
 	FetchNotEmptyByUserId(int64) ([]*DBCCategory, error)
 	FetchByName(int64, string) (*DBCCategory, error)
@@ -81,14 +70,47 @@ type DBCCategoryRepository interface {
 	Remove(int64, int64) error
 }
 
-type DBCChallengesRepository interface {
-	FetchUsersAll(userId int64) ([]*DBCChallenge, error)
-	FetchAll(limit, offset int64) ([]*DBCChallenge, error)
-	FetchById(context.Context, int64) (*DBCChallenge, error)
-	FetchByName(int64, string) (*DBCChallenge, error)
-	Insert(*DBCChallenge) error
-	Update(*DBCChallenge) error
+type DBChallengeInfoRepository interface {
+	// No scope
+	Insert(item *DBCChallengeInfo) error
+}
+
+type DBCUserChallengeRepository interface {
+	// No scope
+	FetchAll(limit, offset int64) ([]*DBCUserChallenge, error)
+	FetchById(context.Context, int64) (*DBCUserChallenge, error)
+	Insert(*DBCUserChallenge) error
+	Update(*DBCUserChallenge) error
 	Remove(int64) error
+
+	// User scope
+	UserFetchAll(userId int64) ([]*DBCUserChallenge, error)
+	UserFetchByName(int64, string) (*DBCUserChallenge, error)
+}
+
+type DBCTrackRepository interface {
+
+	// No scope
+	SetProcessed(ctx context.Context, trackIds []int64) error
+	InsertOrUpdateBulk(context.Context, []*DBCTrack) error
+
+	// Challenge scope
+	ChallengeFetchByDates(challengeId int64, list []time.Time) ([]*DBCTrack, error)
+	ChallengeFetchLastBefore(ctx context.Context, challengeId int64, date time.Time) (*DBCTrack, error)
+	ChallengeFetchLast(ctx context.Context, challengeId int64) (*DBCTrack, error)
+	ChallengeFetchAfter(ctx context.Context, challengeId int64, date time.Time) ([]*DBCTrack, error)
+	ChallengeFetchBetween(ctx context.Context, challengeId int64, from, to time.Time) ([]*DBCTrack, error)
+
+	// Challenge Not processed scope
+	NotProcessedChallengeFetchAllBefore(ctx context.Context, challengeId int64, date time.Time) ([]*DBCTrack, error)
+
+	// For delete
+	//InsertNew(ctx context.Context, tracks []*DBCTrack) error
+	//UpdateSome(ctx context.Context, tracks []*DBCTrack) error
+	//Count(ctx context.Context, challengeId int64) (int64, error)
+	//GetByDate(ctx context.Context, challengeId int64, t time.Time) (*DBCTrack, error)
+	//InsertOrUpdate(context.Context, *DBCTrack) error
+	//FetchNotProcessed(challengeId int64, timeSince time.Time) ([]*DBCTrack, error)
 }
 
 //
@@ -102,9 +124,13 @@ type DBCCategoryUseCase interface {
 }
 
 type DBCChallengesUseCase interface {
-	All(userId int64) (ChallengesListResponse, error)
-	Create(form *CreateDBCChallengeForm) (CreateChallengeResponse, error)
-	Update(ctx context.Context, task *DBCChallenge) (StatusResponse, error)
+
+	// User scope
+	UserAll(userId int64) (ChallengesListResponse, error)
+	UserCreate(form *CreateDBCChallengeForm) (CreateChallengeResponse, error)
+
+	//
+	Update(ctx context.Context, task *DBCUserChallenge) (StatusResponse, error)
 	Remove(userId, taskId int64) (StatusResponse, error)
 
 	TrackDay(ctx context.Context, form *DBCTrack) (UserGamifyResponse, error)
@@ -130,8 +156,8 @@ type CreateChallengeResponse struct {
 }
 
 type ChallengesListResponse struct {
-	StatusCode string
-	Challenges []*DBCChallenge
+	StatusCode     string
+	UserChallenges []*DBCUserChallenge
 }
 
 type CategoryListResponse struct {

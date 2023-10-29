@@ -22,26 +22,26 @@ type DBCProcessor struct {
 	periodProc *PeriodTypeProcessor
 	gamifyProc *AchievementsProcessor
 
-	challengeRepository domain.DBCChallengesRepository
-	trackRepository     domain.DBCTrackRepository
-	userRepo            domain.UsersRepository
+	challengeUserRepository domain.DBCUserChallengeRepository
+	trackRepository         domain.DBCTrackRepository
+	userRepo                domain.UsersRepository
 }
 
 func NewDBCTrackProcessor(log core.Logger,
 	trxManager *manager.Manager,
 	trackProcessor *PeriodTypeProcessor,
 	gamifyProc *AchievementsProcessor,
-	challengeRepository domain.DBCChallengesRepository,
+	challengeRepository domain.DBCUserChallengeRepository,
 	trackRepository domain.DBCTrackRepository,
 	userRepo domain.UsersRepository) *DBCProcessor {
 	return &DBCProcessor{
-		log:                 log,
-		periodProc:          trackProcessor,
-		gamifyProc:          gamifyProc,
-		challengeRepository: challengeRepository,
-		trackRepository:     trackRepository,
-		trxManager:          trxManager,
-		userRepo:            userRepo,
+		log:                     log,
+		periodProc:              trackProcessor,
+		gamifyProc:              gamifyProc,
+		challengeUserRepository: challengeRepository,
+		trackRepository:         trackRepository,
+		trxManager:              trxManager,
+		userRepo:                userRepo,
 	}
 }
 
@@ -58,7 +58,7 @@ func (s *DBCProcessor) MakeTrack(ctx context.Context, challengeId int64, date ti
 	}
 
 	// Получаем челлендж
-	challenge, err := s.challengeRepository.FetchById(ctx, challengeId)
+	challenge, err := s.challengeUserRepository.FetchById(ctx, challengeId)
 	if err != nil {
 		return false, errors.Wrap(err, "FetchById")
 	}
@@ -88,9 +88,9 @@ func (s *DBCProcessor) MakeTrack(ctx context.Context, challengeId int64, date ti
 	var dateSince time.Time
 
 	// Находит дату, от которой нужно начинать перерассчет
-	firstTrackBefore, err := s.trackRepository.GetLastForChallengeBefore(ctx, challengeId, date)
+	firstTrackBefore, err := s.trackRepository.ChallengeFetchLastBefore(ctx, challengeId, date)
 	if err != nil {
-		return false, errors.Wrap(err, "GetLastForChallengeBefore")
+		return false, errors.Wrap(err, "ChallengeFetchLastBefore")
 	}
 
 	// Мы первый в БД - начинаем с себя
@@ -112,9 +112,9 @@ func (s *DBCProcessor) MakeTrack(ctx context.Context, challengeId int64, date ti
 	}
 
 	// Получаем значения треков в данном диапазоне
-	tracks, err := s.trackRepository.FetchForChallengeByDates(challenge.Id, absentDates)
+	tracks, err := s.trackRepository.ChallengeFetchByDates(challenge.Id, absentDates)
 	if err != nil {
-		return false, errors.Wrap(err, "FetchForChallengeByDates")
+		return false, errors.Wrap(err, "ChallengeFetchByDates")
 	}
 
 	for _, track := range tracks {
@@ -144,9 +144,9 @@ func (s *DBCProcessor) MakeTrack(ctx context.Context, challengeId int64, date ti
 
 func (s *DBCProcessor) CalculateDailyScore(ctx context.Context, userId int64) (int64, error) {
 	// Для каждого челленжда вычисляем scores
-	challenges, err := s.challengeRepository.FetchUsersAll(userId)
+	challenges, err := s.challengeUserRepository.UserFetchAll(userId)
 	if err != nil {
-		return -1, errors.Wrap(err, "FetchUsersAll")
+		return -1, errors.Wrap(err, "UserFetchAll")
 	}
 
 	// For Not Auto track
@@ -159,7 +159,7 @@ func (s *DBCProcessor) CalculateDailyScore(ctx context.Context, userId int64) (i
 		// Вычисляем дату на стыке score и dailyScore
 
 		n := DBC_MAX_STEP_CAN_CHANGE
-		if challenge.IsAutoTrack {
+		if challenge.ChallengeInfo.IsAutoTrack {
 			n = DBC_MAX_STEP_CAN_CHANGE_AUTO
 		}
 
@@ -169,12 +169,12 @@ func (s *DBCProcessor) CalculateDailyScore(ctx context.Context, userId int64) (i
 		}
 
 		//
-		dailyTracks, err := s.trackRepository.GetAllForChallengeAfter(ctx, challenge.Id, dateProcessed)
+		dailyTracks, err := s.trackRepository.ChallengeFetchAfter(ctx, challenge.Id, dateProcessed)
 		if err != nil {
-			return -1, errors.Wrap(err, "GetAllForChallengeAfter")
+			return -1, errors.Wrap(err, "ChallengeFetchAfter")
 		}
 
-		if challenge.IsAutoTrack {
+		if challenge.ChallengeInfo.IsAutoTrack {
 			if len(dailyTracks) >= 1 {
 				totalDailyScore += dailyTracks[len(dailyTracks)-1].ScoreDaily
 			} else {
@@ -199,7 +199,7 @@ func (s *DBCProcessor) CalculateDailyScore(ctx context.Context, userId int64) (i
 }
 
 // Обрабатывает все треки (Ручные) для учета User.Score и Challenge.LastSeries
-func (s *DBCProcessor) ProcessChallengeTracks(ctx context.Context, challenge *domain.DBCChallenge) error {
+func (s *DBCProcessor) ProcessChallengeTracks(ctx context.Context, challenge *domain.DBCUserChallenge) error {
 
 	period := domain.GenerationPeriod{Type: domain.PeriodTypeEveryDay}
 
@@ -215,7 +215,7 @@ func (s *DBCProcessor) ProcessChallengeTracks(ctx context.Context, challenge *do
 	}
 
 	// Рассчитываем Score
-	tracks, err := s.trackRepository.GetAllNotProcessedForChallengeBefore(ctx, challenge.Id, dailyDate)
+	tracks, err := s.trackRepository.NotProcessedChallengeFetchAllBefore(ctx, challenge.Id, dailyDate)
 	if err != nil {
 		return errors.Wrap(err, "GetLastNotProcessedForChallengeBefore")
 	}
@@ -229,9 +229,9 @@ func (s *DBCProcessor) ProcessChallengeTracks(ctx context.Context, challenge *do
 	})
 
 	// Рассчитываем LastSeries
-	lastTrack, err := s.trackRepository.GetLastForChallengeBefore(ctx, challenge.Id, dailyDate)
+	lastTrack, err := s.trackRepository.ChallengeFetchLastBefore(ctx, challenge.Id, dailyDate)
 	if err != nil {
-		return errors.Wrap(err, "GetLastForChallengeBefore")
+		return errors.Wrap(err, "ChallengeFetchLastBefore")
 	}
 	if lastTrack != nil {
 		challenge.LastSeries = lastTrack.LastSeries
@@ -250,7 +250,7 @@ func (s *DBCProcessor) ProcessChallengeTracks(ctx context.Context, challenge *do
 			return errors.Wrap(err, "SetProcessed")
 		}
 
-		err = s.challengeRepository.Update(challenge)
+		err = s.challengeUserRepository.Update(challenge)
 		if err != nil {
 			return errors.Wrap(err, "ChallengeUpdate")
 		}
@@ -264,7 +264,7 @@ func (s *DBCProcessor) ProcessChallengeTracks(ctx context.Context, challenge *do
 	return nil
 }
 
-func (s *DBCProcessor) ProcessAutoChallengeTracks(ctx context.Context, challenge *domain.DBCChallenge) error {
+func (s *DBCProcessor) ProcessAutoChallengeTracks(ctx context.Context, challenge *domain.DBCUserChallenge) error {
 
 	period := domain.GenerationPeriod{Type: domain.PeriodTypeEveryDay}
 
@@ -280,7 +280,7 @@ func (s *DBCProcessor) ProcessAutoChallengeTracks(ctx context.Context, challenge
 	}
 
 	// Рассчитываем Score
-	tracks, err := s.trackRepository.GetAllNotProcessedForChallengeBefore(ctx, challenge.Id, dailyDate)
+	tracks, err := s.trackRepository.NotProcessedChallengeFetchAllBefore(ctx, challenge.Id, dailyDate)
 	if err != nil {
 		return errors.Wrap(err, "GetLastNotProcessedForChallengeBefore")
 	}
@@ -294,9 +294,9 @@ func (s *DBCProcessor) ProcessAutoChallengeTracks(ctx context.Context, challenge
 	})
 
 	// Рассчитываем LastSeries
-	lastTrack, err := s.trackRepository.GetLastForChallengeBefore(ctx, challenge.Id, dailyDate)
+	lastTrack, err := s.trackRepository.ChallengeFetchLastBefore(ctx, challenge.Id, dailyDate)
 	if err != nil {
-		return errors.Wrap(err, "GetLastForChallengeBefore")
+		return errors.Wrap(err, "ChallengeFetchLastBefore")
 	}
 	if lastTrack != nil {
 		challenge.LastSeries = lastTrack.LastSeries
@@ -315,7 +315,7 @@ func (s *DBCProcessor) ProcessAutoChallengeTracks(ctx context.Context, challenge
 			return errors.Wrap(err, "SetProcessed")
 		}
 
-		err = s.challengeRepository.Update(challenge)
+		err = s.challengeUserRepository.Update(challenge)
 		if err != nil {
 			return errors.Wrap(err, "ChallengeUpdate")
 		}
@@ -369,7 +369,7 @@ func (s *DBCProcessor) nextTrackPoints(lastScore int64, lastSeries int64, curren
 }
 
 // Fill absent tracks before step N with default .done value
-func (s *DBCProcessor) fillAbsentTracksStepN(ctx context.Context, challenge *domain.DBCChallenge, n int, value bool) error {
+func (s *DBCProcessor) fillAbsentTracksStepN(ctx context.Context, challenge *domain.DBCUserChallenge, n int, value bool) error {
 
 	//
 	// Make step back 1 for auto track last track
@@ -385,9 +385,9 @@ func (s *DBCProcessor) fillAbsentTracksStepN(ctx context.Context, challenge *dom
 		return errors.Wrap(err, "StepBack")
 	}
 
-	lastTrack, err := s.trackRepository.GetLastForChallengeBefore(ctx, challenge.Id, toDate)
+	lastTrack, err := s.trackRepository.ChallengeFetchLastBefore(ctx, challenge.Id, toDate)
 	if err != nil {
-		return errors.Wrap(err, "GetLastForChallengeBefore")
+		return errors.Wrap(err, "ChallengeFetchLastBefore")
 	}
 
 	var fromDate time.Time
