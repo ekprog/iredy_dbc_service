@@ -75,7 +75,7 @@ func (job *DBCTrackerJob) Run() error {
 			// ToDo: ошибка для одного пользователя прерывает все?
 			// Also check what we should do with error list
 			// ETK Stack ?
-			if item.IsAutoTrack {
+			if item.ChallengeInfo.IsAutoTrack {
 				err := job.dbcProc.ProcessAutoChallengeTracks(ctx, item)
 				if err != nil {
 					errorList = append(errorList, errors.Wrap(err, "ProcessAutoChallengeTracks"))

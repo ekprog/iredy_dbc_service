@@ -63,18 +63,56 @@ func (r *DBCUserChallengesRepo) UserFetchAll(userId int64) ([]*domain.DBCUserCha
 }
 
 func (r *DBCUserChallengesRepo) FetchById(ctx context.Context, id int64) (*domain.DBCUserChallenge, error) {
+	var item = &domain.DBCUserChallenge{
+		Id: id,
+		ChallengeInfo: &domain.DBCChallengeInfo{
+			Category: &domain.DBCCategory{},
+		},
+	}
+	query := `select 
+    			c.id,
+    			c.user_id,
+    			c.challenge_id,
+    			ci.is_auto_track,
+    			ci."desc", 
+    			c.created_at, 
+    			c.updated_at,
+    			c.deleted_at
+			from dbc_challenges_users c
+					left join dbc_challenges ci on ci.id = c.challenge_id
+				where c.id=$1
+			limit 1`
 
-	var item *do.DBCChallengesUsers
-	err := r.gormDB.WithContext(ctx).
-		Table("dbc_challenges_users").
-		Preload("Challenge.Category").
-		Where("id = ?", id).
-		First(&item).Error
-	if err != nil {
-		return nil, err
+	var categoryId *int64
+	var categoryName *string
+
+	err := r.db.QueryRow(query, id).Scan(
+		&item.Id,
+		&item.UserId,
+		&item.ChallengeInfoId,
+		&item.ChallengeInfo.IsAutoTrack,
+		&item.ChallengeInfo.Desc,
+		&item.CreatedAt,
+		&item.UpdatedAt,
+		&item.DeletedAt)
+
+	if err == nil && categoryId != nil && categoryName != nil {
+		category := &domain.DBCCategory{
+			Id:   *categoryId,
+			Name: *categoryName,
+		}
+		item.ChallengeInfo.Category = category
+		item.ChallengeInfo.Id = item.ChallengeInfoId
 	}
 
-	return item.DTO(), nil
+	switch err {
+	case nil:
+		return item, nil
+	case sql.ErrNoRows:
+		return nil, nil
+	default:
+		return nil, err
+	}
 }
 
 func (r *DBCUserChallengesRepo) UserFetchByName(userId int64, name string) (*domain.DBCUserChallenge, error) {
@@ -133,6 +171,7 @@ func (r *DBCUserChallengesRepo) Insert(item *domain.DBCUserChallenge) error {
 	item.Id = int64(doItem.ID)
 	return nil
 }
+
 func (r *DBCUserChallengesRepo) Update(item *domain.DBCUserChallenge) error {
 	query := `UPDATE dbc_challenges_users 
 				SET last_series=$2, updated_at=now()
@@ -155,4 +194,17 @@ func (r *DBCUserChallengesRepo) Remove(id int64) error {
 		return err
 	}
 	return nil
+}
+
+func (r *DBCUserChallengesRepo) UserExistsByChallengeId(userId, challengeId int64) (bool, error) {
+	query := `select count(id) from dbc_challenges_users 
+                 where user_id = $1 and challenge_id = $2`
+
+	var c int64
+	err := r.db.QueryRow(query, userId, challengeId).Scan(&c)
+	if err != nil {
+		return false, err
+	}
+
+	return c > 0, nil
 }

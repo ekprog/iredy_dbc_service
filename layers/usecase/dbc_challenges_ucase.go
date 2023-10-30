@@ -44,21 +44,33 @@ func NewChallengesUseCase(log core.Logger,
 	}
 }
 
+func (ucase *ChallengesUseCase) PublicSearch(search string, categoryId *int64, limit, offset int64) (domain.ChallengesListResponse, error) {
+	items, err := ucase.challengesRepo.PublicFetchLike(search, categoryId, limit, offset)
+	if err != nil {
+		return domain.ChallengesListResponse{}, errors.Wrap(err, "PublicFetchLike")
+	}
+
+	return domain.ChallengesListResponse{
+		StatusCode: domain.Success,
+		Challenges: items,
+	}, nil
+}
+
 // Returns all challenges of user with some last tracks (successful or not)
-func (ucase *ChallengesUseCase) UserAll(userId int64) (domain.ChallengesListResponse, error) {
+func (ucase *ChallengesUseCase) UserAll(userId int64) (domain.UserChallengesListResponse, error) {
 	var items []*domain.DBCUserChallenge
 	var err error
 
 	// Here we get only success tracks
 	items, err = ucase.userChallengesRepo.UserFetchAll(userId)
 	if err != nil {
-		return domain.ChallengesListResponse{}, errors.Wrap(err, "cannot fetch dbc-challenges by user id")
+		return domain.UserChallengesListResponse{}, errors.Wrap(err, "cannot fetch dbc-challenges by user id")
 	}
 
 	// Добавляем к Активным челленжам последние 3 трека
 	for _, item := range items {
 		if item.ChallengeInfo == nil {
-			return domain.ChallengesListResponse{}, errors.New("ChallengeInfo is nil")
+			return domain.UserChallengesListResponse{}, errors.New("ChallengeInfo is nil")
 		}
 
 		if item.ChallengeInfo.IsAutoTrack {
@@ -73,12 +85,12 @@ func (ucase *ChallengesUseCase) UserAll(userId int64) (domain.ChallengesListResp
 		// Отскочить на 3 последних треков (учитывая период их генерации)
 		list, err := ucase.periodTypeGenerator.BackwardList(time.Now(), period, 3)
 		if err != nil {
-			return domain.ChallengesListResponse{}, errors.Wrap(err, "UserAll")
+			return domain.UserChallengesListResponse{}, errors.Wrap(err, "UserAll")
 		}
 
 		tracks, err := ucase.tracksRepo.ChallengeFetchByDates(item.Id, list)
 		if err != nil {
-			return domain.ChallengesListResponse{}, errors.Wrap(err, "UserAll")
+			return domain.UserChallengesListResponse{}, errors.Wrap(err, "UserAll")
 		}
 		item.LastTracks = tracks
 
@@ -101,7 +113,7 @@ func (ucase *ChallengesUseCase) UserAll(userId int64) (domain.ChallengesListResp
 		//	}
 		//})
 		//if err != nil {
-		//	return domain.ChallengesListResponse{}, errors.Wrap(err, "PeriodTypeProcessor")
+		//	return domain.UserChallengesListResponse{}, errors.Wrap(err, "PeriodTypeProcessor")
 		//}
 		//
 		//// Сортируем по времени
@@ -110,7 +122,7 @@ func (ucase *ChallengesUseCase) UserAll(userId int64) (domain.ChallengesListResp
 		//})
 	}
 
-	return domain.ChallengesListResponse{
+	return domain.UserChallengesListResponse{
 		StatusCode:     domain.Success,
 		UserChallenges: items,
 	}, nil
@@ -173,12 +185,10 @@ func (ucase *ChallengesUseCase) UserCreate(form *domain.CreateDBCChallengeForm) 
 		OwnerId:        form.UserId,
 		IsAutoTrack:    form.IsAutoTrack,
 		VisibilityType: "private",
+		CategoryId:     categoryId,
 		Name:           form.Name,
 		Desc:           form.Desc,
 		Image:          nil,
-	}
-	if categoryId != nil {
-		challengeInfo.Category = &domain.DBCCategory{Id: *categoryId}
 	}
 	err = ucase.challengesRepo.Insert(challengeInfo)
 	if err != nil {
@@ -303,5 +313,23 @@ func (ucase *ChallengesUseCase) GetMonthTracks(ctx context.Context, date time.Ti
 	return &domain.ChallengeMonthTracksResponse{
 		StatusCode: domain.Success,
 		Tracks:     betweenTracks,
+	}, nil
+}
+
+func (ucase *ChallengesUseCase) Info(userId int64, challengeId int64) (domain.ChallengeInfoResponse, error) {
+	exists, err := ucase.userChallengesRepo.UserExistsByChallengeId(userId, challengeId)
+	if err != nil {
+		return domain.ChallengeInfoResponse{}, errors.Wrap(err, "UserExistsByChallengeId")
+	}
+
+	challenge, err := ucase.challengesRepo.FetchById(challengeId)
+	if err != nil {
+		return domain.ChallengeInfoResponse{}, errors.Wrap(err, "FetchById")
+	}
+
+	return domain.ChallengeInfoResponse{
+		StatusCode: domain.Success,
+		Challenge:  challenge,
+		IsMember:   exists,
 	}, nil
 }

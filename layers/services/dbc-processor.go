@@ -47,7 +47,7 @@ func NewDBCTrackProcessor(log core.Logger,
 
 // Меняет значение трека и всей предыдущей цепочки треков
 // (НЕ ПРОВЕРЯЕТ дату на возможность трека со стороны бизнеса)
-func (s *DBCProcessor) MakeTrack(ctx context.Context, challengeId int64, date time.Time, value bool) (bool, error) {
+func (s *DBCProcessor) MakeTrack(ctx context.Context, challengeUserId int64, date time.Time, value bool) (bool, error) {
 
 	now := tools.RoundDateTimeToDay(time.Now().UTC())
 	date = tools.RoundDateTimeToDay(date.UTC())
@@ -58,11 +58,11 @@ func (s *DBCProcessor) MakeTrack(ctx context.Context, challengeId int64, date ti
 	}
 
 	// Получаем челлендж
-	challenge, err := s.challengeUserRepository.FetchById(ctx, challengeId)
+	userChallenge, err := s.challengeUserRepository.FetchById(ctx, challengeUserId)
 	if err != nil {
 		return false, errors.Wrap(err, "FetchById")
 	}
-	if challenge == nil {
+	if userChallenge == nil {
 		return false, nil
 	}
 
@@ -88,7 +88,7 @@ func (s *DBCProcessor) MakeTrack(ctx context.Context, challengeId int64, date ti
 	var dateSince time.Time
 
 	// Находит дату, от которой нужно начинать перерассчет
-	firstTrackBefore, err := s.trackRepository.ChallengeFetchLastBefore(ctx, challengeId, date)
+	firstTrackBefore, err := s.trackRepository.ChallengeFetchLastBefore(ctx, challengeUserId, date)
 	if err != nil {
 		return false, errors.Wrap(err, "ChallengeFetchLastBefore")
 	}
@@ -112,7 +112,7 @@ func (s *DBCProcessor) MakeTrack(ctx context.Context, challengeId int64, date ti
 	}
 
 	// Получаем значения треков в данном диапазоне
-	tracks, err := s.trackRepository.ChallengeFetchByDates(challenge.Id, absentDates)
+	tracks, err := s.trackRepository.ChallengeFetchByDates(userChallenge.Id, absentDates)
 	if err != nil {
 		return false, errors.Wrap(err, "ChallengeFetchByDates")
 	}
@@ -126,8 +126,9 @@ func (s *DBCProcessor) MakeTrack(ctx context.Context, challengeId int64, date ti
 		// Рассчитываем score
 		lastScore, lastSeries, diff = s.nextTrackPoints(lastScore, lastSeries, currentValue)
 
-		track.UserId = challenge.UserId
-		track.ChallengeId = challenge.Id
+		track.UserId = userChallenge.UserId
+		track.ChallengeId = userChallenge.ChallengeInfoId
+		track.ChallengeUserId = userChallenge.Id
 		track.LastSeries = lastSeries
 		track.Done = currentValue
 		track.Score = lastScore

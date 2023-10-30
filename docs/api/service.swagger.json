@@ -77,6 +77,56 @@
           "type": "string",
           "format": "int64"
         },
+        "ownerId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "categoryId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "categoryName": {
+          "type": "string"
+        },
+        "isAutoTrack": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "desc": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "lastTracks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DBTrack"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deletedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "DBCUserChallenge": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
         "userId": {
           "type": "string",
           "format": "int64"
@@ -165,6 +215,20 @@
         }
       }
     },
+    "GetChallengeInfoResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "challenge": {
+          "$ref": "#/definitions/DBCChallenge"
+        },
+        "isMember": {
+          "type": "boolean"
+        }
+      }
+    },
     "GetChallengesResponse": {
       "type": "object",
       "properties": {
@@ -189,6 +253,20 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/DBTrack"
+          }
+        }
+      }
+    },
+    "GetUserChallengesResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "challenges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DBCUserChallenge"
           }
         }
       }

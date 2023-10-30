@@ -2,22 +2,24 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS dbc_challenges
 (
-    id              SERIAL PRIMARY KEY NOT NULL,
-    owner_id        bigint                      default null,
-    category_id     bigint                      default null,
+    id                      SERIAL PRIMARY KEY NOT NULL,
+    owner_id                bigint                      default null,
+    category_id             bigint                      default null,
 
     -- Активность трекается пользователем?
-    is_auto_track   bool               not null default false,
+    is_auto_track           bool               not null default false,
 
-    visibility_type varchar(255)       not null default 'private',
+    visibility_type         varchar(255)       not null default 'private',
+    -- Если пользователь отправляет запрос на изменение visibility_types
+    visibility_type_request varchar(255)                default null,
 
-    name            varchar(255)       not null,
-    image           varchar(255)                default null,
-    "desc"          varchar(1000),
+    name                    varchar(255)       not null,
+    image                   varchar(255)                default null,
+    "desc"                  varchar(1000),
 
-    created_at      timestamp(0)       NOT NULL DEFAULT now(),
-    updated_at      timestamp(0)       NOT NULL DEFAULT now(),
-    deleted_at      timestamp(0)                DEFAULT null,
+    created_at              timestamp(0)       NOT NULL DEFAULT now(),
+    updated_at              timestamp(0)       NOT NULL DEFAULT now(),
+    deleted_at              timestamp(0)                DEFAULT null,
 
     unique (owner_id, name),
 

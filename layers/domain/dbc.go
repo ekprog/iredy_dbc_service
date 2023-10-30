@@ -19,9 +19,11 @@ type DBCCategory struct {
 }
 
 type DBCChallengeInfo struct {
-	Id       int64
-	OwnerId  int64
-	Category *DBCCategory
+	Id      int64
+	OwnerId int64
+
+	CategoryId *int64
+	Category   *DBCCategory
 
 	IsAutoTrack    bool
 	VisibilityType string
@@ -36,8 +38,10 @@ type DBCChallengeInfo struct {
 }
 
 type DBCUserChallenge struct {
-	Id            int64
-	ChallengeInfo *DBCChallengeInfo
+	Id int64
+
+	ChallengeInfoId int64
+	ChallengeInfo   *DBCChallengeInfo
 
 	UserId     int64
 	LastSeries int64
@@ -49,11 +53,14 @@ type DBCUserChallenge struct {
 }
 
 type DBCTrack struct {
-	Id          int64
-	UserId      int64
-	ChallengeId int64
-	Date        time.Time
-	Done        bool
+	Id     int64
+	UserId int64
+
+	ChallengeUserId int64
+	ChallengeId     int64
+
+	Date time.Time
+	Done bool
 
 	LastSeries int64
 	Score      int64
@@ -72,7 +79,11 @@ type DBCCategoryRepository interface {
 
 type DBChallengeInfoRepository interface {
 	// No scope
+	FetchById(int64) (*DBCChallengeInfo, error)
 	Insert(item *DBCChallengeInfo) error
+
+	// Public scope
+	PublicFetchLike(search string, categoryId *int64, limit, offset int64) ([]*DBCChallengeInfo, error)
 }
 
 type DBCUserChallengeRepository interface {
@@ -86,10 +97,10 @@ type DBCUserChallengeRepository interface {
 	// User scope
 	UserFetchAll(userId int64) ([]*DBCUserChallenge, error)
 	UserFetchByName(int64, string) (*DBCUserChallenge, error)
+	UserExistsByChallengeId(int64, int64) (bool, error)
 }
 
 type DBCTrackRepository interface {
-
 	// No scope
 	SetProcessed(ctx context.Context, trackIds []int64) error
 	InsertOrUpdateBulk(context.Context, []*DBCTrack) error
@@ -103,14 +114,6 @@ type DBCTrackRepository interface {
 
 	// Challenge Not processed scope
 	NotProcessedChallengeFetchAllBefore(ctx context.Context, challengeId int64, date time.Time) ([]*DBCTrack, error)
-
-	// For delete
-	//InsertNew(ctx context.Context, tracks []*DBCTrack) error
-	//UpdateSome(ctx context.Context, tracks []*DBCTrack) error
-	//Count(ctx context.Context, challengeId int64) (int64, error)
-	//GetByDate(ctx context.Context, challengeId int64, t time.Time) (*DBCTrack, error)
-	//InsertOrUpdate(context.Context, *DBCTrack) error
-	//FetchNotProcessed(challengeId int64, timeSince time.Time) ([]*DBCTrack, error)
 }
 
 //
@@ -124,12 +127,15 @@ type DBCCategoryUseCase interface {
 }
 
 type DBCChallengesUseCase interface {
+	// Public Scope
+	PublicSearch(search string, categoryId *int64, limit, offset int64) (ChallengesListResponse, error)
 
 	// User scope
-	UserAll(userId int64) (ChallengesListResponse, error)
+	UserAll(userId int64) (UserChallengesListResponse, error)
 	UserCreate(form *CreateDBCChallengeForm) (CreateChallengeResponse, error)
 
 	//
+	Info(userId int64, id int64) (ChallengeInfoResponse, error)
 	Update(ctx context.Context, task *DBCUserChallenge) (StatusResponse, error)
 	Remove(userId, taskId int64) (StatusResponse, error)
 
@@ -155,9 +161,20 @@ type CreateChallengeResponse struct {
 	CategoryId *int64
 }
 
-type ChallengesListResponse struct {
+type UserChallengesListResponse struct {
 	StatusCode     string
 	UserChallenges []*DBCUserChallenge
+}
+
+type ChallengeInfoResponse struct {
+	StatusCode string
+	Challenge  *DBCChallengeInfo
+	IsMember   bool
+}
+
+type ChallengesListResponse struct {
+	StatusCode string
+	Challenges []*DBCChallengeInfo
 }
 
 type CategoryListResponse struct {

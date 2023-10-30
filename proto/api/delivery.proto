@@ -29,6 +29,11 @@ message RemoveCategoriesRequest {
 
 message GetChallengesRequest {}
 
+message GetUserChallengesResponse {
+  Status status = 1;
+  repeated DBCUserChallenge challenges = 2;
+}
+
 message GetChallengesResponse {
   Status status = 1;
   repeated DBCChallenge challenges = 2;
@@ -39,6 +44,15 @@ message CreateChallengesResponse {
   int64 id = 2;
   optional int64 category_id = 3;
   bool is_auto_track = 4;
+}
+
+// SEARCH CHALLENGES
+
+message SearchChallengesRequest {
+  string search = 1;
+  optional int64 category_id = 2;
+  int64 limit = 3;
+  int64 offset = 4;
 }
 
 // CREATE CHALLENGE
@@ -83,5 +97,11 @@ message GetMonthTracksRequest {
 message GetMonthTracksResponse {
   Status status = 1;
   repeated DBTrack tracks = 2;
+}
+
+message GetChallengeInfoResponse {
+  Status status = 1;
+  DBCChallenge challenge = 2;
+  bool isMember = 3;
 }
 
